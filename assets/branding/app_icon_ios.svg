@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E3AC57"/><stop offset="0.5" stop-color="#A8431F"/><stop offset="1" stop-color="#7E2F14"/></linearGradient><radialGradient id="glow" cx="0.3" cy="0.22" r="0.75"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient></defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/><rect width="1024" height="1024" fill="url(#glow)"/>
+  <circle cx="512" cy="530" r="392" fill="none" stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="10"/>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer flame -->
+    <path stroke-width="46" d="M512 238C604 348 708 428 708 596C708 712 620 800 512 800C404 800 316 712 316 596C316 506 362 444 414 396C414 472 450 520 498 536C466 432 478 332 512 238Z"/>
+    <!-- Inner flame -->
+    <path stroke-width="38" d="M512 592C546 632 572 660 572 696C572 724 546 746 512 746C478 746 452 724 452 696C452 660 478 632 512 592Z" opacity="0.92"/>
+  </g>
+</svg>
