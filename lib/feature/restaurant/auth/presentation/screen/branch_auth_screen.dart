@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class _BranchLoginScreenState extends ConsumerState<BranchLoginScreen> {
                             ),
                             const SizedBox(width: 12),
                             const Text(
-                              'RestoPOS',
+                              kAppName,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
