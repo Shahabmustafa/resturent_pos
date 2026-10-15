@@ -1,10 +1,10 @@
 -- Step 2: Row Level Security.
--- Branch user  -> sirf apni branch ka data.
--- Company owner -> apni company ki saari branches ka data.
--- anon (login ke baghair) -> kuch nahi.
+-- Branch user  -> only their own branch's data.
+-- Company owner -> data of all branches in their company.
+-- anon (not logged in) -> nothing.
 
 -- ── Helper functions ──────────────────────────────────────────────────────
--- security definer: branch_users/companys ki RLS ko bypass karte hain, warna policies recursive ho jati hain.
+-- security definer: bypasses RLS on branch_users/companys, otherwise the policies become recursive.
 
 create or replace function public.my_branch_id()
 returns uuid language sql stable security definer set search_path = '' as $$
@@ -38,7 +38,7 @@ returns boolean language sql stable security definer set search_path = '' as $$
   )
 $$;
 
--- Kuch purani tables mein branch_id text hai
+-- Some older tables store branch_id as text
 create or replace function public.can_access_branch_text(p_branch_id text)
 returns boolean language sql stable security definer set search_path = '' as $$
   select case
@@ -48,7 +48,7 @@ returns boolean language sql stable security definer set search_path = '' as $$
   end
 $$;
 
--- Users add/edit kar sakta hai: branch ka admin/manager ya company owner
+-- Can add/edit users: the branch admin/manager or the company owner
 create or replace function public.can_manage_branch(p_branch_id uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select p_branch_id is not null and (
@@ -67,7 +67,7 @@ grant execute on function public.my_branch_id(), public.my_branch_role(), public
   public.can_access_branch(uuid), public.can_access_branch_text(text), public.can_manage_branch(uuid)
   to authenticated;
 
--- ── Purani "sab ko ijazat" policies hatao ─────────────────────────────────
+-- ── Remove old "allow everyone" policies ──────────────────────────────────
 do $$
 declare p record;
 begin
@@ -165,19 +165,19 @@ create policy companys_select on public.companys for select to authenticated
 create policy companys_update on public.companys for update to authenticated
   using (id = public.my_company_id())
   with check (id = public.my_company_id());
--- Company ka owner account, plan aur status sirf service role badal sakta hai
+-- Only the service role can change the company's owner account, plan and status
 revoke update on public.companys from authenticated;
 grant update (name, phone, logo_url, city, address) on public.companys to authenticated;
 
 -- ── branch_users ──────────────────────────────────────────────────────────
--- Insert/delete aur email/password badalna sirf Edge Function (manage-branch-user) se.
+-- Insert/delete and email/password changes only via the Edge Function (manage-branch-user).
 create policy branch_users_select on public.branch_users for select to authenticated
   using (public.can_access_branch(branch_id));
 create policy branch_users_update on public.branch_users for update to authenticated
   using (public.can_manage_branch(branch_id))
   with check (
     public.can_manage_branch(branch_id)
-    -- manager kisi ko admin nahi bana sakta
+    -- a manager cannot make anyone an admin
     and (role <> 'admin' or public.my_branch_role() = 'admin' or public.my_company_id() is not null)
   );
 revoke insert, delete, update on public.branch_users from authenticated;

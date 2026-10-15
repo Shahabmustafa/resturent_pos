@@ -1,6 +1,6 @@
--- Step 1: POS users (branch_users) aur company owners (companys) ko Supabase Auth se link karo.
--- Purane accounts ko temporary email milti hai: <username>@pizzahouse.pos
--- Password wahi rehta hai jo abhi table mein hai.
+-- Step 1: Link POS users (branch_users) and company owners (companys) to Supabase Auth.
+-- Existing accounts get a temporary email: <username>@pizzahouse.pos
+-- The password stays the same as the one currently in the table.
 
 alter table public.branch_users
   add column if not exists email text,
@@ -59,11 +59,11 @@ end $$;
 
 alter table public.branch_users alter column email set not null;
 
--- Naye users Edge Function (manage-branch-user) se bante hain, is liye password column ab optional hai.
--- Column step 3 mein drop hoga, jab login test ho jaye.
+-- New users are created via the Edge Function (manage-branch-user), so the password column is now optional.
+-- The column is dropped in step 3, once login has been tested.
 alter table public.branch_users alter column password drop not null;
 alter table public.companys     alter column password_hash drop not null;
 
--- Purane login RPCs (verify_branch_login already toota hua tha: branches.username exist nahi karta)
+-- Old login RPCs (verify_branch_login was already broken: branches.username does not exist)
 drop function if exists public.verify_company_login(text, text);
 drop function if exists public.verify_branch_login(text, text, uuid);

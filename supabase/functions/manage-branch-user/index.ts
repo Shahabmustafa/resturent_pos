@@ -1,6 +1,6 @@
 // manage-branch-user
-// Branch users ke Supabase Auth accounts banata/badalta/delete karta hai.
-// Sirf branch ka admin/manager ya company owner call kar sakta hai.
+// Creates, updates and deletes Supabase Auth accounts for branch users.
+// Only the branch admin/manager or the company owner may call it.
 //
 // Body:
 //   { action: "create", branch_id, email, password, name, username, phone?, role, status?, avatar_url? }
@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Caller ke JWT ke sath client: RLS helper functions isi user ke hisaab se chalte hain
+  // Client with the caller's JWT: RLS helper functions run as this user
   const caller = createClient(url, anonKey, {
     global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
     auth: { persistSession: false },
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     const assertCanManage = async (branchId: string, touchesAdmin: boolean) => {
       const { data: canManage, error } = await caller.rpc("can_manage_branch", { p_branch_id: branchId });
       if (error) throw new HttpError(500, error.message);
-      if (!canManage) throw new HttpError(403, "Aap is branch ke users manage nahi kar sakte");
+      if (!canManage) throw new HttpError(403, "You are not allowed to manage users of this branch");
 
       if (touchesAdmin) {
         const [{ data: role }, { data: companyId }] = await Promise.all([
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
           caller.rpc("my_company_id"),
         ]);
         if (role !== "admin" && !companyId) {
-          throw new HttpError(403, "Sirf admin hi admin user bana ya badal sakta hai");
+          throw new HttpError(403, "Only an admin can create or change an admin user");
         }
       }
     };
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       case "create": {
         const { branch_id, email, password } = body;
         if (!branch_id || !email || !password || !body.name || !body.username) {
-          throw new HttpError(400, "branch_id, email, password, name aur username zaroori hain");
+          throw new HttpError(400, "branch_id, email, password, name and username are required");
         }
         await assertCanManage(branch_id, body.role === "admin");
 
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
           .eq("id", body.user_id)
           .maybeSingle();
         if (findErr) throw new HttpError(500, findErr.message);
-        if (!target) throw new HttpError(404, "User nahi mila");
+        if (!target) throw new HttpError(404, "User not found");
 
         await assertCanManage(target.branch_id, target.role === "admin" || body.role === "admin");
 
@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
         if (body.password) authChanges.password = body.password;
 
         if (Object.keys(authChanges).length > 0) {
-          if (!target.auth_user_id) throw new HttpError(400, "Is user ka auth account nahi hai");
+          if (!target.auth_user_id) throw new HttpError(400, "This user has no auth account");
           const { error } = await admin.auth.admin.updateUserById(target.auth_user_id, authChanges);
           if (error) throw new HttpError(400, error.message);
         }
@@ -153,8 +153,8 @@ Deno.serve(async (req) => {
           .eq("id", body.user_id)
           .maybeSingle();
         if (findErr) throw new HttpError(500, findErr.message);
-        if (!target) throw new HttpError(404, "User nahi mila");
-        if (target.auth_user_id === callerAuthId) throw new HttpError(400, "Aap apna account delete nahi kar sakte");
+        if (!target) throw new HttpError(404, "User not found");
+        if (target.auth_user_id === callerAuthId) throw new HttpError(400, "You cannot delete your own account");
 
         await assertCanManage(target.branch_id, target.role === "admin");
 
