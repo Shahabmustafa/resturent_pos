@@ -1,4 +1,4 @@
-# Financial Reports Module — Spice Garden POS
+# Financial Reports Module — PakAfghan Restaurant POS
 
 ## Files
 
@@ -68,7 +68,7 @@ case 'pdf':
     expenses: state.expenseReports,
     startDate: state.startDate,
     endDate: state.endDate,
-    restaurantName: 'Spice Garden', // ya settings se lo
+    restaurantName: 'PakAfghan Restaurant', // or read it from settings
   );
 
 case 'csv':

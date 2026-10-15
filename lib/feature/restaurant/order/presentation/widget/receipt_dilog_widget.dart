@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
@@ -189,7 +190,7 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
           pw.Text(
               branch?.restaurantName.isNotEmpty == true
                   ? branch!.restaurantName
-                  : branch?.name ?? '',
+                  : kAppName,
               style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, letterSpacing: 0.5)),
           if ((branch?.address ?? '').isNotEmpty) ...[
             pw.SizedBox(height: 2),
@@ -397,7 +398,7 @@ class _ReceiptPreview extends StatelessWidget {
             Text(
                 branch?.restaurantName.isNotEmpty == true
                     ? branch!.restaurantName
-                    : branch?.name ?? '',
+                    : kAppName,
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.black, letterSpacing: 0.3)),
             if ((branch?.address ?? '').isNotEmpty) ...[
               const SizedBox(height: 2),

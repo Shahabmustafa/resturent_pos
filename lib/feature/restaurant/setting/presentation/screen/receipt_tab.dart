@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'dart:io';
@@ -368,7 +369,7 @@ class _ReceiptPreview extends StatelessWidget {
             Text(
               branch?.restaurantName.isNotEmpty == true
                   ? branch!.restaurantName
-                  : 'Restaurant Name',
+                  : kAppName,
               style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,

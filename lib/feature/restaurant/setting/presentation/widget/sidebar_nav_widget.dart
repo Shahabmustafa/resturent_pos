@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,7 @@ class Sidebar extends StatelessWidget {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Spice Garden', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                    Text(kAppName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
                     Text('POS System v2.1', style: TextStyle(color: AppColors.primary, fontSize: 11)),
                   ],
                 ),

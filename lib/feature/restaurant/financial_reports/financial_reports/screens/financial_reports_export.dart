@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/constants/app_info.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
@@ -148,7 +149,7 @@ Future<void> exportReportPdf({
       pw.SizedBox(height: 24),
       pw.Divider(color: border),
       pw.Text(
-        'Generated on ${formatFullDate(DateTime.now())} · Spice Garden POS',
+        'Generated on ${formatFullDate(DateTime.now())} · $kAppName',
         style: pw.TextStyle(font: regular, fontSize: 8, color: muted),
       ),
     ],
