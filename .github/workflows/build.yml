@@ -28,6 +28,15 @@ jobs:
       - name: Build Windows (POS)
         run: flutter build windows --release -t lib/main.dart
 
+      - name: Verify MSVC runtime DLLs are bundled
+        shell: pwsh
+        run: |
+          foreach ($dll in 'msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') {
+            if (-not (Test-Path "build/windows/x64/runner/Release/$dll")) {
+              Write-Error "$dll missing from Release folder"; exit 1
+            }
+          }
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
