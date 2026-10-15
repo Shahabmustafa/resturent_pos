@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
@@ -80,32 +81,35 @@ class AdminTopBar extends StatelessWidget {
           bottom: BorderSide(color: AppColors.border, width: 0.5)),
     ),
     child: Row(children: [
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.dark)),
-        Text(subtitle,
-            style: const TextStyle(
-                fontSize: 11, color: AppColors.grey)),
-      ]),
-      const Spacer(),
+      Expanded(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.dark)),
+          Text(subtitle,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 11, color: AppColors.grey)),
+        ]),
+      ),
       ...actions,
       if (actions.isNotEmpty) const SizedBox(width: 12),
-      Container(
+      if (MediaQuery.sizeOf(context).width >= 700) Container(
         padding:
         const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.primaryLt,
           borderRadius: BorderRadius.circular(7),
         ),
-        child: const Row(children: [
-          SvgIcon(AppIcons.calendarTodayOutlined,
+        child: Row(children: [
+          const SvgIcon(AppIcons.calendarTodayOutlined,
               size: 12, color: AppColors.primary),
-          SizedBox(width: 5),
-          Text('Jun 11, 2026',
-              style: TextStyle(
+          const SizedBox(width: 5),
+          Text(DateFormat('MMM d, yyyy').format(DateTime.now()),
+              style: const TextStyle(
                   fontSize: 11,
                   color: AppColors.primary,
                   fontWeight: FontWeight.w500)),

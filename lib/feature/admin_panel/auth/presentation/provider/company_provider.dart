@@ -13,10 +13,14 @@ class CompanyAuthState {
   final bool isLoading;
   final String? errorMessage;
 
+  /// True until the saved session has been checked on start-up.
+  final bool restoring;
+
   const CompanyAuthState({
     this.company,
     this.isLoading = false,
     this.errorMessage,
+    this.restoring = false,
   });
 
   bool get isLoggedIn => company != null;
@@ -27,11 +31,13 @@ class CompanyAuthState {
     String? errorMessage,
     bool clearError = false,
     bool clearCompany = false,
+    bool? restoring,
   }) {
     return CompanyAuthState(
       company: clearCompany ? null : company ?? this.company,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
+      restoring: restoring ?? this.restoring,
     );
   }
 }
@@ -39,7 +45,7 @@ class CompanyAuthState {
 class CompanyAuthNotifier extends StateNotifier<CompanyAuthState> {
   final CompanyAuthDatasource _datasource;
 
-  CompanyAuthNotifier(this._datasource) : super(const CompanyAuthState()) {
+  CompanyAuthNotifier(this._datasource) : super(const CompanyAuthState(restoring: true)) {
     _loadSavedCompany();
   }
 
@@ -47,9 +53,9 @@ class CompanyAuthNotifier extends StateNotifier<CompanyAuthState> {
     state = state.copyWith(isLoading: true);
     try {
       final company = await _datasource.getSavedCompany();
-      state = state.copyWith(company: company, isLoading: false);
+      state = state.copyWith(company: company, isLoading: false, restoring: false);
     } catch (_) {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, restoring: false);
     }
   }
 

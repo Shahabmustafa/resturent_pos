@@ -509,6 +509,8 @@ class _DetailPanel extends StatelessWidget {
                 _BillRow('Discount', '− ${formatMoney(order.discountAmt)}', kPrimary),
               _BillRow('Tax (${order.taxPct.toStringAsFixed(0)}%)',
                   formatMoney(order.taxAmt), kSub),
+              if (order.deliveryFee > 0)
+                _BillRow('Delivery charge', formatMoney(order.deliveryFee), kSub),
               const Divider(color: kBorder, height: 16),
               _BillRow('TOTAL', formatMoney(order.total), kPrimary, bold: true),
             ]),

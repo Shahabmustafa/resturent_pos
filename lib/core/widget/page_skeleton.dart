@@ -77,10 +77,15 @@ class _StatRowSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      for (var i = 0; i < count; i++) ...[
-        if (i > 0) const SizedBox(width: 14),
-        Expanded(
+    // Two per row on phones (owner panel), one row otherwise.
+    return LayoutBuilder(builder: (context, c) {
+      const gap = 14.0;
+      final cols = c.maxWidth < 600 ? 2 : count;
+      final w = (c.maxWidth - gap * (cols - 1)) / cols;
+      return Wrap(spacing: gap, runSpacing: gap, children: [
+      for (var i = 0; i < count; i++)
+        SizedBox(
+          width: w,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
@@ -106,8 +111,8 @@ class _StatRowSkeleton extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    ]);
+      ]);
+    });
   }
 }
 
@@ -128,7 +133,7 @@ class _TableCardSkeleton extends StatelessWidget {
             child: Row(children: [
               ShimmerBox(width: 90, height: 16),
               Spacer(),
-              ShimmerBox(width: 220, height: 36, radius: 8),
+              Flexible(child: ShimmerBox(width: 220, height: 36, radius: 8)),
             ]),
           ),
         ),

@@ -5,6 +5,8 @@ import '../../../../../core/constants/app_colors.dart';
 
 class AdminSidebar extends StatelessWidget {
   final int selected;
+  final String companyName;
+  final String accountName;
   final int branchCount;
   final int openCount;
   final ValueChanged<int> onSelect;
@@ -13,6 +15,8 @@ class AdminSidebar extends StatelessWidget {
   const AdminSidebar({
     super.key,
     required this.selected,
+    required this.companyName,
+    required this.accountName,
     required this.branchCount,
     required this.openCount,
     required this.onSelect,
@@ -40,18 +44,21 @@ class AdminSidebar extends StatelessWidget {
                   color: Colors.white, size: 18),
             ),
             const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Spice Garden',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13)),
-                Text('Owner Portal',
-                    style: TextStyle(
-                        color: AppColors.primary, fontSize: 10)),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(companyName.isEmpty ? 'Admin Panel' : companyName,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13)),
+                  const Text('Owner Portal',
+                      style: TextStyle(
+                          color: AppColors.primary, fontSize: 10)),
+                ],
+              ),
             ),
           ]),
         ),
@@ -68,10 +75,12 @@ class AdminSidebar extends StatelessWidget {
             const SvgIcon(AppIcons.storeOutlined,
                 size: 13, color: AppColors.sidebarTxt),
             const SizedBox(width: 6),
-            Text('$branchCount Branches',
-                style: const TextStyle(
-                    color: AppColors.sidebarTxt, fontSize: 11)),
-            const Spacer(),
+            Expanded(
+              child: Text('$branchCount Branches',
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: AppColors.sidebarTxt, fontSize: 11)),
+            ),
             Container(
                 width: 7,
                 height: 7,
@@ -106,7 +115,7 @@ class AdminSidebar extends StatelessWidget {
         _NavItem(
           icon: AppIcons.dashboardOutlined,
           iconFill: AppIcons.dashboardRounded,
-          label: 'Dashboard',
+          label: 'Branch Reports',
           active: selected == 0,
           onTap: () => onSelect(0),
         ),
@@ -116,6 +125,13 @@ class AdminSidebar extends StatelessWidget {
           label: 'Branches',
           active: selected == 1,
           onTap: () => onSelect(1),
+        ),
+        _NavItem(
+          icon: AppIcons.barChartOutlined,
+          iconFill: AppIcons.barChartRounded,
+          label: 'Detailed Reports',
+          active: selected == 2,
+          onTap: () => onSelect(2),
         ),
 
         const Spacer(),
@@ -131,38 +147,47 @@ class AdminSidebar extends StatelessWidget {
             CircleAvatar(
               radius: 15,
               backgroundColor: AppColors.primary.withOpacity(0.2),
-              child: const Text('AK',
-                  style: TextStyle(
+              child: Text(_initials(accountName.isEmpty ? companyName : accountName),
+                  style: const TextStyle(
                       color: AppColors.primary,
                       fontSize: 10,
                       fontWeight: FontWeight.w700)),
             ),
             const SizedBox(width: 8),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Asif Khan',
-                      style: TextStyle(
+                  Text(accountName.isEmpty ? companyName : accountName,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w600)),
-                  Text('Super Admin',
+                  const Text('Owner',
                       style: TextStyle(
                           color: AppColors.sidebarTxt, fontSize: 10)),
                 ],
               ),
             ),
-            GestureDetector(
-              onTap: onLogout,
-              child: const SvgIcon(AppIcons.logoutRounded,
-                  size: 14, color: AppColors.sidebarTxt),
+            IconButton(
+              tooltip: 'Log out',
+              onPressed: onLogout,
+              icon: const SvgIcon(AppIcons.logoutRounded,
+                  size: 16, color: AppColors.sidebarTxt),
             ),
           ]),
         ),
       ],
     ),
   );
+}
+
+String _initials(String name) {
+  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+  if (parts.isEmpty) return '?';
+  if (parts.length == 1) return parts[0][0].toUpperCase();
+  return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
 }
 
 // ── Nav Item ──────────────────────────────────────────────────────────────────
@@ -200,15 +225,18 @@ class _NavItem extends StatelessWidget {
             color:
             active ? AppColors.primary : AppColors.sidebarTxt),
         const SizedBox(width: 9),
-        Text(label,
-            style: TextStyle(
-                fontSize: 13,
-                color: active
-                    ? AppColors.primary
-                    : AppColors.sidebarTxt,
-                fontWeight: active
-                    ? FontWeight.w600
-                    : FontWeight.normal)),
+        Expanded(
+          child: Text(label,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 13,
+                  color: active
+                      ? AppColors.primary
+                      : AppColors.sidebarTxt,
+                  fontWeight: active
+                      ? FontWeight.w600
+                      : FontWeight.normal)),
+        ),
       ]),
     ),
   );

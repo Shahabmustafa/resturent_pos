@@ -35,6 +35,31 @@ class CheckoutDetails {
   });
 }
 
+/// A website card checkout (`website_payments`), from starting it on Stripe
+/// until the webhook turns it into an order.
+class CardPayment {
+  final String status; // open | paid | expired
+  final String? orderNumber; // set once paid
+  final bool delivery;
+
+  /// What was in the cart: (menu item id, size or '', qty).
+  final List<({String menuItemId, String size, int qty})> items;
+
+  const CardPayment({required this.status, required this.orderNumber, required this.delivery, required this.items});
+
+  bool get isPaid => status == 'paid';
+
+  factory CardPayment.fromJson(Map<String, dynamic> j) => CardPayment(
+    status: j['status'] as String,
+    orderNumber: j['order_number'] as String?,
+    delivery: j['delivery'] as bool? ?? false,
+    items: [
+      for (final l in (j['lines'] as List? ?? const []))
+        (menuItemId: l['menu_item_id'] as String, size: (l['size'] as String?) ?? '', qty: (l['qty'] as num).toInt()),
+    ],
+  );
+}
+
 /// One line of a customer's past order.
 class CustomerOrderLine {
   final String name;
@@ -183,6 +208,47 @@ class CustomerDatasource {
     return number as String;
   }
 
+  /// Starts a card payment: the `create-checkout-session` Edge Function checks and
+  /// prices the cart like [placeOrder], then opens a Stripe Checkout session.
+  /// Returns the Stripe page to send the browser to. The order is only created
+  /// once Stripe confirms the payment, already marked Online / Paid.
+  Future<({Uri url, String paymentId})> startCardCheckout({
+    required CheckoutDetails details,
+    required List<({Dish dish, DishOption option, int qty})> lines,
+    required Uri returnUrl,
+  }) async {
+    final res = await _db.functions.invoke(
+      'create-checkout-session',
+      body: {
+        'delivery': details.delivery,
+        'name': details.name,
+        'phone': details.phone,
+        'address': details.delivery ? details.address : '',
+        'notes': details.notes,
+        'items': [
+          for (final l in lines)
+            {'menu_item_id': l.dish.id, 'size': l.option.isSize ? l.option.label : '', 'qty': l.qty},
+        ],
+        'return_url': returnUrl.toString(),
+      },
+    );
+    final data = res.data as Map<String, dynamic>;
+    return (url: Uri.parse(data['url'] as String), paymentId: data['payment_id'] as String);
+  }
+
+  /// A card checkout of the signed-in customer, checked every 2 seconds until
+  /// the Stripe webhook marks it paid or it expires (about 2 minutes at most).
+  /// Emits null if it isn't theirs (RLS) or doesn't exist.
+  Stream<CardPayment?> watchCardPayment(String paymentId) async* {
+    for (var i = 0; i < 60; i++) {
+      final row = await _db.from('website_payments').select().eq('id', paymentId).maybeSingle();
+      final payment = row == null ? null : CardPayment.fromJson(row);
+      yield payment;
+      if (payment == null || payment.status != 'open') return;
+      await Future<void>.delayed(const Duration(seconds: 2));
+    }
+  }
+
   /// Table number behind a table QR code, or null if the code isn't valid.
   Future<String?> tableForQr(String token) async =>
       await _db.rpc('table_for_qr', params: {'p_token': token}) as String?;
@@ -256,6 +322,10 @@ class CustomerDatasource {
       params: {'p_order_id': orderId, 'p_rating': rating, 'p_comment': comment.trim()},
     );
   }
+
+  /// Delivery charge set in the POS (Settings → Company Info → Delivery). Only
+  /// shown here; the order functions add it on the server.
+  Future<double> fetchDeliveryFee() async => ((await _db.rpc('website_delivery_fee')) as num?)?.toDouble() ?? 0;
 
   /// Hours from the website branch, read through `website_hours()` so the rest of
   /// the branch row stays private.

@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/widget/svg_icon.dart';
 import '../../data/model/dish_model.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestException, User;
+import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException, PostgrestException, User;
 import '../../data/customer_datasource.dart';
 import '../provider/cart_provider.dart';
 import '../provider/customer_providers.dart';
@@ -14,6 +16,8 @@ import '../widget/customer_widgets.dart';
 import '../widget/dish_card.dart';
 
 enum _Fulfilment { delivery, collection }
+
+enum _PayBy { card, cash }
 
 class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
@@ -27,6 +31,8 @@ final _ukPostcode = RegExp(r'^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$');
 
 class _CartScreenState extends ConsumerState<CartScreen> {
   _Fulfilment _fulfilment = _Fulfilment.delivery;
+  // Online payment goes through Stripe Checkout, which needs the browser (website only).
+  _PayBy _payBy = kIsWeb ? _PayBy.card : _PayBy.cash;
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _phone = TextEditingController();
@@ -53,7 +59,6 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     if (_address.text.isEmpty) _address.text = user.savedAddress;
   }
 
-
   // Light grey page so the white checkout cards stand out.
   @override
   Widget build(BuildContext context) => ColoredBox(color: CColors.pageGrey, child: _page(context));
@@ -64,6 +69,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     final user = ref.watch(customerUserProvider).value;
     // Opened from a table's QR code: dine-in order for that table, no login needed.
     final table = ref.watch(tableSessionProvider).value;
+    // Only delivery orders pay it; the server adds the same amount to the order.
+    final deliveryFee = table == null && _fulfilment == _Fulfilment.delivery
+        ? ref.watch(deliveryFeeProvider).value ?? 0.0
+        : 0.0;
     final gutter = MediaQuery.sizeOf(context).width < 640 ? 20.0 : 28.0;
     _prefill(user);
 
@@ -178,7 +187,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   decoration: const InputDecoration(hintText: 'e.g. GU21 6AB'),
                                   validator: (v) => _ukPostcode.hasMatch((v ?? '').trim().toUpperCase())
                                       ? null
-                                      : 'Enter a valid UK postcode',
+                                      : 'Enter the full postcode, e.g. GU21 6AB',
                                 ),
                               ],
                               label('Notes (optional)'),
@@ -186,19 +195,48 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                 controller: _notes,
                                 decoration: const InputDecoration(hintText: 'e.g. extra spicy, no onions'),
                               ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  const SvgIcon(AppIcons.paymentsRounded, size: 18, color: CColors.olive),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Payment: cash on delivery / at pickup',
-                                      style: CText.body(13, color: CColors.olive, weight: FontWeight.w600),
+                              if (kIsWeb) ...[
+                                label('Payment'),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _FulfilmentOption(
+                                        icon: AppIcons.creditCardRounded,
+                                        label: 'Online Payment',
+                                        hint: 'Card, Apple Pay, Google Pay',
+                                        selected: _payBy == _PayBy.card,
+                                        onTap: () => setState(() => _payBy = _PayBy.card),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _FulfilmentOption(
+                                        icon: AppIcons.paymentsRounded,
+                                        label: _fulfilment == _Fulfilment.delivery
+                                            ? 'Cash on Delivery'
+                                            : 'Cash at Pickup',
+                                        hint: 'Pay when you get your food',
+                                        selected: _payBy == _PayBy.cash,
+                                        onTap: () => setState(() => _payBy = _PayBy.cash),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ] else ...[
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    const SvgIcon(AppIcons.paymentsRounded, size: 18, color: CColors.olive),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Payment: cash on delivery / at pickup',
+                                        style: CText.body(13, color: CColors.olive, weight: FontWeight.w600),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -209,9 +247,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             ),
             _CheckoutBar(
               subtotal: subtotal,
+              deliveryFee: deliveryFee,
               gutter: gutter,
               signedIn: user != null,
               table: table,
+              payByCard: _payBy == _PayBy.card,
               placing: _placing,
               onCheckout: () => table != null ? _checkoutTable(table) : _checkout(user),
             ),
@@ -229,21 +269,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final delivery = _fulfilment == _Fulfilment.delivery;
+    final details = CheckoutDetails(
+      delivery: delivery,
+      name: _name.text.trim(),
+      phone: _phone.text.trim(),
+      // The postcode goes on the end of the address the restaurant sees.
+      address: delivery ? '${_address.text.trim()}, ${_postcode.text.trim().toUpperCase()}' : '',
+      notes: _notes.text,
+    );
+    final lines = [for (final l in ref.read(cartProvider)) (dish: l.dish, option: l.option, qty: l.qty)];
+    if (_payBy == _PayBy.card) return _payByCard(details, lines);
+
     setState(() => _placing = true);
     try {
-      final orderNumber = await ref
-          .read(customerDatasourceProvider)
-          .placeOrder(
-            details: CheckoutDetails(
-              delivery: delivery,
-              name: _name.text.trim(),
-              phone: _phone.text.trim(),
-              // The postcode goes on the end of the address the restaurant sees.
-              address: delivery ? '${_address.text.trim()}, ${_postcode.text.trim().toUpperCase()}' : '',
-              notes: _notes.text,
-            ),
-            lines: [for (final l in ref.read(cartProvider)) (dish: l.dish, option: l.option, qty: l.qty)],
-          );
+      final orderNumber = await ref.read(customerDatasourceProvider).placeOrder(details: details, lines: lines);
       if (!mounted) return;
       _notes.clear();
       final viewOrders = await _showPlaced(orderNumber, delivery);
@@ -256,6 +295,30 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       ).showSnackBar(SnackBar(content: Text('Couldn\'t place your order. Please try again. ($e)')));
     } finally {
       if (mounted) setState(() => _placing = false);
+    }
+  }
+
+  /// Sends the browser to Stripe Checkout. Stripe brings the customer back to
+  /// this page with `?checkout=success|cancelled` (see CardCheckoutReturn).
+  Future<void> _payByCard(CheckoutDetails details, List<({Dish dish, DishOption option, int qty})> lines) async {
+    setState(() => _placing = true);
+    try {
+      final checkout = await ref
+          .read(customerDatasourceProvider)
+          .startCardCheckout(details: details, lines: lines, returnUrl: Uri.base);
+      // Same tab, so coming back reloads the site; _placing stays on until then.
+      final opened = await launchUrl(checkout.url, webOnlyWindowName: '_self');
+      if (!opened) throw 'Couldn\'t open the payment page.';
+    } catch (e) {
+      if (!mounted) return;
+      final message = switch (e) {
+        FunctionException(:final details) when details is Map && details['error'] != null => '${details['error']}',
+        _ => 'Please try again.',
+      };
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Couldn\'t start the online payment. $message')));
+      setState(() => _placing = false);
     }
   }
 
@@ -630,20 +693,38 @@ class _FulfilmentOption extends StatelessWidget {
 
 class _CheckoutBar extends StatelessWidget {
   final double subtotal;
+  final double deliveryFee;
   final double gutter;
   final bool signedIn;
   final String? table;
+  final bool payByCard;
   final bool placing;
   final VoidCallback onCheckout;
 
   const _CheckoutBar({
     required this.subtotal,
+    required this.deliveryFee,
     required this.gutter,
     required this.signedIn,
     required this.table,
+    required this.payByCard,
     required this.placing,
     required this.onCheckout,
   });
+
+  double get total => subtotal + deliveryFee;
+
+  Widget _amountRow(String label, double amount) => Row(
+    children: [
+      Expanded(
+        child: Text(label, style: CText.body(13.5, color: CColors.muted)),
+      ),
+      Text(
+        formatPrice(amount),
+        style: CText.body(14, color: CColors.ink, weight: FontWeight.w600),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -657,21 +738,29 @@ class _CheckoutBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (deliveryFee > 0) ...[
+            _amountRow('Subtotal', subtotal),
+            const SizedBox(height: 4),
+            _amountRow('Delivery charge', deliveryFee),
+            const SizedBox(height: 8),
+          ],
           Row(
             children: [
               Expanded(
                 child: Text('Total', style: CText.body(14.5, color: CColors.muted)),
               ),
-              Text(formatPrice(subtotal), style: CText.display(22)),
+              Text(formatPrice(total), style: CText.display(22)),
             ],
           ),
           const SizedBox(height: 14),
           PillButton(
             label: placing
-                ? 'Placing order…'
+                ? (payByCard && table == null ? 'Opening secure payment…' : 'Placing order…')
                 : table != null
                 ? 'Send Order to Kitchen'
-                : (signedIn ? 'Place Order' : 'Login to Order'),
+                : !signedIn
+                ? 'Login to Order'
+                : (payByCard ? 'Pay ${formatPrice(total)} Online' : 'Place Order'),
             icon: placing
                 ? null
                 : (signedIn || table != null ? AppIcons.arrowForwardRounded : AppIcons.lockOutlineRounded),

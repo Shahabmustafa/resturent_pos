@@ -18,6 +18,7 @@ class BranchModel {
   final String openingTime;
   final String closingTime;
   final String branchType;
+  final double deliveryFee;  // added to website delivery orders
 
   const BranchModel({
     required this.id,
@@ -39,6 +40,7 @@ class BranchModel {
     required this.openingTime,
     required this.closingTime,
     required this.branchType,
+    this.deliveryFee = 0,
   });
 
   factory BranchModel.fromJson(Map<String, dynamic> j) => BranchModel(
@@ -61,6 +63,7 @@ class BranchModel {
     openingTime:    j['opening_time'] as String? ?? '11:00 AM',
     closingTime:    j['closing_time'] as String? ?? '11:30 PM',
     branchType:     j['branch_type'] as String? ?? 'restaurant',
+    deliveryFee:    (j['delivery_fee'] as num?)?.toDouble() ?? 0,
   );
 
   Map<String, dynamic> toJson() => {
@@ -77,12 +80,14 @@ class BranchModel {
     'is_24_hours':     is24Hours,
     'opening_time':    openingTime,
     'closing_time':    closingTime,
+    'delivery_fee':    deliveryFee,
   };
 
   BranchModel copyWith({
     String? restaurantName, String? name, String? city, String? address,
     String? phone, String? email, String? website, String? ntn, String? strn,
     String? posId, bool? is24Hours, String? openingTime, String? closingTime,
+    double? deliveryFee,
   }) => BranchModel(
     id:             id,
     companyId:      companyId,
@@ -103,5 +108,6 @@ class BranchModel {
     openingTime:    openingTime    ?? this.openingTime,
     closingTime:    closingTime    ?? this.closingTime,
     branchType:     branchType,
+    deliveryFee:    deliveryFee    ?? this.deliveryFee,
   );
 }

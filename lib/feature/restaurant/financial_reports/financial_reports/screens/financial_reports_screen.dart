@@ -2,10 +2,13 @@ import 'package:resturent_application/core/widget/page_skeleton.dart';
 import 'package:resturent_application/core/widget/app_tab_bar.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
+import 'dart:convert';
+import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../models/financial_reports_models.dart';
-import '../providers/financial_reports_notifier.dart';
 import '../providers/financial_reports_provider.dart';
 import '../widgets/date_filter_bar.dart';
 import '../widgets/report_helpers.dart';
@@ -13,9 +16,13 @@ import 'sales_report_tab.dart';
 import 'profit_report_tab.dart';
 import 'product_report_tab.dart';
 import 'expense_report_tab.dart';
+import 'financial_reports_export.dart';
 
 class FinancialReportsScreen extends ConsumerStatefulWidget {
-  const FinancialReportsScreen({super.key});
+  /// Name printed at the top of exported reports.
+  final String reportName;
+
+  const FinancialReportsScreen({super.key, this.reportName = 'Financial Report'});
 
   @override
   ConsumerState<FinancialReportsScreen> createState() => _FinancialReportsScreenState();
@@ -62,8 +69,11 @@ class _FinancialReportsScreenState extends ConsumerState<FinancialReportsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(children: [
-                  const Text('Financial Reports', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kText)),
-                  const Spacer(),
+                  const Expanded(
+                    child: Text('Financial Reports',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kText)),
+                  ),
                   if (state.isLoading)
                     const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary))
                   else
@@ -76,7 +86,7 @@ class _FinancialReportsScreenState extends ConsumerState<FinancialReportsScreen>
                     ),
                   const SizedBox(width: 12),
                   // Export button
-                  _ExportButton(state: state),
+                  _ExportButton(state: state, products: notifier.sortedProducts, reportName: widget.reportName),
                 ]),
                 const SizedBox(height: 4),
                 Text(
@@ -148,7 +158,9 @@ class _FinancialReportsScreenState extends ConsumerState<FinancialReportsScreen>
 // ─── Export Button ────────────────────────────────────────────────────────────
 class _ExportButton extends StatelessWidget {
   final FinancialReportsState state;
-  const _ExportButton({required this.state});
+  final List<ProductReport> products;
+  final String reportName;
+  const _ExportButton({required this.state, required this.products, required this.reportName});
 
   @override
   Widget build(BuildContext context) {
@@ -173,17 +185,49 @@ class _ExportButton extends StatelessWidget {
     );
   }
 
-  void _export(BuildContext context, String format) {
-    // TODO: Implement PDF/CSV export
-    // For PDF: use 'pdf' + 'printing' packages (same as receipt_print_dialog.dart)
-    // For CSV: build CSV string, use file_selector to save
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Exporting as ${format.toUpperCase()}...'),
-        backgroundColor: kPrimary,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  Future<void> _export(BuildContext context, String format) async {
+    final messenger = ScaffoldMessenger.of(context);
+    void snack(String text, {bool error = false}) => messenger.showSnackBar(SnackBar(
+          content: Text(text),
+          backgroundColor: error ? kRed : kPrimary,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ));
+    try {
+      if (format == 'pdf') {
+        await exportReportPdf(
+          context: context,
+          summary: state.summary,
+          products: products,
+          expenses: state.expenseReports,
+          startDate: state.startDate,
+          endDate: state.endDate,
+          restaurantName: reportName,
+        );
+        return;
+      }
+      final csv = buildReportCsv(
+        summary: state.summary,
+        products: products,
+        expenses: state.expenseReports,
+        startDate: state.startDate,
+        endDate: state.endDate,
+      );
+      final name = 'financial_report_${DateFormat('yyyy-MM-dd').format(state.startDate)}.csv';
+      final file = XFile.fromData(utf8.encode(csv), mimeType: 'text/csv', name: name);
+      if (kIsWeb) {
+        await file.saveTo(name); // the browser downloads it
+      } else {
+        final location = await getSaveLocation(
+          suggestedName: name,
+          acceptedTypeGroups: const [XTypeGroup(label: 'CSV', extensions: ['csv'])],
+        );
+        if (location == null) return; // save dialog cancelled
+        await file.saveTo(location.path);
+      }
+      snack('Saved $name');
+    } catch (e) {
+      snack('Export failed: $e', error: true);
+    }
   }
 }

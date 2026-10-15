@@ -70,7 +70,7 @@ class FinancialReportsDatasource {
           .from('supplier_transactions')
           .select('amount')
           .eq('branch_id', branchId)
-          .eq('type', 'payment')             // payment entries only
+          .eq('is_payment', true)            // payment entries only
           .gte('created_at', startIso)
           .lte('created_at', endIso);
       final expenses = List<Map<String, dynamic>>.from(expRes as List);
@@ -233,7 +233,7 @@ class FinancialReportsDatasource {
           .from('supplier_transactions')
           .select('amount, supplier_id, suppliers(name)')
           .eq('branch_id', branchId)
-          .eq('type', 'payment')
+          .eq('is_payment', true)
           .gte('created_at', start.toUtc().toIso8601String())
           .lte('created_at', end.toUtc().toIso8601String());
 

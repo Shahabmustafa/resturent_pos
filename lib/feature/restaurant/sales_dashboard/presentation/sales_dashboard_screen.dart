@@ -72,17 +72,23 @@ class _Header extends StatelessWidget {
           Text('Sales · $range', style: const TextStyle(fontSize: 13, color: kMuted)),
         ]),
         Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: kCard,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: kBorder),
+          // Scrolls sideways on narrow screens (owner panel on a phone).
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: kCard,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: kBorder),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  for (final p in DashboardPeriod.values)
+                    _PeriodChip(label: p.label, selected: p == state.period, onTap: () => onPeriod(p)),
+                ]),
+              ),
             ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              for (final p in DashboardPeriod.values)
-                _PeriodChip(label: p.label, selected: p == state.period, onTap: () => onPeriod(p)),
-            ]),
           ),
           const SizedBox(width: 8),
           IconButton(

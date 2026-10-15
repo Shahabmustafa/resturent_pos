@@ -8,6 +8,8 @@ import '../provider/customer_providers.dart';
 import '../provider/navigation_provider.dart';
 import '../theme/customer_theme.dart';
 import '../widget/auth_dialog.dart';
+import '../widget/auth_email_link.dart';
+import '../widget/card_checkout_return.dart';
 import '../widget/customer_avatar.dart';
 import '../widget/customer_widgets.dart';
 import 'cart_screen.dart';
@@ -35,25 +37,29 @@ class CustomerShell extends ConsumerWidget {
     final tab = ref.watch(customerTabProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
 
-    return Scaffold(
-      body: Column(
-        children: [
-          const _UtilityBar(),
-          _Header(wide: wide),
-          const _TableBanner(),
-          Expanded(
-            child: _TabFade(
-              index: tab.index,
-              child: IndexedStack(
-                index: tab.index,
-                // Built from the enum so every tab always has exactly one screen.
-                children: [for (final t in CustomerTab.values) _screenFor(t)],
+    return CardCheckoutReturn(
+      child: AuthEmailLink(
+        child: Scaffold(
+          body: Column(
+            children: [
+              const _UtilityBar(),
+              _Header(wide: wide),
+              const _TableBanner(),
+              Expanded(
+                child: _TabFade(
+                  index: tab.index,
+                  child: IndexedStack(
+                    index: tab.index,
+                    // Built from the enum so every tab always has exactly one screen.
+                    children: [for (final t in CustomerTab.values) _screenFor(t)],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+          bottomNavigationBar: wide ? null : const _BottomNav(),
+        ),
       ),
-      bottomNavigationBar: wide ? null : const _BottomNav(),
     );
   }
 }

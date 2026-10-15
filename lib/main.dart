@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:resturent_application/core/constants/supabase_config.dart';
+import 'package:resturent_application/feature/admin_panel/admin_panel_app.dart';
 import 'package:resturent_application/feature/customer_app/customer_app.dart';
 import 'package:resturent_application/feature/app_mode/app_mode.dart';
 import 'package:resturent_application/feature/app_mode/mobile_app.dart';
@@ -12,7 +13,12 @@ void main() async {
   // The website also reads the menu from and writes orders to Supabase.
   await SupabaseConfig.init();
 
-  // Web build = customer website; phone build = customer or Rider app (asked once); desktop build = POS.
+  // Web build = customer website (or the owner's admin panel at /admin-panel);
+  // phone build = customer or Rider app (asked once); desktop build = POS.
+  if (kIsWeb && isAdminPanelUrl(Uri.base)) {
+    runApp(const ProviderScope(child: AdminPanelApp()));
+    return;
+  }
   if (kIsWeb) {
     runApp(const ProviderScope(child: CustomerApp()));
     return;

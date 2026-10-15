@@ -41,6 +41,9 @@ final publicFeedbackProvider = FutureProvider<FeedbackSummary>(
   (ref) => ref.watch(customerDatasourceProvider).fetchFeedback(),
 );
 
+/// Delivery charge as set in the POS (Settings → Company Info → Delivery).
+final deliveryFeeProvider = FutureProvider<double>((ref) => ref.watch(customerDatasourceProvider).fetchDeliveryFee());
+
 /// Opening hours as set in the POS (Settings → Company → Working hours).
 final openingHoursProvider = FutureProvider<OpeningHoursInfo>(
   (ref) => ref.watch(customerDatasourceProvider).fetchOpeningHours(),
@@ -54,6 +57,23 @@ class CustomerAuth {
   CustomerAuth._();
 
   static GoTrueClient get _auth => Supabase.instance.client.auth;
+
+  /// Where the link in a confirmation / password-reset email opens: this same
+  /// website (localhost while developing, the real domain when live), tagged with
+  /// [purpose] so the site knows what to show (see AuthEmailLink). Must be in
+  /// Supabase → Authentication → URL Configuration → Redirect URLs.
+  /// Phones get null, so Supabase uses the project's Site URL (the website).
+  static String? _emailLink(String purpose) {
+    if (!kIsWeb) return null;
+    final here = Uri.base;
+    return Uri(
+      scheme: here.scheme,
+      host: here.host,
+      port: here.hasPort ? here.port : null,
+      path: here.path,
+      queryParameters: {'auth': purpose},
+    ).toString();
+  }
 
   static Future<void> signIn(String email, String password) async {
     try {
@@ -74,6 +94,7 @@ class CustomerAuth {
         email: email.trim(),
         password: password,
         data: {'full_name': name.trim(), 'phone': phone.trim(), 'account_type': 'customer'},
+        emailRedirectTo: _emailLink('confirm'),
       );
       return res.session != null ? SignUpResult.signedIn : SignUpResult.confirmEmail;
     } on AuthException catch (e) {
@@ -82,6 +103,15 @@ class CustomerAuth {
   }
 
   static Future<void> signOut() => _auth.signOut();
+
+  /// Emails a link that opens the website with a "choose a new password" dialog.
+  static Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.resetPasswordForEmail(email.trim(), redirectTo: _emailLink('reset'));
+    } on AuthException catch (e) {
+      throw _friendly(e);
+    }
+  }
 
   /// Saves the profile fields (also used to pre-fill checkout).
   static Future<void> updateProfile({required String name, required String phone, required String address}) async {
@@ -159,6 +189,9 @@ class CustomerAuth {
     }
     if (m.contains('email not confirmed')) return 'Please confirm your email first (check your inbox).';
     if (m.contains('should be different')) return 'The new password must be different from your current one.';
+    if (m.contains('rate limit') || m.contains('security purposes')) {
+      return 'Too many emails sent — please wait a minute and try again.';
+    }
     return e.message;
   }
 }

@@ -101,6 +101,7 @@ class AppIcons {
   static const manageAccountsRounded = AppIcon('assets/icons/manage_accounts_rounded.svg');
   static const menuBookOutlined = AppIcon('assets/icons/menu_book_outlined.svg');
   static const menuBookRounded = AppIcon('assets/icons/menu_book_rounded.svg');
+  static const menuRounded = AppIcon('assets/icons/menu_rounded.svg');
   static const militaryTechRounded = AppIcon('assets/icons/military_tech_rounded.svg');
   static const moneyOff = AppIcon('assets/icons/money_off.svg');
   static const moreVertRounded = AppIcon('assets/icons/more_vert_rounded.svg');

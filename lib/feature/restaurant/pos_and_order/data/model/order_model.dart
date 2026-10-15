@@ -19,6 +19,7 @@ class OrderModel {
   final double  discountAmt;
   final double  taxPct;
   final double  taxAmt;
+  final double  deliveryFee; // website delivery orders; set by the server
   final double  total;
   final String  notes;
   final DateTime createdAt;
@@ -43,6 +44,7 @@ class OrderModel {
     required this.discountAmt,
     required this.taxPct,
     required this.taxAmt,
+    this.deliveryFee = 0,
     required this.total,
     required this.notes,
     required this.createdAt,
@@ -69,6 +71,7 @@ class OrderModel {
         discountAmt:   (j['discount_amt']  as num).toDouble(),
         taxPct:        (j['tax_pct']       as num).toDouble(),
         taxAmt:        (j['tax_amt']       as num).toDouble(),
+        deliveryFee:   (j['delivery_fee']  as num?)?.toDouble() ?? 0,
         total:         (j['total']         as num).toDouble(),
         notes:         j['notes']          ?? '',
         createdAt:     DateTime.parse(j['created_at']),
@@ -104,7 +107,7 @@ class OrderModel {
     status:        status        ?? this.status,
     paymentMethod: paymentMethod, paymentStatus: paymentStatus ?? this.paymentStatus,
     subtotal: subtotal, discountPct: discountPct, discountFlat: discountFlat,
-    discountAmt: discountAmt, taxPct: taxPct, taxAmt: taxAmt, total: total,
+    discountAmt: discountAmt, taxPct: taxPct, taxAmt: taxAmt, deliveryFee: deliveryFee, total: total,
     notes: notes, createdAt: createdAt, items: items,
   );
 }

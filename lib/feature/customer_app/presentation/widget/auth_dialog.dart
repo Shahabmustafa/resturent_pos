@@ -54,6 +54,34 @@ class _AuthFormState extends State<_AuthForm> {
 
   String? _required(String? v) => (v == null || v.trim().isEmpty) ? 'Required' : null;
 
+  static final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+  Future<void> _forgotPassword() async {
+    final email = _email.text.trim();
+    if (!_emailPattern.hasMatch(email)) {
+      setState(() {
+        _info = null;
+        _error = 'Enter your email above, then tap "Forgot password?" again.';
+      });
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+      _info = null;
+    });
+    try {
+      await CustomerAuth.sendPasswordReset(email);
+      setState(
+        () => _info = 'We sent a password reset link to $email. Open it in this browser to choose a new password.',
+      );
+    } catch (e) {
+      setState(() => _error = '$e'.replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
@@ -156,8 +184,7 @@ class _AuthFormState extends State<_AuthForm> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.email],
-              validator: (v) =>
-                  RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch((v ?? '').trim()) ? null : 'Enter a valid email',
+              validator: (v) => _emailPattern.hasMatch((v ?? '').trim()) ? null : 'Enter a valid email',
               decoration: const InputDecoration(hintText: 'you@example.com'),
             ),
             label('Password'),
@@ -179,6 +206,17 @@ class _AuthFormState extends State<_AuthForm> {
                 ),
               ),
             ),
+            if (!_register)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _busy ? null : _forgotPassword,
+                  child: Text(
+                    'Forgot password?',
+                    style: CText.body(13, color: CColors.rust, weight: FontWeight.w600),
+                  ),
+                ),
+              ),
             if (_error != null) _Notice(_error!, error: true),
             if (_info != null) _Notice(_info!),
             const SizedBox(height: 22),

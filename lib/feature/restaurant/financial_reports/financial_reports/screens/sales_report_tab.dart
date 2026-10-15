@@ -115,8 +115,8 @@ class _StatRow extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Row(children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: kMuted)),
-          const Spacer(),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 12, color: kMuted))),
+          const SizedBox(width: 8),
           Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: valueColor ?? kText)),
         ]),
       );

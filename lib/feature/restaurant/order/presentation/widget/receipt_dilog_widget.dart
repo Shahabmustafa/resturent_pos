@@ -272,6 +272,8 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
           if (s.showTaxBreakdown)
             _pdfRow('Tax (${order.taxPct.toStringAsFixed(0)}%)',
                 formatMoney(order.taxAmt)),
+          if (order.deliveryFee > 0)
+            _pdfRow('Delivery charge', formatMoney(order.deliveryFee)),
           pw.SizedBox(height: 6),
           pw.Container(
             padding: const pw.EdgeInsets.symmetric(vertical: 6),
@@ -459,6 +461,8 @@ class _ReceiptPreview extends StatelessWidget {
             if (s?.showTaxBreakdown == true)
               _RRow(l: 'Tax (${order.taxPct.toStringAsFixed(0)}%)',
                   r: formatMoney(order.taxAmt)),
+            if (order.deliveryFee > 0)
+              _RRow(l: 'Delivery charge', r: formatMoney(order.deliveryFee)),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10),

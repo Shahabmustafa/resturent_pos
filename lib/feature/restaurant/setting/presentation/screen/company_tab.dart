@@ -29,6 +29,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
   final _posId          = TextEditingController();
   final _openingTime    = TextEditingController();
   final _closingTime    = TextEditingController();
+  final _deliveryFee    = TextEditingController();
   bool _is24Hours = false;
   bool _loaded = false;
 
@@ -38,7 +39,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
     _phone.dispose();  _email.dispose();   _address.dispose();
     _city.dispose();   _website.dispose(); _ntn.dispose();
     _strn.dispose();   _posId.dispose();   _openingTime.dispose();
-    _closingTime.dispose();
+    _closingTime.dispose(); _deliveryFee.dispose();
     super.dispose();
   }
 
@@ -58,6 +59,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
     _openingTime.text    = b.openingTime;
     _closingTime.text    = b.closingTime;
     _is24Hours           = b.is24Hours;
+    _deliveryFee.text    = b.deliveryFee.toStringAsFixed(2);
   }
 
   void _discard(BranchModel b) {
@@ -67,6 +69,14 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
   }
 
   void _save(BranchModel current) {
+    final fee = double.tryParse(_deliveryFee.text.trim().replaceAll('£', '').replaceAll(',', '').trim());
+    if (fee == null || fee < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Enter a valid delivery charge, e.g. 2.50 (or 0 for free delivery)'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
     final updated = current.copyWith(
       restaurantName: _restaurantName.text.trim(),
       name:           _branchName.text.trim(),
@@ -81,6 +91,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
       openingTime:    _openingTime.text.trim(),
       closingTime:    _closingTime.text.trim(),
       is24Hours:      _is24Hours,
+      deliveryFee:    (fee * 100).round() / 100,
     );
     ref.read(branchSettingsProvider.notifier).save(updated);
   }
@@ -201,6 +212,15 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
             },
           ),
         ])),
+      ]),
+
+      // ── Delivery ──────────────────────────────────────────────────────
+      SectionCard(title: 'DELIVERY', children: [
+        _Field(
+          label: 'Delivery charge (£) — added to every website delivery order, 0 = free',
+          ctrl: _deliveryFee,
+          kt: const TextInputType.numberWithOptions(decimal: true),
+        ),
       ]),
 
       // ── Buttons ───────────────────────────────────────────────────────

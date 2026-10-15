@@ -2,7 +2,6 @@ import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:resturent_application/feature/admin_panel/admin_shell/presentation/screen/admin_shall_page.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../provider/company_provider.dart';
 
@@ -52,10 +51,8 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
     final authState = ref.watch(companyAuthProvider);
 
     ref.listen<CompanyAuthState>(companyAuthProvider, (prev, next) {
-      if (next.isLoggedIn) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => AdminShell()));
-      }
-      if (next.errorMessage != null) {
+      // AdminPanelApp swaps to the dashboard once a company is signed in.
+      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
@@ -67,12 +64,14 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
       }
     });
 
+    final wide = MediaQuery.sizeOf(context).width >= 820;
+
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: Row(
         children: [
-          // ── Left Panel (Branding) ──────────────────────────────────
-          Expanded(
+          // ── Left Panel (Branding), hidden on phones ────────────────
+          if (wide) Expanded(
             flex: 5,
             child: Container(
               color: AppColors.sidebar,
@@ -188,8 +187,10 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
             child: Container(
               color: AppColors.white,
               child: Center(
-                child: SizedBox(
-                  width: 380,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 380),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 32),
@@ -330,6 +331,7 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
                       ],
                     ),
                   ),
+                ),
                 ),
               ),
             ),
