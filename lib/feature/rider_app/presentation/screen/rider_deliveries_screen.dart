@@ -35,8 +35,10 @@ class RiderDeliveriesScreen extends ConsumerWidget {
     }).toList();
     final cashToHandIn = today.fold<double>(0, (sum, o) => sum + o.amount);
 
-    void openDetail(DeliveryOrder o) =>
-        Navigator.push(context, MaterialPageRoute(builder: (_) => RiderOrderDetailScreen(orderId: o.id)));
+    void openDetail(DeliveryOrder o) => Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RiderOrderDetailScreen(orderId: o.id)),
+    );
 
     return DefaultTabController(
       length: 2,
@@ -48,7 +50,8 @@ class RiderDeliveriesScreen extends ConsumerWidget {
               toggling: s.togglingOnline,
               onToggle: (online) async {
                 final msg = await n.setOnline(online);
-                if (msg != null && context.mounted) riderToast(context, msg, kYellow);
+                if (msg != null && context.mounted)
+                  riderToast(context, msg, kYellow);
               },
               todayCount: today.length,
               todayEarnings: today.length * me.chargePerDelivery,
@@ -57,7 +60,10 @@ class RiderDeliveriesScreen extends ConsumerWidget {
           ),
           SliverPersistentHeader(
             pinned: true,
-            delegate: _TabsHeader(activeCount: active.length, historyCount: history.length),
+            delegate: _TabsHeader(
+              activeCount: active.length,
+              historyCount: history.length,
+            ),
           ),
         ],
         body: s.orders == null
@@ -69,7 +75,9 @@ class RiderDeliveriesScreen extends ConsumerWidget {
                     onRefresh: n.refresh,
                     empty: _Empty(
                       icon: AppIcons.deliveryDiningRounded,
-                      title: me.status == RiderStatus.offline ? "You're offline" : 'No delivery right now',
+                      title: me.status == RiderStatus.offline
+                          ? "You're offline"
+                          : 'No delivery right now',
                       body: me.status == RiderStatus.offline
                           ? 'Go online so the restaurant can assign you deliveries.'
                           : 'Stay online — new deliveries show up here instantly.',
@@ -78,7 +86,9 @@ class RiderDeliveriesScreen extends ConsumerWidget {
                       order: o,
                       busy: s.working.contains(o.id),
                       onTap: () => openDetail(o),
-                      onStartTrip: o.status == DeliveryOrderStatus.assigned ? () => startTrip(context, ref, o) : null,
+                      onStartTrip: o.status == DeliveryOrderStatus.assigned
+                          ? () => startTrip(context, ref, o)
+                          : null,
                       onDelivered: o.status == DeliveryOrderStatus.onTheWay
                           ? () => markDelivered(context, ref, o)
                           : null,
@@ -93,7 +103,8 @@ class RiderDeliveriesScreen extends ConsumerWidget {
                       title: 'No past deliveries',
                       body: 'Deliveries you finish will be listed here.',
                     ),
-                    itemBuilder: (o) => RiderHistoryTile(order: o, onTap: () => openDetail(o)),
+                    itemBuilder: (o) =>
+                        RiderHistoryTile(order: o, onTap: () => openDetail(o)),
                   ),
                 ],
               ),
@@ -130,8 +141,18 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (title, subtitle, color, icon) = switch (rider.status) {
-      RiderStatus.available => ("You're online", 'New deliveries will come to you', kGreen, AppIcons.wifiTethering),
-      RiderStatus.busy => ('On a delivery', 'Finish it to get the next one', kYellow, AppIcons.directionsBikeRounded),
+      RiderStatus.available => (
+        "You're online",
+        'New deliveries will come to you',
+        kGreen,
+        AppIcons.wifiTethering,
+      ),
+      RiderStatus.busy => (
+        'On a delivery',
+        'Finish it to get the next one',
+        kYellow,
+        AppIcons.directionsBikeRounded,
+      ),
       RiderStatus.offline => (
         "You're offline",
         'Go online to start getting deliveries',
@@ -148,7 +169,12 @@ class _Header extends StatelessWidget {
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
-      padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 18, 20, 22),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        MediaQuery.paddingOf(context).top + 18,
+        20,
+        22,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -160,13 +186,20 @@ class _Header extends StatelessWidget {
                   children: [
                     Text(
                       '${_greeting()},',
-                      style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.75)),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.75),
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       rider.name.split(' ').first,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white),
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -182,7 +215,11 @@ class _Header extends StatelessWidget {
                   backgroundColor: Colors.white.withValues(alpha: 0.18),
                   child: Text(
                     rider.name.isEmpty ? '?' : rider.name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: Colors.white),
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -193,15 +230,25 @@ class _Header extends StatelessWidget {
           // Status card
           Container(
             padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
             child: Row(
               children: [
                 Container(
                   width: 44,
                   height: 44,
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.14), shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                  ),
                   alignment: Alignment.center,
-                  child: SvgIcon(icon, size: 22, color: color == kMuted ? kSub : color),
+                  child: SvgIcon(
+                    icon,
+                    size: 22,
+                    color: color == kMuted ? kSub : color,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -210,7 +257,11 @@ class _Header extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: kText),
+                        style: const TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w800,
+                          color: kText,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -228,20 +279,31 @@ class _Header extends StatelessWidget {
                     child: SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: kPrimary,
+                      ),
                     ),
                   )
                 else if (rider.status == RiderStatus.busy)
                   // Can't go offline mid-delivery, so no switch here.
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: kYellow.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
                       'BUSY',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: kYellow, letterSpacing: 0.8),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: kYellow,
+                        letterSpacing: 0.8,
+                      ),
                     ),
                   )
                 else
@@ -252,7 +314,9 @@ class _Header extends StatelessWidget {
                     activeTrackColor: kGreen,
                     inactiveThumbColor: Colors.white,
                     inactiveTrackColor: kBorder,
-                    trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+                    trackOutlineColor: const WidgetStatePropertyAll(
+                      Colors.transparent,
+                    ),
                   ),
               ],
             ),
@@ -274,11 +338,23 @@ class _Header extends StatelessWidget {
           ),
           Row(
             children: [
-              _Stat(icon: AppIcons.checkCircleRounded, label: 'Delivered', value: '$todayCount'),
+              _Stat(
+                icon: AppIcons.checkCircleRounded,
+                label: 'Delivered',
+                value: '$todayCount',
+              ),
               const SizedBox(width: 10),
-              _Stat(icon: AppIcons.savingsRounded, label: 'Earned', value: formatMoney(todayEarnings)),
+              _Stat(
+                icon: AppIcons.savingsRounded,
+                label: 'Earned',
+                value: formatMoney(todayEarnings),
+              ),
               const SizedBox(width: 10),
-              _Stat(icon: AppIcons.paymentsRounded, label: 'Cash', value: formatMoney(cashToHandIn)),
+              _Stat(
+                icon: AppIcons.paymentsRounded,
+                label: 'Cash',
+                value: formatMoney(cashToHandIn),
+              ),
             ],
           ),
         ],
@@ -311,10 +387,20 @@ class _Stat extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white),
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
           ),
-          Text(label, style: TextStyle(fontSize: 11.5, color: Colors.white.withValues(alpha: 0.7))),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.5,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
         ],
       ),
     ),
@@ -332,7 +418,11 @@ class _TabsHeader extends SliverPersistentHeaderDelegate {
   double get maxExtent => 66;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     final controller = DefaultTabController.of(context);
     return Container(
       color: kBg,
@@ -348,14 +438,19 @@ class _TabsHeader extends SliverPersistentHeaderDelegate {
           ),
           child: Row(
             children: [
-              for (final (i, label, count) in [(0, 'Active', activeCount), (1, 'History', historyCount)])
+              for (final (i, label, count) in [
+                (0, 'Active', activeCount),
+                (1, 'History', historyCount),
+              ])
                 Expanded(
                   child: GestureDetector(
                     onTap: () => controller.animateTo(i),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       decoration: BoxDecoration(
-                        color: controller.index == i ? kPrimary : Colors.transparent,
+                        color: controller.index == i
+                            ? kPrimary
+                            : Colors.transparent,
                         borderRadius: BorderRadius.circular(11),
                       ),
                       alignment: Alignment.center,
@@ -367,14 +462,21 @@ class _TabsHeader extends SliverPersistentHeaderDelegate {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: controller.index == i ? Colors.white : kSub,
+                              color: controller.index == i
+                                  ? Colors.white
+                                  : kSub,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 1,
+                            ),
                             decoration: BoxDecoration(
-                              color: controller.index == i ? Colors.white.withValues(alpha: 0.22) : kBg,
+                              color: controller.index == i
+                                  ? Colors.white.withValues(alpha: 0.22)
+                                  : kBg,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
@@ -382,7 +484,9 @@ class _TabsHeader extends SliverPersistentHeaderDelegate {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
-                                color: controller.index == i ? Colors.white : kSub,
+                                color: controller.index == i
+                                    ? Colors.white
+                                    : kSub,
                               ),
                             ),
                           ),
@@ -399,7 +503,8 @@ class _TabsHeader extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(_TabsHeader old) => old.activeCount != activeCount || old.historyCount != historyCount;
+  bool shouldRebuild(_TabsHeader old) =>
+      old.activeCount != activeCount || old.historyCount != historyCount;
 }
 
 class _OrderList extends StatelessWidget {
@@ -448,7 +553,11 @@ class _OrderList extends StatelessWidget {
 
     // The stream is sorted by creation time; headings follow delivery time, so re-sort by that.
     final sorted = groupByDay
-        ? ([...orders]..sort((a, b) => (b.deliveredAt ?? b.createdAt).compareTo(a.deliveredAt ?? a.createdAt)))
+        ? ([...orders]..sort(
+            (a, b) => (b.deliveredAt ?? b.createdAt).compareTo(
+              a.deliveredAt ?? a.createdAt,
+            ),
+          ))
         : orders;
     final children = <Widget>[];
     DateTime? lastDay;
@@ -492,7 +601,12 @@ class _DayHeading extends StatelessWidget {
     padding: EdgeInsets.fromLTRB(4, first ? 2 : 12, 4, 8),
     child: Text(
       label.toUpperCase(),
-      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: kMuted, letterSpacing: 0.8),
+      style: const TextStyle(
+        fontSize: 11.5,
+        fontWeight: FontWeight.w800,
+        color: kMuted,
+        letterSpacing: 0.8,
+      ),
     ),
   );
 }
@@ -563,14 +677,21 @@ class _Empty extends StatelessWidget {
       Container(
         width: 84,
         height: 84,
-        decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: kPrimary.withValues(alpha: 0.08),
+          shape: BoxShape.circle,
+        ),
         alignment: Alignment.center,
         child: SvgIcon(icon, size: 40, color: kPrimary),
       ),
       const SizedBox(height: 16),
       Text(
         title,
-        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: kText),
+        style: const TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w800,
+          color: kText,
+        ),
       ),
       const SizedBox(height: 6),
       Text(

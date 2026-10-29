@@ -6,13 +6,15 @@ import '../theme/customer_theme.dart';
 import 'customer_widgets.dart';
 
 /// Login / register dialog. Resolves to true once the customer is signed in.
-Future<bool> showCustomerAuthDialog(BuildContext context, {String? reason}) async {
+Future<bool> showCustomerAuthDialog(
+  BuildContext context, {
+  String? reason,
+}) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (_) => Dialog(
       backgroundColor: CColors.paper,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
         child: _AuthForm(reason: reason),
@@ -52,7 +54,8 @@ class _AuthFormState extends State<_AuthForm> {
     super.dispose();
   }
 
-  String? _required(String? v) => (v == null || v.trim().isEmpty) ? 'Required' : null;
+  String? _required(String? v) =>
+      (v == null || v.trim().isEmpty) ? 'Required' : null;
 
   static final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
@@ -73,7 +76,8 @@ class _AuthFormState extends State<_AuthForm> {
     try {
       await CustomerAuth.sendPasswordReset(email);
       setState(
-        () => _info = 'We sent a password reset link to $email. Open it in this browser to choose a new password.',
+        () => _info =
+            'We sent a password reset link to $email. Open it in this browser to choose a new password.',
       );
     } catch (e) {
       setState(() => _error = '$e'.replaceFirst('Exception: ', ''));
@@ -136,17 +140,29 @@ class _AuthFormState extends State<_AuthForm> {
           children: [
             Row(
               children: [
-                Expanded(child: Text(_register ? 'Create your account' : 'Welcome back', style: CText.display(26))),
+                Expanded(
+                  child: Text(
+                    _register ? 'Create your account' : 'Welcome back',
+                    style: CText.display(26),
+                  ),
+                ),
                 IconButton(
                   tooltip: 'Close',
                   onPressed: _busy ? null : () => Navigator.pop(context, false),
-                  icon: const SvgIcon(AppIcons.closeRounded, size: 22, color: CColors.muted),
+                  icon: const SvgIcon(
+                    AppIcons.closeRounded,
+                    size: 22,
+                    color: CColors.muted,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             Text(
-              widget.reason ?? (_register ? 'Create an account to place your order.' : 'Log in to place your order.'),
+              widget.reason ??
+                  (_register
+                      ? 'Create an account to place your order.'
+                      : 'Log in to place your order.'),
               style: CText.body(14, color: CColors.muted, height: 1.5),
             ),
             const SizedBox(height: 16),
@@ -174,7 +190,9 @@ class _AuthFormState extends State<_AuthForm> {
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 validator: (v) =>
-                    (v ?? '').replaceAll(RegExp(r'\D'), '').length < 10 ? 'Enter a valid phone number' : null,
+                    (v ?? '').replaceAll(RegExp(r'\D'), '').length < 10
+                    ? 'Enter a valid phone number'
+                    : null,
                 decoration: const InputDecoration(hintText: '03xx xxxxxxx'),
               ),
             ],
@@ -184,22 +202,30 @@ class _AuthFormState extends State<_AuthForm> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.email],
-              validator: (v) => _emailPattern.hasMatch((v ?? '').trim()) ? null : 'Enter a valid email',
+              validator: (v) => _emailPattern.hasMatch((v ?? '').trim())
+                  ? null
+                  : 'Enter a valid email',
               decoration: const InputDecoration(hintText: 'you@example.com'),
             ),
             label('Password'),
             TextFormField(
               controller: _password,
               obscureText: !_showPassword,
-              autofillHints: [_register ? AutofillHints.newPassword : AutofillHints.password],
+              autofillHints: [
+                _register ? AutofillHints.newPassword : AutofillHints.password,
+              ],
               onFieldSubmitted: (_) => _submit(),
-              validator: (v) => (v ?? '').length < 6 ? 'At least 6 characters' : null,
+              validator: (v) =>
+                  (v ?? '').length < 6 ? 'At least 6 characters' : null,
               decoration: InputDecoration(
                 hintText: '••••••',
                 suffixIcon: IconButton(
-                  onPressed: () => setState(() => _showPassword = !_showPassword),
+                  onPressed: () =>
+                      setState(() => _showPassword = !_showPassword),
                   icon: SvgIcon(
-                    _showPassword ? AppIcons.visibilityOffRounded : AppIcons.visibilityRounded,
+                    _showPassword
+                        ? AppIcons.visibilityOffRounded
+                        : AppIcons.visibilityRounded,
                     size: 20,
                     color: CColors.muted,
                   ),
@@ -213,7 +239,11 @@ class _AuthFormState extends State<_AuthForm> {
                   onPressed: _busy ? null : _forgotPassword,
                   child: Text(
                     'Forgot password?',
-                    style: CText.body(13, color: CColors.rust, weight: FontWeight.w600),
+                    style: CText.body(
+                      13,
+                      color: CColors.rust,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -221,7 +251,9 @@ class _AuthFormState extends State<_AuthForm> {
             if (_info != null) _Notice(_info!),
             const SizedBox(height: 22),
             PillButton(
-              label: _busy ? 'Please wait…' : (_register ? 'Create Account' : 'Login'),
+              label: _busy
+                  ? 'Please wait…'
+                  : (_register ? 'Create Account' : 'Login'),
               icon: _busy ? null : AppIcons.arrowForwardRounded,
               expand: true,
               onPressed: _busy ? null : _submit,
@@ -257,7 +289,11 @@ class _ModeSwitch extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               label,
-              style: CText.body(13.5, color: active ? Colors.white : CColors.muted, weight: FontWeight.w600),
+              style: CText.body(
+                13.5,
+                color: active ? Colors.white : CColors.muted,
+                weight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -296,10 +332,17 @@ class _Notice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SvgIcon(error ? AppIcons.warningRounded : AppIcons.checkCircleRounded, size: 18, color: color),
+          SvgIcon(
+            error ? AppIcons.warningRounded : AppIcons.checkCircleRounded,
+            size: 18,
+            color: color,
+          ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: CText.body(13, color: color, height: 1.45)),
+            child: Text(
+              text,
+              style: CText.body(13, color: color, height: 1.45),
+            ),
           ),
         ],
       ),

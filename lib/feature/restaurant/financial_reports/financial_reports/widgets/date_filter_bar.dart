@@ -29,7 +29,10 @@ class DateFilterBar extends StatelessWidget {
       initialDateRange: DateTimeRange(start: startDate, end: endDate),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(primary: kPrimary, onPrimary: Colors.white),
+          colorScheme: const ColorScheme.light(
+            primary: kPrimary,
+            onPrimary: Colors.white,
+          ),
         ),
         child: child!,
       ),
@@ -45,31 +48,41 @@ class DateFilterBar extends StatelessWidget {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: DateFilter.values.where((f) => f != DateFilter.custom).map((f) {
-                final isSelected = selected == f;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: () => onFilter(f),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: isSelected ? kPrimary : kCard,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isSelected ? kPrimary : kBorder),
-                      ),
-                      child: Text(
-                        f.label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          color: isSelected ? Colors.white : kText,
+              children: DateFilter.values
+                  .where((f) => f != DateFilter.custom)
+                  .map((f) {
+                    final isSelected = selected == f;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => onFilter(f),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected ? kPrimary : kCard,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? kPrimary : kBorder,
+                            ),
+                          ),
+                          child: Text(
+                            f.label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                              color: isSelected ? Colors.white : kText,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  })
+                  .toList(),
             ),
           ),
         ),
@@ -81,23 +94,33 @@ class DateFilterBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected == DateFilter.custom ? kPrimary : kCard,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: selected == DateFilter.custom ? kPrimary : kBorder),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              SvgIcon(AppIcons.dateRange, size: 14,
-                  color: selected == DateFilter.custom ? Colors.white : kMuted),
-              const SizedBox(width: 4),
-              Text(
-                selected == DateFilter.custom
-                    ? '${formatDate(startDate)} – ${formatDate(endDate)}'
-                    : 'Custom',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: selected == DateFilter.custom ? Colors.white : kText,
-                  fontWeight: selected == DateFilter.custom ? FontWeight.w600 : FontWeight.normal,
-                ),
+              border: Border.all(
+                color: selected == DateFilter.custom ? kPrimary : kBorder,
               ),
-            ]),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgIcon(
+                  AppIcons.dateRange,
+                  size: 14,
+                  color: selected == DateFilter.custom ? Colors.white : kMuted,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  selected == DateFilter.custom
+                      ? '${formatDate(startDate)} – ${formatDate(endDate)}'
+                      : 'Custom',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: selected == DateFilter.custom ? Colors.white : kText,
+                    fontWeight: selected == DateFilter.custom
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

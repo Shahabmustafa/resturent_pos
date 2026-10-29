@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/widget/old_dialog_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -15,7 +16,9 @@ class CColors {
   static const rustDeep = Color(0xFF7E2F14);
   static const olive = Color(0xFF57603C);
   static const cream = Color(0xFFF8F2E6);
-  static const pageGrey = Color(0xFFF1F1EF); // light grey page (cart / checkout)
+  static const pageGrey = Color(
+    0xFFF1F1EF,
+  ); // light grey page (cart / checkout)
   static const cream2 = Color(0xFFEFE3C9);
   static const paper = Color(0xFFFFFDF8);
   static const text = Color(0xFF241D15);
@@ -33,15 +36,25 @@ class CColors {
 class CShadows {
   CShadows._();
 
-  static const soft = [BoxShadow(color: Color(0x1A23190A), blurRadius: 36, offset: Offset(0, 14))];
-  static const large = [BoxShadow(color: Color(0x381A140F), blurRadius: 64, offset: Offset(0, 30))];
-  static const rust = [BoxShadow(color: Color(0x59A8431F), blurRadius: 24, offset: Offset(0, 10))];
+  static const soft = [
+    BoxShadow(color: Color(0x1A23190A), blurRadius: 36, offset: Offset(0, 14)),
+  ];
+  static const large = [
+    BoxShadow(color: Color(0x381A140F), blurRadius: 64, offset: Offset(0, 30)),
+  ];
+  static const rust = [
+    BoxShadow(color: Color(0x59A8431F), blurRadius: 24, offset: Offset(0, 10)),
+  ];
 }
 
 class CText {
   CText._();
 
-  static TextStyle display(double size, {Color color = CColors.ink, FontStyle? style}) => GoogleFonts.playfairDisplay(
+  static TextStyle display(
+    double size, {
+    Color color = CColors.ink,
+    FontStyle? style,
+  }) => GoogleFonts.playfairDisplay(
     fontSize: size,
     fontWeight: FontWeight.w700,
     color: color,
@@ -54,11 +67,20 @@ class CText {
     Color color = CColors.text,
     FontWeight weight = FontWeight.w400,
     double? height,
-  }) => GoogleFonts.poppins(fontSize: size, fontWeight: weight, color: color, height: height);
+  }) => GoogleFonts.poppins(
+    fontSize: size,
+    fontWeight: weight,
+    color: color,
+    height: height,
+  );
 
   /// Small uppercase label shown above section titles.
-  static TextStyle eyebrow({Color color = CColors.rust}) =>
-      GoogleFonts.poppins(fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: 2.2, color: color);
+  static TextStyle eyebrow({Color color = CColors.rust}) => GoogleFonts.poppins(
+    fontSize: 11.5,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 2.2,
+    color: color,
+  );
 }
 
 ThemeData buildCustomerTheme() {
@@ -72,7 +94,9 @@ ThemeData buildCustomerTheme() {
       onPrimary: Colors.white,
       onSurface: CColors.text,
     ),
-    textTheme: GoogleFonts.poppinsTextTheme(base.textTheme).apply(bodyColor: CColors.text, displayColor: CColors.ink),
+    textTheme: GoogleFonts.poppinsTextTheme(
+      base.textTheme,
+    ).apply(bodyColor: CColors.text, displayColor: CColors.ink),
     splashFactory: InkSparkle.splashFactory,
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -92,6 +116,7 @@ ThemeData buildCustomerTheme() {
         borderSide: const BorderSide(color: CColors.gold, width: 1.5),
       ),
     ),
+    dialogTheme: kOldStyleDialogTheme,
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: CColors.ink,

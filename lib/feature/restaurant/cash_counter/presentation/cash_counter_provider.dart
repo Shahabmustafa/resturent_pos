@@ -9,8 +9,9 @@ import '../../order/presentation/provider/order_provider.dart';
 import '../data/cash_counter_datasource.dart';
 import '../data/cash_counter_models.dart';
 
-final cashCounterDatasourceProvider =
-    Provider<CashCounterDatasource>((_) => CashCounterDatasource(Supabase.instance.client));
+final cashCounterDatasourceProvider = Provider<CashCounterDatasource>(
+  (_) => CashCounterDatasource(Supabase.instance.client),
+);
 
 class CashCounterState {
   final bool loading;
@@ -40,16 +41,15 @@ class CashCounterState {
     CounterSummary? summary,
     List<CounterEntry>? entries,
     List<CashCounter>? history,
-  }) =>
-      CashCounterState(
-        loading: loading ?? this.loading,
-        busy:    busy ?? this.busy,
-        error:   clearError ? null : error ?? this.error,
-        open:    identical(open, _keep) ? this.open : open as CashCounter?,
-        summary: summary ?? this.summary,
-        entries: entries ?? this.entries,
-        history: history ?? this.history,
-      );
+  }) => CashCounterState(
+    loading: loading ?? this.loading,
+    busy: busy ?? this.busy,
+    error: clearError ? null : error ?? this.error,
+    open: identical(open, _keep) ? this.open : open as CashCounter?,
+    summary: summary ?? this.summary,
+    entries: entries ?? this.entries,
+    history: history ?? this.history,
+  );
 }
 
 const _keep = Object();
@@ -62,11 +62,16 @@ class CashCounterNotifier extends StateNotifier<CashCounterState> {
   Timer? _debounce;
   Timer? _poll;
 
-  CashCounterNotifier(this._ds, this._orders, this._branchId) : super(const CashCounterState()) {
+  CashCounterNotifier(this._ds, this._orders, this._branchId)
+    : super(const CashCounterState()) {
     load();
     if (_branchId.isEmpty) return;
     // Sales totals follow orders live (new sales, payments, cancellations).
-    _channel = _orders.subscribeToOrders(_branchId, 'counter', (_) => _refreshSoon());
+    _channel = _orders.subscribeToOrders(
+      _branchId,
+      'counter',
+      (_) => _refreshSoon(),
+    );
     _poll = Timer.periodic(const Duration(seconds: 30), (_) => _refreshLive());
   }
 
@@ -86,12 +91,18 @@ class CashCounterNotifier extends StateNotifier<CashCounterState> {
   Future<void> load() async {
     if (_branchId.isEmpty) return;
     try {
-      final results = await Future.wait([_ds.fetchOpen(_branchId), _ds.fetchHistory(_branchId)]);
+      final results = await Future.wait([
+        _ds.fetchOpen(_branchId),
+        _ds.fetchHistory(_branchId),
+      ]);
       final open = results[0] as CashCounter?;
       var summary = const CounterSummary();
       var entries = const <CounterEntry>[];
       if (open != null) {
-        final live = await Future.wait([_ds.fetchSummary(open.id), _ds.fetchEntries(open.id)]);
+        final live = await Future.wait([
+          _ds.fetchSummary(open.id),
+          _ds.fetchEntries(open.id),
+        ]);
         summary = live[0] as CounterSummary;
         entries = live[1] as List<CounterEntry>;
       }
@@ -116,21 +127,37 @@ class CashCounterNotifier extends StateNotifier<CashCounterState> {
     if (open == null || state.busy) return;
     try {
       final summary = await _ds.fetchSummary(open.id);
-      if (mounted && state.open?.id == open.id) state = state.copyWith(summary: summary);
+      if (mounted && state.open?.id == open.id)
+        state = state.copyWith(summary: summary);
     } catch (_) {}
   }
 
   Future<bool> openCounter(double openingCash) =>
       _run(() => _ds.open(_branchId, openingCash));
 
-  Future<bool> addEntry({required bool isIn, required double amount, required String reason}) =>
-      _run(() => _ds.addEntry(state.open!.id, isIn: isIn, amount: amount, reason: reason));
+  Future<bool> addEntry({
+    required bool isIn,
+    required double amount,
+    required String reason,
+  }) => _run(
+    () => _ds.addEntry(
+      state.open!.id,
+      isIn: isIn,
+      amount: amount,
+      reason: reason,
+    ),
+  );
 
   /// Closes the open counter and returns its stored report.
-  Future<CashCounter?> closeCounter({required double countedCash, required String notes}) async {
+  Future<CashCounter?> closeCounter({
+    required double countedCash,
+    required String notes,
+  }) async {
     final id = state.open?.id;
     if (id == null) return null;
-    final ok = await _run(() => _ds.close(id, countedCash: countedCash, notes: notes));
+    final ok = await _run(
+      () => _ds.close(id, countedCash: countedCash, notes: notes),
+    );
     if (!ok) return null;
     return state.history.where((c) => c.id == id).firstOrNull;
   }
@@ -150,15 +177,19 @@ class CashCounterNotifier extends StateNotifier<CashCounterState> {
     }
   }
 
-  static String _message(Object e) =>
-      e is PostgrestException ? e.message : e.toString().replaceFirst('Exception: ', '');
+  static String _message(Object e) => e is PostgrestException
+      ? e.message
+      : e.toString().replaceFirst('Exception: ', '');
 }
 
-final cashCounterProvider = StateNotifierProvider.autoDispose<CashCounterNotifier, CashCounterState>((ref) {
-  final branchId = ref.watch(branchAuthProvider).branch?.branchId ?? '';
-  return CashCounterNotifier(
-    ref.watch(cashCounterDatasourceProvider),
-    ref.watch(orderDatasourceProvider),
-    branchId,
-  );
-});
+final cashCounterProvider =
+    StateNotifierProvider.autoDispose<CashCounterNotifier, CashCounterState>((
+      ref,
+    ) {
+      final branchId = ref.watch(branchAuthProvider).branch?.branchId ?? '';
+      return CashCounterNotifier(
+        ref.watch(cashCounterDatasourceProvider),
+        ref.watch(orderDatasourceProvider),
+        branchId,
+      );
+    });

@@ -6,7 +6,12 @@ class MiniStatCard extends StatelessWidget {
   final String value;
   final AppIcon icon;
   final Color color;
-  const MiniStatCard({required this.label, required this.value, required this.icon, required this.color});
+  const MiniStatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,13 @@ class MiniStatCard extends StatelessWidget {
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE8EAF0)),
-        boxShadow: [BoxShadow(color: Color(0x0D000030), blurRadius: 10, offset: Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0D000030),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -34,8 +45,21 @@ class MiniStatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(value, style: const TextStyle(color: const Color(0xFF1A1D3A), fontSize: 16, fontWeight: FontWeight.w800)),
-                Text(label, style: const TextStyle(color: const Color(0xFF9396B0), fontSize: 11)),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: const Color(0xFF1A1D3A),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: const Color(0xFF9396B0),
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),

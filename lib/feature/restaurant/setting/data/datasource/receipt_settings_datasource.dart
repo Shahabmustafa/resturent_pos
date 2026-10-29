@@ -10,14 +10,10 @@ class ReceiptSettingsDataSource {
   ReceiptSettingsDataSource(this._db);
 
   Future<ReceiptSettings> fetch(String branchId) async {
-    final res = await _db
-        .from(_table)
-        .select()
-        .eq('branch_id', branchId)
-        .maybeSingle();
+    final res = await _db.from(_table).select().maybeSingle();
 
     if (res == null) {
-      final def = ReceiptSettings(branchId: branchId);
+      final def = const ReceiptSettings();
       await _db.from(_table).insert(def.toMap());
       return def;
     }
@@ -25,9 +21,12 @@ class ReceiptSettingsDataSource {
   }
 
   Future<void> upsert(ReceiptSettings settings) async {
-    await _db
-        .from(_table)
-        .upsert(settings.toMap(), onConflict: 'branch_id');
+    final existing = await _db.from(_table).select('id').maybeSingle();
+    if (existing == null) {
+      await _db.from(_table).insert(settings.toMap());
+    } else {
+      await _db.from(_table).update(settings.toMap()).eq('id', existing['id']);
+    }
   }
 
   // ← Logo upload function

@@ -28,7 +28,8 @@ class AppModeController {
   static Future<void> choose(AppMode m) async {
     // Keep a session only if it belongs to this side; otherwise start signed out.
     final user = Supabase.instance.client.auth.currentUser;
-    if (user != null && !_belongsTo(user, m)) await Supabase.instance.client.auth.signOut();
+    if (user != null && !_belongsTo(user, m))
+      await Supabase.instance.client.auth.signOut();
     try {
       await (await SharedPreferences.getInstance()).setString(_key, m.name);
     } catch (_) {}

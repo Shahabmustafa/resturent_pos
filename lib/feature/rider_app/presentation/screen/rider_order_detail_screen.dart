@@ -22,8 +22,12 @@ class RiderOrderDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final order = ref.watch(riderProvider.select((s) => s.order(orderId)));
-    final busy = ref.watch(riderProvider.select((s) => s.working.contains(orderId)));
-    final charge = ref.watch(riderProvider.select((s) => s.me?.chargePerDelivery ?? 0));
+    final busy = ref.watch(
+      riderProvider.select((s) => s.working.contains(orderId)),
+    );
+    final charge = ref.watch(
+      riderProvider.select((s) => s.me?.chargePerDelivery ?? 0),
+    );
 
     if (order == null) {
       return Scaffold(
@@ -33,7 +37,11 @@ class RiderOrderDetailScreen extends ConsumerWidget {
           surfaceTintColor: kBg,
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const SvgIcon(AppIcons.arrowBackRounded, size: 22, color: kText),
+            icon: const SvgIcon(
+              AppIcons.arrowBackRounded,
+              size: 22,
+              color: kText,
+            ),
           ),
         ),
         body: Center(
@@ -45,14 +53,25 @@ class RiderOrderDetailScreen extends ConsumerWidget {
                 Container(
                   width: 84,
                   height: 84,
-                  decoration: BoxDecoration(color: kMuted.withValues(alpha: 0.12), shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: kMuted.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
                   alignment: Alignment.center,
-                  child: const SvgIcon(AppIcons.deliveryDiningRounded, size: 40, color: kMuted),
+                  child: const SvgIcon(
+                    AppIcons.deliveryDiningRounded,
+                    size: 40,
+                    color: kMuted,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'Delivery not found',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: kText),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: kText,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
@@ -61,7 +80,10 @@ class RiderOrderDetailScreen extends ConsumerWidget {
                   style: TextStyle(fontSize: 14, color: kSub, height: 1.5),
                 ),
                 const SizedBox(height: 18),
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Back to deliveries')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Back to deliveries'),
+                ),
               ],
             ),
           ),
@@ -71,7 +93,11 @@ class RiderOrderDetailScreen extends ConsumerWidget {
 
     final status = order.status;
     final active = isActiveDelivery(order);
-    final items = order.items.split(RegExp(r'[,\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final items = order.items
+        .split(RegExp(r'[,\n]'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
 
     return Scaffold(
       backgroundColor: kBg,
@@ -80,13 +106,26 @@ class RiderOrderDetailScreen extends ConsumerWidget {
         surfaceTintColor: kBg,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const SvgIcon(AppIcons.arrowBackRounded, size: 22, color: kText),
+          icon: const SvgIcon(
+            AppIcons.arrowBackRounded,
+            size: 22,
+            color: kText,
+          ),
         ),
         title: Text(
           order.orderNum,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: kText),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: kText,
+          ),
         ),
-        actions: [Padding(padding: const EdgeInsets.only(right: 16), child: _StatusChip(status))],
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: _StatusChip(status),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -102,17 +141,28 @@ class RiderOrderDetailScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'The restaurant cancelled this delivery.',
-                          style: TextStyle(fontSize: 14, color: kRed, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: kRed,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   )
                 : Column(
                     children: [
-                      _Step(title: 'Assigned to you', time: order.assignedAt, done: true, isLast: false),
+                      _Step(
+                        title: 'Assigned to you',
+                        time: order.assignedAt,
+                        done: true,
+                        isLast: false,
+                      ),
                       _Step(
                         title: 'Picked up — on the way',
-                        done: status == DeliveryOrderStatus.onTheWay || status == DeliveryOrderStatus.delivered,
+                        done:
+                            status == DeliveryOrderStatus.onTheWay ||
+                            status == DeliveryOrderStatus.delivered,
                         current: status == DeliveryOrderStatus.assigned,
                         isLast: false,
                       ),
@@ -134,11 +184,21 @@ class RiderOrderDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _InfoRow(AppIcons.personRounded, order.customerName, bold: true),
+                _InfoRow(
+                  AppIcons.personRounded,
+                  order.customerName,
+                  bold: true,
+                ),
                 const SizedBox(height: 12),
-                _InfoRow(AppIcons.phoneRounded, order.phone.isEmpty ? 'No phone number' : order.phone),
+                _InfoRow(
+                  AppIcons.phoneRounded,
+                  order.phone.isEmpty ? 'No phone number' : order.phone,
+                ),
                 const SizedBox(height: 12),
-                _InfoRow(AppIcons.locationOnOutlined, order.address.isEmpty ? 'No address given' : order.address),
+                _InfoRow(
+                  AppIcons.locationOnOutlined,
+                  order.address.isEmpty ? 'No address given' : order.address,
+                ),
                 if (active) ...[
                   const SizedBox(height: 16),
                   Row(
@@ -150,7 +210,10 @@ class RiderOrderDetailScreen extends ConsumerWidget {
                           color: kGreen,
                           onTap: order.phone.isEmpty
                               ? null
-                              : () => openExternal(context, Uri(scheme: 'tel', path: order.phone)),
+                              : () => openExternal(
+                                  context,
+                                  Uri(scheme: 'tel', path: order.phone),
+                                ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -163,7 +226,10 @@ class RiderOrderDetailScreen extends ConsumerWidget {
                               ? null
                               : () => openExternal(
                                   context,
-                                  Uri.https('www.google.com', '/maps/dir/', {'api': '1', 'destination': order.address}),
+                                  Uri.https('www.google.com', '/maps/dir/', {
+                                    'api': '1',
+                                    'destination': order.address,
+                                  }),
                                 ),
                         ),
                       ),
@@ -179,7 +245,10 @@ class RiderOrderDetailScreen extends ConsumerWidget {
           _Card(
             title: 'Order items',
             child: items.isEmpty
-                ? const Text('No items listed', style: TextStyle(fontSize: 14, color: kMuted))
+                ? const Text(
+                    'No items listed',
+                    style: TextStyle(fontSize: 14, color: kMuted),
+                  )
                 : Column(
                     children: [
                       for (final item in items)
@@ -192,11 +261,21 @@ class RiderOrderDetailScreen extends ConsumerWidget {
                                 margin: const EdgeInsets.only(top: 7),
                                 width: 6,
                                 height: 6,
-                                decoration: const BoxDecoration(color: kPrimary, shape: BoxShape.circle),
+                                decoration: const BoxDecoration(
+                                  color: kPrimary,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: Text(item, style: const TextStyle(fontSize: 14.5, color: kText, height: 1.4)),
+                                child: Text(
+                                  item,
+                                  style: const TextStyle(
+                                    fontSize: 14.5,
+                                    color: kText,
+                                    height: 1.4,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -209,7 +288,14 @@ class RiderOrderDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             _Card(
               title: 'Notes from the restaurant',
-              child: Text(order.notes, style: const TextStyle(fontSize: 14.5, color: kText, height: 1.5)),
+              child: Text(
+                order.notes,
+                style: const TextStyle(
+                  fontSize: 14.5,
+                  color: kText,
+                  height: 1.5,
+                ),
+              ),
             ),
           ],
           const SizedBox(height: 12),
@@ -221,7 +307,11 @@ class RiderOrderDetailScreen extends ConsumerWidget {
               children: [
                 _MoneyRow('Collect from customer', order.amount, big: true),
                 const Divider(color: kBorder, height: 24),
-                _MoneyRow('Your charge for this delivery', charge, color: kGreen),
+                _MoneyRow(
+                  'Your charge for this delivery',
+                  charge,
+                  color: kGreen,
+                ),
               ],
             ),
           ),
@@ -260,7 +350,11 @@ class _NextStepButton extends StatelessWidget {
   final bool onTheWay;
   final bool busy;
   final VoidCallback onPressed;
-  const _NextStepButton({required this.onTheWay, required this.busy, required this.onPressed});
+  const _NextStepButton({
+    required this.onTheWay,
+    required this.busy,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -275,16 +369,23 @@ class _NextStepButton extends StatelessWidget {
           disabledBackgroundColor: color.withValues(alpha: 0.5),
           disabledForegroundColor: Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         icon: busy
             ? const SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
               )
             : SvgIcon(
-                onTheWay ? AppIcons.checkCircleRounded : AppIcons.directionsBikeRounded,
+                onTheWay
+                    ? AppIcons.checkCircleRounded
+                    : AppIcons.directionsBikeRounded,
                 size: 22,
                 color: Colors.white,
               ),
@@ -313,10 +414,17 @@ class _StatusChip extends StatelessWidget {
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Text(
           label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: color,
+          ),
         ),
       ),
     );
@@ -341,7 +449,12 @@ class _Card extends StatelessWidget {
       children: [
         Text(
           title.toUpperCase(),
-          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: kMuted, letterSpacing: 0.8),
+          style: const TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w800,
+            color: kMuted,
+            letterSpacing: 0.8,
+          ),
         ),
         const SizedBox(height: 12),
         child,
@@ -358,7 +471,13 @@ class _Step extends StatelessWidget {
   final bool current;
   final bool isLast;
 
-  const _Step({required this.title, this.time, required this.done, this.current = false, required this.isLast});
+  const _Step({
+    required this.title,
+    this.time,
+    required this.done,
+    this.current = false,
+    required this.isLast,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -380,10 +499,21 @@ class _Step extends StatelessWidget {
                     border: Border.all(color: color, width: 2),
                   ),
                   alignment: Alignment.center,
-                  child: done ? const SvgIcon(AppIcons.checkRounded, size: 14, color: Colors.white) : null,
+                  child: done
+                      ? const SvgIcon(
+                          AppIcons.checkRounded,
+                          size: 14,
+                          color: Colors.white,
+                        )
+                      : null,
                 ),
                 if (!isLast)
-                  Expanded(child: Container(width: 2, color: done ? kGreen.withValues(alpha: 0.5) : kBorder)),
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      color: done ? kGreen.withValues(alpha: 0.5) : kBorder,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -398,13 +528,18 @@ class _Step extends StatelessWidget {
                       title,
                       style: TextStyle(
                         fontSize: 14.5,
-                        fontWeight: done || current ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: done || current
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: done || current ? kText : kMuted,
                       ),
                     ),
                   ),
                   if (time != null)
-                    Text(_clock.format(time!.toLocal()), style: const TextStyle(fontSize: 12.5, color: kMuted)),
+                    Text(
+                      _clock.format(time!.toLocal()),
+                      style: const TextStyle(fontSize: 12.5, color: kMuted),
+                    ),
                 ],
               ),
             ),
@@ -450,7 +585,12 @@ class _BigButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback? onTap;
-  const _BigButton({required this.icon, required this.label, required this.color, this.onTap});
+  const _BigButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) => Material(
@@ -471,7 +611,11 @@ class _BigButton extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: onTap == null ? kMuted : color),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: onTap == null ? kMuted : color,
+                  ),
                 ),
               ),
             ),
@@ -497,7 +641,11 @@ class _MoneyRow extends StatelessWidget {
       ),
       Text(
         formatMoney(value),
-        style: TextStyle(fontSize: big ? 22 : 16, fontWeight: FontWeight.w800, color: color ?? kText),
+        style: TextStyle(
+          fontSize: big ? 22 : 16,
+          fontWeight: FontWeight.w800,
+          color: color ?? kText,
+        ),
       ),
     ],
   );

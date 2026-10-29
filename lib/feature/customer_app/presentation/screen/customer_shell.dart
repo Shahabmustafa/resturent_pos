@@ -51,7 +51,9 @@ class CustomerShell extends ConsumerWidget {
                   child: IndexedStack(
                     index: tab.index,
                     // Built from the enum so every tab always has exactly one screen.
-                    children: [for (final t in CustomerTab.values) _screenFor(t)],
+                    children: [
+                      for (final t in CustomerTab.values) _screenFor(t),
+                    ],
                   ),
                 ),
               ),
@@ -76,9 +78,17 @@ class _TabFade extends StatefulWidget {
   State<_TabFade> createState() => _TabFadeState();
 }
 
-class _TabFadeState extends State<_TabFade> with SingleTickerProviderStateMixin {
-  late final _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 380), value: 1);
-  late final _curve = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+class _TabFadeState extends State<_TabFade>
+    with SingleTickerProviderStateMixin {
+  late final _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 380),
+    value: 1,
+  );
+  late final _curve = CurvedAnimation(
+    parent: _ctrl,
+    curve: Curves.easeOutCubic,
+  );
 
   @override
   void didUpdateWidget(_TabFade old) {
@@ -100,7 +110,10 @@ class _TabFadeState extends State<_TabFade> with SingleTickerProviderStateMixin 
     child: widget.child,
     builder: (context, child) => Opacity(
       opacity: 0.2 + 0.8 * _curve.value,
-      child: Transform.translate(offset: Offset(0, (1 - _curve.value) * 14), child: child),
+      child: Transform.translate(
+        offset: Offset(0, (1 - _curve.value) * 14),
+        child: child,
+      ),
     ),
   );
 }
@@ -120,7 +133,8 @@ class _TableBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (tableQrToken == null || tableQrToken!.isEmpty) return const SizedBox.shrink();
+    if (tableQrToken == null || tableQrToken!.isEmpty)
+      return const SizedBox.shrink();
     final session = ref.watch(tableSessionProvider);
     if (session.isLoading) return const SizedBox.shrink();
     final table = session.value;
@@ -132,14 +146,22 @@ class _TableBanner extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgIcon(AppIcons.tableRestaurantRounded, size: 16, color: valid ? CColors.ink : Colors.white),
+          SvgIcon(
+            AppIcons.tableRestaurantRounded,
+            size: 16,
+            color: valid ? CColors.ink : Colors.white,
+          ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               valid
                   ? 'Table $table · Dine-in — add dishes and send your order from the cart'
                   : 'This table QR code isn\'t valid. Please ask the staff for help.',
-              style: CText.body(13, color: valid ? CColors.ink : Colors.white, weight: FontWeight.w600),
+              style: CText.body(
+                13,
+                color: valid ? CColors.ink : Colors.white,
+                weight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -155,20 +177,37 @@ class _UtilityBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Hours come from the POS settings; blank until loaded so no stale times flash.
     final hours = ref.watch(openingHoursProvider).value;
-    final text = hours == null ? '' : (hours.is24Hours ? 'Open 24 hours, every day' : 'Open daily ${hours.range}');
+    final text = hours == null
+        ? ''
+        : (hours.is24Hours
+              ? 'Open 24 hours, every day'
+              : 'Open daily ${hours.range}');
     return Container(
       color: CColors.ink,
-      padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 7, 16, 7),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        MediaQuery.paddingOf(context).top + 7,
+        16,
+        7,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SvgIcon(AppIcons.accessTimeRounded, size: 14, color: CColors.goldLight),
+          const SvgIcon(
+            AppIcons.accessTimeRounded,
+            size: 14,
+            color: CColors.goldLight,
+          ),
           const SizedBox(width: 7),
           Flexible(
             child: Text(
               text,
               overflow: TextOverflow.ellipsis,
-              style: CText.body(11.5, color: CColors.goldPale, weight: FontWeight.w500),
+              style: CText.body(
+                11.5,
+                color: CColors.goldPale,
+                weight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -216,7 +255,12 @@ class _Header extends ConsumerWidget {
               ),
               if (wide) ...[
                 for (final (t, label, _) in _tabs)
-                  if (t != CustomerTab.cart) _NavLink(label: label, active: tab == t, onTap: () => go(t)),
+                  if (t != CustomerTab.cart)
+                    _NavLink(
+                      label: label,
+                      active: tab == t,
+                      onTap: () => go(t),
+                    ),
                 const SizedBox(width: 16),
                 PillButton(
                   label: 'Order Now',
@@ -228,7 +272,10 @@ class _Header extends ConsumerWidget {
               ],
               // Phone app only — the website never offers the Rider app.
               if (!kIsWeb) ...[const _RiderButton(), const SizedBox(width: 10)],
-              _AccountButton(active: tab == CustomerTab.profile, onOpen: () => go(CustomerTab.profile)),
+              _AccountButton(
+                active: tab == CustomerTab.profile,
+                onOpen: () => go(CustomerTab.profile),
+              ),
               const SizedBox(width: 10),
               _CartButton(onTap: () => go(CustomerTab.cart)),
             ],
@@ -245,7 +292,11 @@ class _NavLink extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  const _NavLink({required this.label, required this.active, required this.onTap});
+  const _NavLink({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +312,11 @@ class _NavLink extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: CText.body(14.5, color: active || hovered ? CColors.rust : CColors.ink, weight: FontWeight.w600),
+                style: CText.body(
+                  14.5,
+                  color: active || hovered ? CColors.rust : CColors.ink,
+                  weight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 4),
               AnimatedContainer(
@@ -269,7 +324,10 @@ class _NavLink extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 height: 2,
                 width: active ? 22 : (hovered ? 10 : 0),
-                decoration: BoxDecoration(color: CColors.rust, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: CColors.rust,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ],
           ),
@@ -299,13 +357,20 @@ class _AccountButton extends ConsumerWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () async {
-              if (await showCustomerAuthDialog(context, reason: 'Log in to order and manage your profile.')) {
+              if (await showCustomerAuthDialog(
+                context,
+                reason: 'Log in to order and manage your profile.',
+              )) {
                 onOpen();
               }
             },
             child: const Padding(
               padding: EdgeInsets.all(11),
-              child: SvgIcon(AppIcons.personRounded, size: 20, color: CColors.ink),
+              child: SvgIcon(
+                AppIcons.personRounded,
+                size: 20,
+                color: CColors.ink,
+              ),
             ),
           ),
         ),
@@ -321,7 +386,10 @@ class _AccountButton extends ConsumerWidget {
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: active ? CColors.rust : Colors.transparent, width: 2),
+            border: Border.all(
+              color: active ? CColors.rust : Colors.transparent,
+              width: 2,
+            ),
           ),
           child: CustomerAvatar(user: user, size: 38),
         ),
@@ -344,7 +412,11 @@ class _RiderButton extends StatelessWidget {
         onTap: () => confirmSwitchToRider(context),
         child: const Padding(
           padding: EdgeInsets.all(11),
-          child: SvgIcon(AppIcons.deliveryDiningRounded, size: 20, color: CColors.rust),
+          child: SvgIcon(
+            AppIcons.deliveryDiningRounded,
+            size: 20,
+            color: CColors.rust,
+          ),
         ),
       ),
     ),
@@ -372,7 +444,11 @@ class _CartButton extends ConsumerWidget {
           onTap: onTap,
           child: const Padding(
             padding: EdgeInsets.all(11),
-            child: SvgIcon(AppIcons.shoppingBagRounded, size: 20, color: Colors.white),
+            child: SvgIcon(
+              AppIcons.shoppingBagRounded,
+              size: 20,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -393,7 +469,12 @@ class _BottomNav extends ConsumerWidget {
         color: CColors.paper,
         border: Border(top: BorderSide(color: CColors.line)),
       ),
-      padding: EdgeInsets.fromLTRB(10, 8, 10, 8 + MediaQuery.paddingOf(context).bottom),
+      padding: EdgeInsets.fromLTRB(
+        10,
+        8,
+        10,
+        8 + MediaQuery.paddingOf(context).bottom,
+      ),
       child: Row(
         children: [
           for (final (t, label, icon) in _tabs)
@@ -408,16 +489,25 @@ class _BottomNav extends ConsumerWidget {
                     children: [
                       AnimatedContainer(
                         duration: Duration.zero,
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: tab == t ? CColors.goldPale : Colors.transparent,
+                          color: tab == t
+                              ? CColors.goldPale
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Badge(
                           isLabelVisible: t == CustomerTab.cart && count > 0,
                           label: Text('$count'),
                           backgroundColor: CColors.rust,
-                          child: SvgIcon(icon, size: 22, color: tab == t ? CColors.rust : CColors.muted),
+                          child: SvgIcon(
+                            icon,
+                            size: 22,
+                            color: tab == t ? CColors.rust : CColors.muted,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),

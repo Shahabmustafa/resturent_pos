@@ -14,8 +14,11 @@ final financialReportsDatasourceProvider = Provider<FinancialReportsDatasource>(
   (ref) => FinancialReportsDatasource(Supabase.instance.client),
 );
 
-final financialReportsProvider = StateNotifierProvider<FinancialReportsNotifier, FinancialReportsState>((ref) {
-  final branchId = ref.watch(branchAuthProvider).branch!.branchId;
-  final ds = ref.watch(financialReportsDatasourceProvider);
-  return FinancialReportsNotifier(ds, branchId);
-});
+final financialReportsProvider =
+    StateNotifierProvider<FinancialReportsNotifier, FinancialReportsState>((
+      ref,
+    ) {
+      final branchId = ref.watch(branchAuthProvider).branch!.branchId;
+      final ds = ref.watch(financialReportsDatasourceProvider);
+      return FinancialReportsNotifier(ds, branchId);
+    });

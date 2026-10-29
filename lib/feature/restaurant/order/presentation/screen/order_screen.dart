@@ -1,670 +1,1412 @@
-import 'package:resturent_application/core/widget/status_pill.dart';
-import 'package:resturent_application/core/widget/stat_card.dart';
-import '../widget/order_skeleton.dart';
-import 'package:resturent_application/core/constants/app_icons.dart';
-import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../core/constants/app_colors.dart';
+import 'package:intl/intl.dart';
+import 'package:resturent_application/core/constants/app_icons.dart';
+import 'package:resturent_application/core/constants/currency.dart';
+import 'package:resturent_application/core/widget/svg_icon.dart';
+import 'package:resturent_application/feature/restaurant/live_orders/presentation/live_orders_screen.dart';
 import '../../../pos_and_order/data/model/order_model.dart';
 import '../provider/order_provider.dart';
 import '../widget/receipt_dilog_widget.dart';
-import 'package:resturent_application/core/constants/currency.dart';
 
+const _bg = Color(0xFFF2F2F2);
+const _barBg = Color(0xFFD4D4D2);
+const _perPage = 15;
 
-class OrdersScreen extends ConsumerWidget {
-  const OrdersScreen({super.key});
+const _statusOptions = [
+  ('pending', 'Ordered'),
+  ('preparing', 'Preparing'),
+  ('completed', 'Complete'),
+  ('cancelled', 'Cancelled'),
+];
+
+String _statusLabel(String s) =>
+    _statusOptions.where((o) => o.$1 == s.toLowerCase()).firstOrNull?.$2 ?? s;
+
+Color _statusColor(String s) => switch (s.toLowerCase()) {
+  'completed' || 'delivered' => const Color(0xFF2DC937),
+  'preparing' => const Color(0xFF2EC4B6),
+  'cancelled' => const Color(0xFF6B6B6B),
+  _ => const Color(0xFFE05FE8),
+};
+
+Color _typeColor(String t) => switch (t) {
+  'Dine-in' => const Color(0xFF2368D6),
+  'Delivery' => const Color(0xFFFF7A00),
+  _ => const Color(0xFFC9168A),
+};
+
+String _typeLabel(String t) => switch (t) {
+  'Dine-in' => 'dine',
+  'Delivery' => 'delivery',
+  _ => 'collection',
+};
+
+AppIcon _typeIcon(String t) => switch (t) {
+  'Dine-in' => AppIcons.restaurantRounded,
+  'Delivery' => AppIcons.localShippingRounded,
+  _ => AppIcons.shoppingBagRounded,
+};
+
+/// One day's orders as touch rows: tick rows to complete, change status or delete them,
+/// tap a row for the full order.
+class OrdersScreen extends ConsumerStatefulWidget {
+  final VoidCallback onBack;
+  const OrdersScreen({super.key, required this.onBack});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(orderProvider);
+  ConsumerState<OrdersScreen> createState() => _OrdersScreenState();
+}
 
-    if (state.error != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error!), backgroundColor: kPrimary, behavior: SnackBarBehavior.floating));
-        ref.read(orderProvider.notifier).clearError();
-      });
+class _OrdersScreenState extends ConsumerState<OrdersScreen> {
+  late final OrderNotifier _notifier = ref.read(orderProvider.notifier);
+  late DateTime _day = _today();
+  final Set<String> _checked = {};
+  int _page = 0;
+  bool _filterOpen = false;
+
+  // Filter panel (empty set = no filter in that group).
+  final Set<String> _payFilter = {};
+  final Set<String> _typeFilter = {};
+  final Set<String> _statusFilter = {};
+
+  static DateTime _today() {
+    final n = DateTime.now();
+    return DateTime(n.year, n.month, n.day);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_loadDay);
+  }
+
+  @override
+  void dispose() {
+    // The other screens (live board, manage) read the same list: put it back to the default.
+    Future.microtask(_notifier.clearFilters);
+    super.dispose();
+  }
+
+  void _loadDay() {
+    final utc = _day.toUtc(); // the range is sent to the database as UTC
+    _notifier.setDateRange(utc, utc);
+  }
+
+  void _moveDay(int days) {
+    setState(() {
+      _day = _day.add(Duration(days: days));
+      _page = 0;
+      _checked.clear();
+    });
+    _loadDay();
+  }
+
+  Future<void> _pickDay() async {
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _day,
+      firstDate: DateTime(2024),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+    );
+    if (d == null) return;
+    setState(() {
+      _day = DateTime(d.year, d.month, d.day);
+      _page = 0;
+      _checked.clear();
+    });
+    _loadDay();
+  }
+
+  bool _sameDay(DateTime a) {
+    final l = a.toLocal();
+    return l.year == _day.year && l.month == _day.month && l.day == _day.day;
+  }
+
+  bool _matches(OrderModel o) {
+    if (!_sameDay(o.createdAt)) return false;
+    final status = o.status.toLowerCase();
+    // Deleted (cancelled) orders stay hidden unless asked for.
+    if (_statusFilter.isEmpty
+        ? status == 'cancelled'
+        : !_statusFilter.contains(status))
+      return false;
+    if (_typeFilter.isNotEmpty && !_typeFilter.contains(o.orderType))
+      return false;
+    if (_payFilter.isNotEmpty) {
+      final unpaid = o.paymentStatus != 'Paid';
+      final keys = {
+        if (o.paymentMethod == 'Cash' && !unpaid) 'cash',
+        if (o.paymentMethod == 'Cash' && unpaid) 'cash_due',
+        if (o.paymentMethod == 'Card') 'card',
+        if (o.paymentMethod == 'Online') 'online',
+      };
+      if (keys.intersection(_payFilter).isEmpty) return false;
+    }
+    return true;
+  }
+
+  void _snack(String msg) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+  List<OrderModel> _selectedOrders(List<OrderModel> shown) =>
+      shown.where((o) => _checked.contains(o.id)).toList();
+
+  Future<void> _setStatus(List<OrderModel> orders, String status) async {
+    for (final o in orders) {
+      await _notifier.updateStatus(o.id, status);
+    }
+    if (mounted) setState(_checked.clear);
+  }
+
+  Future<void> _chooseStatus(List<OrderModel> orders) async {
+    if (orders.isEmpty) return _snack('Tick an order first');
+    final status = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Set status'),
+        children: [
+          for (final s in _statusOptions)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, s.$1),
+              child: Text(s.$2),
+            ),
+        ],
+      ),
+    );
+    if (status != null) await _setStatus(orders, status);
+  }
+
+  Future<void> _delete(List<OrderModel> orders) async {
+    if (orders.isEmpty) return _snack('Tick an order first');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete orders'),
+        content: Text(
+          'Delete ${orders.length} order(s)? They are marked cancelled and removed from this list.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD9534F),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await _setStatus(orders, 'cancelled');
+  }
+
+  Future<void> _print(List<OrderModel> orders) async {
+    if (orders.isEmpty) return _snack('Tick an order first');
+    for (final o in orders) {
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        builder: (_) => ReceiptPrintDialog(order: o),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(orderProvider);
+    final selected = state.selected;
+    if (selected != null) {
+      // Always show the freshest copy (status changes, realtime updates).
+      final fresh =
+          state.orders.where((o) => o.id == selected.id).firstOrNull ??
+          selected;
+      return _OrderDetail(
+        order: fresh,
+        notifier: _notifier,
+        onBack: () => _notifier.select(null),
+      );
     }
 
-    return Scaffold(
-      backgroundColor: kBg,
-      body: Row(children: [
-        // ── Left: List ───────────────────────────────────────────────
-        Expanded(
-          child: Column(children: [
-            _TopBar(
-              isLoading: state.loading || state.updating,
-              hasActiveFilters: state.statusFilter != 'All' || state.typeFilter != 'All' || state.paymentFilter != 'All' || state.search.isNotEmpty || state.from != null,
-              onRefresh:     () => ref.read(orderProvider.notifier).load(),
-              onClearFilter: () => ref.read(orderProvider.notifier).clearFilters(),
-            ),
-            state.loading && state.orders.isEmpty
-                ? const OrderSummaryStripSkeleton()
-                : _SummaryStrip(state: state),
-            _FilterBar(state: state, notifier: ref.read(orderProvider.notifier), context: context),
-            Expanded(
-              child: state.loading && state.orders.isEmpty ?
-              const OrderTableSkeleton() :
-              state.orders.isEmpty ?
-              _EmptyState(hasFilters: state.statusFilter != 'All' || state.typeFilter != 'All' || state.search.isNotEmpty) :
-              _OrderTable(
-                orders: state.orders,
-                selected: state.selected,
-                onSelect: (o) => ref.read(orderProvider.notifier).select(state.selected?.id == o.id ? null : o),
-                onPrint: (o) => showDialog(
-                  context: context,
-                  builder: (_) => ReceiptPrintDialog(order: o),
+    final shown = state.orders.where(_matches).toList();
+    final pages = (shown.length / _perPage).ceil().clamp(1, 99999);
+    final page = _page.clamp(0, pages - 1);
+    final rows = shown.skip(page * _perPage).take(_perPage).toList();
+    final picked = _selectedOrders(shown);
+    final allTicked =
+        rows.isNotEmpty && rows.every((o) => _checked.contains(o.id));
+
+    return Stack(
+      children: [
+        Container(
+          color: _barBg,
+          child: Column(
+            children: [
+              Container(
+                color: _bg,
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Row(
+                  children: [
+                    _Tick(
+                      value: allTicked,
+                      onChanged: (v) => setState(() {
+                        for (final o in rows) {
+                          v ? _checked.add(o.id) : _checked.remove(o.id);
+                        }
+                      }),
+                    ),
+                    const SizedBox(width: 200),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      color: const Color(0xFF6B6B6B),
+                      child: Text(
+                        'Total Orders: ${shown.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    _SmallButton(
+                      child: const SvgIcon(
+                        AppIcons.arrowBackRounded,
+                        size: 18,
+                        color: Colors.black,
+                      ),
+                      onTap: () => _moveDay(-1),
+                    ),
+                    Material(
+                      color: const Color(0xFF1E5FC4),
+                      child: InkWell(
+                        onTap: _pickDay,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 11,
+                          ),
+                          child: Text(
+                            DateFormat('dd/MM/yy').format(_day),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    _SmallButton(
+                      child: const SvgIcon(
+                        AppIcons.arrowForwardRounded,
+                        size: 18,
+                        color: Colors.black,
+                      ),
+                      onTap: () => _moveDay(1),
+                    ),
+                    const SizedBox(width: 100),
+                    Material(
+                      color: const Color(0xFF2C73B8),
+                      elevation: 2,
+                      borderRadius: BorderRadius.circular(3),
+                      child: InkWell(
+                        onTap: () => _print(picked),
+                        child: const SizedBox(
+                          width: 110,
+                          height: 52,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgIcon(
+                                AppIcons.printRounded,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                'Print',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 30),
+                    _PageBtn(
+                      '‹',
+                      page > 0 ? () => setState(() => _page = page - 1) : null,
+                    ),
+                    Container(
+                      width: 30,
+                      height: 34,
+                      color: const Color(0xFF1E7BC6),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${page + 1}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    _PageBtn(
+                      '›',
+                      page < pages - 1
+                          ? () => setState(() => _page = page + 1)
+                          : null,
+                    ),
+                    const Spacer(),
+                    Material(
+                      color: Colors.white,
+                      elevation: 2,
+                      child: InkWell(
+                        onTap: () => setState(() => _filterOpen = true),
+                        child: SizedBox(
+                          width: 74,
+                          height: 40,
+                          child: Center(
+                            child: Badge(
+                              isLabelVisible:
+                                  _payFilter.length +
+                                      _typeFilter.length +
+                                      _statusFilter.length >
+                                  0,
+                              child: const SvgIcon(
+                                AppIcons.tuneRounded,
+                                size: 22,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ]),
-        ),
-
-        // ── Right: Detail Panel ──────────────────────────────────────
-        if (state.selected != null)
-          SizedBox(
-            width: 340,
-            child: _DetailPanel(
-              order: state.selected!,
-              updating: state.updating,
-              onClose: () => ref.read(orderProvider.notifier).select(null),
-              onUpdateStatus:  (s) => ref.read(orderProvider.notifier).updateStatus(state.selected!.id, s),
-              onUpdatePayment: (s) => ref.read(orderProvider.notifier).updatePaymentStatus(state.selected!.id, s),
-              onPrint: () => showDialog(
-                context: context,
-                builder: (_) => ReceiptPrintDialog(order: state.selected!),
+              Expanded(
+                child: Container(
+                  color: _bg,
+                  child: state.loading && state.orders.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : rows.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No orders',
+                            style: TextStyle(color: Color(0xFF6B7280)),
+                          ),
+                        )
+                      : ListView(
+                          children: [
+                            for (final o in rows)
+                              _OrderRow(
+                                order: o,
+                                checked: _checked.contains(o.id),
+                                onChecked: (v) => setState(
+                                  () => v
+                                      ? _checked.add(o.id)
+                                      : _checked.remove(o.id),
+                                ),
+                                onTap: () => _notifier.select(o),
+                              ),
+                          ],
+                        ),
+                ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
+                child: Row(
+                  children: [
+                    const TimeBox(),
+                    const SizedBox(width: 10),
+                    _BarButton(
+                      label: 'Back',
+                      icon: AppIcons.arrowBackRounded,
+                      color: Colors.black,
+                      onTap: widget.onBack,
+                    ),
+                    const SizedBox(width: 140),
+                    _BarButton(
+                      label: 'Delete',
+                      icon: AppIcons.deleteOutlineRounded,
+                      color: const Color(0xFFD9534F),
+                      width: 100,
+                      onTap: () => _delete(picked),
+                    ),
+                    const Spacer(),
+                    _BarButton(
+                      label: 'Complete',
+                      icon: AppIcons.checkRounded,
+                      color: const Color(0xFF38C73A),
+                      width: 160,
+                      onTap: () {
+                        if (picked.isEmpty)
+                          return _snack('Tick an order first');
+                        _setStatus(picked, 'completed');
+                      },
+                    ),
+                    const SizedBox(width: 6),
+                    _BarButton(
+                      label: 'Status',
+                      icon: AppIcons.tuneRounded,
+                      color: const Color(0xFF5BC0DE),
+                      width: 160,
+                      onTap: () => _chooseStatus(picked),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_filterOpen)
+          Positioned(
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: 480,
+            child: _FilterPanel(
+              pay: _payFilter,
+              type: _typeFilter,
+              status: _statusFilter,
+              onChanged: () => setState(() => _page = 0),
+              onClose: () => setState(() => _filterOpen = false),
             ),
           ),
-      ]),
+      ],
     );
   }
 }
 
-// ── Top Bar ───────────────────────────────────────────────────────────────────
-class _TopBar extends StatelessWidget {
-  final bool isLoading, hasActiveFilters;
-  final VoidCallback onRefresh, onClearFilter;
-  const _TopBar({required this.isLoading, required this.hasActiveFilters,
-    required this.onRefresh, required this.onClearFilter});
+class _OrderRow extends StatelessWidget {
+  final OrderModel order;
+  final bool checked;
+  final ValueChanged<bool> onChecked;
+  final VoidCallback onTap;
+  const _OrderRow({
+    required this.order,
+    required this.checked,
+    required this.onChecked,
+    required this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 60,
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    decoration: const BoxDecoration(color: kCard, border: Border(bottom: BorderSide(color: kBorder))),
-    child: Row(children: [
-      const SvgIcon(AppIcons.receiptLongRounded, color: kPrimary, size: 20),
-      const SizedBox(width: 10),
-      const Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Orders', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: kText)),
-        Text('View and manage all orders', style: TextStyle(fontSize: 11, color: kMuted)),
-      ]),
-      const Spacer(),
-      if (hasActiveFilters)
-        TextButton.icon(
-          onPressed: onClearFilter,
-          icon: const SvgIcon(AppIcons.filterAltOffRounded, size: 14),
-          label: const Text('Clear Filters', style: TextStyle(fontSize: 12)),
-          style: TextButton.styleFrom(foregroundColor: kPrimary),
-        ),
-      const SizedBox(width: 4),
-      if (isLoading)
-        const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary))
-      else
-        IconButton(onPressed: onRefresh, icon: const SvgIcon(AppIcons.refreshRounded, color: kPrimary, size: 20), tooltip: 'Refresh'),
-    ]),
-  );
-}
-
-// ── Summary Strip ─────────────────────────────────────────────────────────────
-class _SummaryStrip extends StatelessWidget {
-  final OrderState state;
-  const _SummaryStrip({required this.state});
-
-  @override
-  Widget build(BuildContext context) => Container(
-    color: kCard,
-    padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
-    child: StatCardRow(cards: [
-      StatCardData(AppIcons.receiptRounded,     'Total Orders', '${state.totalOrders}',    kBlue),
-      StatCardData(AppIcons.pendingRounded,     'Pending',      '${state.pendingCount}',   kYellow),
-      StatCardData(AppIcons.checkCircleRounded, 'Completed',    '${state.completedCount}', kGreen),
-      StatCardData(AppIcons.paymentsRounded,    'Revenue',      formatMoney(state.totalRevenue), kPrimary),
-      StatCardData(AppIcons.checkRounded,       'Collected',    formatMoney(state.totalPaid),    kPurple),
-    ]),
-  );
-}
-
-// ── Filter Bar ────────────────────────────────────────────────────────────────
-class _FilterBar extends StatelessWidget {
-  final OrderState state;
-  final OrderNotifier notifier;
-  final BuildContext context;
-  const _FilterBar({required this.state, required this.notifier, required this.context});
-
-  static const _statuses = ['All', 'pending', 'completed', 'cancelled'];
-  static const _types    = ['All', 'Dine-in', 'Takeaway', 'Delivery'];
-  static const _payments = ['All', 'Paid', 'Unpaid', 'Partial'];
-
-  @override
-  Widget build(BuildContext context) => Container(
-    color: kCard,
-    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-    child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(children: [
-        // Search
-        SizedBox(
-          width: 190,
-          child: TextField(
-            onChanged: notifier.setSearch,
-            style: const TextStyle(fontSize: 13, color: kText),
-            decoration: InputDecoration(
-              hintText: 'Search...', hintStyle: const TextStyle(color: kMuted, fontSize: 12),
-              prefixIcon: const SvgIcon(AppIcons.searchRounded, size: 16, color: kMuted),
-              filled: true, fillColor: kLight, isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: kBorder)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: kBorder)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: kPrimary, width: 1.5)),
-            ),
+  Widget build(BuildContext context) {
+    final paid = order.paymentStatus == 'Paid';
+    final at = order.createdAt.toLocal();
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 88,
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: Color(0xFFE5E5E5))),
           ),
-        ),
-        const SizedBox(width: 10),
-        _vDivider(),
-        const SizedBox(width: 10),
-        // Status chips
-        ..._statuses.map((s) => Padding(padding: const EdgeInsets.only(right: 6), child: _Chip(
-          label: s == 'All' ? 'All' : s[0].toUpperCase() + s.substring(1),
-          selected: state.statusFilter == s,
-          color: kPrimary,
-          onTap: () => notifier.setStatusFilter(s),
-        ))),
-        _vDivider(), const SizedBox(width: 6),
-        // Type chips
-        ..._types.map((t) => Padding(padding: const EdgeInsets.only(right: 6), child: _Chip(
-          label: t, selected: state.typeFilter == t, color: kPrimary,
-          onTap: () => notifier.setTypeFilter(t),
-        ))),
-        _vDivider(), const SizedBox(width: 6),
-        // Payment chips
-        ..._payments.map((p) => Padding(padding: const EdgeInsets.only(right: 6), child: _Chip(
-          label: p,
-          selected: state.paymentFilter == p,
-          color: kPrimary,
-          onTap: () => notifier.setPaymentFilter(p),
-        ))),
-        _vDivider(), const SizedBox(width: 6),
-        // Date range
-        GestureDetector(
-          onTap: () async {
-            final r = await showDateRangePicker(
-              context: context,
-              firstDate: DateTime(2024),
-              lastDate: DateTime.now(),
-              initialDateRange: state.from != null && state.to != null ?
-              DateTimeRange(start: state.from!, end: state.to!) : null,
-              builder: (ctx, child) => Theme(
-                data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: kPrimary)),
-                child: child!,
-              ),
-            );
-            if (r != null) notifier.setDateRange(r.start, r.end);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: state.from != null ? kPrimary.withValues(alpha: 0.08) : kLight,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: state.from != null ? kPrimary.withValues(alpha: 0.4) : kBorder),
-            ),
-            child: Row(children: [
-              SvgIcon(AppIcons.dateRangeRounded, size: 14, color: state.from != null ? kPrimary : kMuted),
-              const SizedBox(width: 5),
-              Text(
-                state.from != null
-                    ? '${state.from!.day}/${state.from!.month} – ${state.to!.day}/${state.to!.month}'
-                    : 'Date Range',
-                style: TextStyle(fontSize: 12, color: state.from != null ? kPrimary : kMuted, fontWeight: FontWeight.w600),
-              ),
-              if (state.from != null) ...[
-                const SizedBox(width: 4),
-                GestureDetector(
-                  onTap: () => notifier.setDateRange(null, null),
-                  child: const SvgIcon(AppIcons.closeRounded, size: 13, color: kPrimary),
-                ),
-              ],
-            ]),
-          ),
-        ),
-      ]),
-    ),
-  );
-
-  Widget _vDivider() => Container(width: 1, height: 20, color: kBorder);
-}
-
-class _Chip extends StatelessWidget {
-  final String label; final bool selected; final Color color; final VoidCallback onTap;
-  const _Chip({required this.label, required this.selected, required this.color, required this.onTap});
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: selected ? color.withValues(alpha: 0.1) : kLight,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: selected ? color.withValues(alpha: 0.4) : kBorder),
-      ),
-      child: Text(label, style: TextStyle(fontSize: 12, color: selected ? color : kMuted,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w400)),
-    ),
-  );
-}
-
-// ── Orders Table ──────────────────────────────────────────────────────────────
-// ── Orders Table (FIXED — flexible columns instead of fixed SizedBox widths) ──
-class _OrderTable extends StatelessWidget {
-  final List<OrderModel> orders;
-  final OrderModel? selected;
-  final ValueChanged<OrderModel> onSelect;
-  final ValueChanged<OrderModel> onPrint;
-  const _OrderTable({required this.orders, required this.selected,
-    required this.onSelect, required this.onPrint});
-
-  Color _sc(String s) => orderStatusColor(s);
-  Color _pc(String s) => paymentStatusColor(s);
-
-  @override
-  Widget build(BuildContext context) => Column(children: [
-    // Header row
-    Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: const BoxDecoration(color: kCard, border: Border(bottom: BorderSide(color: kBorder))),
-      child: Row(children: const [
-        Expanded(flex: 2, child: Text('Order #',  style: _h)),
-        Expanded(flex: 2, child: Text('Time',     style: _h)),
-        Expanded(flex: 2, child: Text('Type',     style: _h)),
-        Expanded(flex: 3, child: Text('Customer', style: _h)),
-        Expanded(flex: 2, child: Text('Table',    style: _h)),
-        Expanded(flex: 2, child: Text('Status',   style: _h)),
-        Expanded(flex: 2, child: Text('Payment',  style: _h)),
-        Expanded(flex: 2, child: Text('Total',    style: _h, textAlign: TextAlign.right)),
-        SizedBox(width: 40), // print column — stays fixed
-      ]),
-    ),
-    Expanded(
-      child: ListView.builder(
-        itemCount: orders.length,
-        itemBuilder: (_, i) {
-          final o   = orders[i];
-          final sel = selected?.id == o.id;
-          return GestureDetector(
-            onTap: () => onSelect(o),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 120),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: sel ? kPrimary.withValues(alpha: 0.05) : (i.isEven ? kCard : kBg),
-                border: Border(
-                  bottom: BorderSide(color: kBorder.withValues(alpha: 0.5)),
-                  left: BorderSide(color: sel ? kPrimary : Colors.transparent, width: 3),
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: Row(
+            children: [
+              _Tick(value: checked, onChanged: onChecked),
+              const SizedBox(width: 48),
+              Container(
+                width: 100,
+                height: 82,
+                color: _typeColor(order.orderType),
+                padding: const EdgeInsets.all(6),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 4,
+                      bottom: 4,
+                      child: Text(
+                        _typeLabel(order.orderType),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 4,
+                      child: SvgIcon(
+                        _typeIcon(order.orderType),
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(children: [
-                Expanded(flex: 2, child: Text(o.orderNumber, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kPrimary))),
-                Expanded(flex: 2, child: Text(_time(o.createdAt), overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: kSub))),
-                Expanded(flex: 2, child: _TypeChip(o.orderType)),
-                Expanded(flex: 3, child: Text(o.customerName.isNotEmpty ? o.customerName : 'Walk-in',
-                    style: const TextStyle(fontSize: 12, color: kText), overflow: TextOverflow.ellipsis)),
-                Expanded(flex: 2, child: Text(o.tableNumber.isNotEmpty ? o.tableNumber : '—',
-                    overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: kSub))),
-                Expanded(flex: 2, child: _Badge(o.status[0].toUpperCase() + o.status.substring(1), _sc(o.status))),
-                Expanded(flex: 2, child: _Badge(o.paymentStatus, _pc(o.paymentStatus))),
-                Expanded(flex: 2, child: Text(formatMoney(o.total), textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kText))),
-                // ── Print Icon ──
-                SizedBox(
-                  width: 40,
-                  child: IconButton(
-                    onPressed: () => onPrint(o),
-                    icon: const SvgIcon(AppIcons.printRounded, size: 16, color: kMuted),
-                    tooltip: 'Print Receipt',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    splashRadius: 16,
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 190,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '#${order.orderNumber}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: 176,
+                      color: _statusColor(order.status),
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Text(
+                        _statusLabel(order.status),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 120),
+              Container(
+                width: 50,
+                height: 44,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFDDDDDD)),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${order.items.length}',
+                  style: const TextStyle(fontSize: 15),
+                ),
+              ),
+              const Spacer(),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    DateFormat('hh:mm a').format(at),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('dd-MM-yyyy').format(at),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              SizedBox(
+                width: 110,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      formatMoney(order.total),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      order.paymentMethod,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 120),
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 1,
+                  ),
+                  color: paid
+                      ? const Color(0xFF4CAF50)
+                      : const Color(0xFFD9534F),
+                  child: Text(
+                    paid ? 'Paid' : order.paymentStatus,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ]),
-            ),
-          );
-        },
-      ),
-    ),
-  ]);
-
-  String _time(DateTime d) {
-    final now = DateTime.now();
-    if (d.day == now.day && d.month == now.month)
-      return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-    return '${d.day}/${d.month} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-  }
-
-  static const _h = TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: kMuted, letterSpacing: 0.3);
-}
-
-class _Badge extends StatelessWidget {
-  final String text; final Color color;
-  const _Badge(this.text, this.color);
-  @override
-  Widget build(BuildContext context) => StatusPill(label: text, color: color, dot: true);
-}
-
-Color orderStatusColor(String status) => switch (status.toLowerCase()) {
-  'pending'   => kYellow,
-  'completed' => kGreen,
-  'cancelled' => kRed,
-  _           => kBlue,
-};
-
-Color paymentStatusColor(String status) => switch (status.toLowerCase()) {
-  'paid'    => kGreen,
-  'unpaid'  => kRed,
-  'partial' => kYellow,
-  _         => kBlue,
-};
-
-class _TypeChip extends StatelessWidget {
-  final String type;
-  const _TypeChip(this.type);
-  AppIcon get _icon => switch (type) {
-    'Takeaway' => AppIcons.takeoutDiningRounded,
-    'Delivery' => AppIcons.deliveryDiningRounded,
-    _ => AppIcons.restaurantRounded,
-  };
-  @override
-  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-    SvgIcon(_icon, size: 12, color: kMuted), const SizedBox(width: 4),
-    Text(type, style: const TextStyle(fontSize: 11, color: kSub)),
-  ]);
-}
-
-// ── Detail Panel ──────────────────────────────────────────────────────────────
-class _DetailPanel extends StatelessWidget {
-  final OrderModel order;
-  final bool updating;
-  final VoidCallback onClose;
-  final VoidCallback onPrint;
-  final ValueChanged<String> onUpdateStatus, onUpdatePayment;
-  const _DetailPanel({required this.order, required this.updating, required this.onClose,
-    required this.onUpdateStatus, required this.onUpdatePayment, required this.onPrint});
-
-  Color _sc(String s) => orderStatusColor(s);
-  Color _pc(String s) => paymentStatusColor(s);
-
-  // Grey panel so the white invoice cards stand out.
-  static const _panelBg = Color(0xFFF1F2F6);
-
-  @override
-  Widget build(BuildContext context) => Container(
-    decoration: const BoxDecoration(color: _panelBg, border: Border(left: BorderSide(color: kBorder))),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // Header
-      Container(
-        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-        decoration: const BoxDecoration(color: kCard, border: Border(bottom: BorderSide(color: kBorder))),
-        child: Row(children: [
-          Text(order.orderNumber,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: kPrimary)),
-          const SizedBox(width: 8),
-          if (updating)
-            const SizedBox(width: 14, height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2, color: kPrimary)),
-          const Spacer(),
-          // Print button in detail panel header
-          IconButton(
-            onPressed: onPrint,
-            icon: const SvgIcon(AppIcons.printRounded, size: 18, color: kMuted),
-            tooltip: 'Print Receipt',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            splashRadius: 16,
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: onClose,
-            icon: const SvgIcon(AppIcons.closeRounded, size: 18, color: kMuted),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ]),
-      ),
-      Expanded(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // Badges
-            Row(children: [
-              _Badge(order.status[0].toUpperCase() + order.status.substring(1), _sc(order.status)),
-              const SizedBox(width: 6),
-              _Badge(order.paymentStatus, _pc(order.paymentStatus)),
-              const SizedBox(width: 6),
-              _TypeChip(order.orderType),
-            ]),
-            const SizedBox(height: 14),
-
-            // Info card
-            _Card(children: [
-              if (order.customerName.isNotEmpty)
-                _Row(AppIcons.personRounded, 'Customer', order.customerName),
-              if (order.customerPhone.isNotEmpty)
-                _Row(AppIcons.phoneRounded, 'Phone', order.customerPhone),
-              if (order.tableNumber.isNotEmpty)
-                _Row(AppIcons.tableRestaurantRounded, 'Table', order.tableNumber),
-              _Row(AppIcons.accessTimeRounded, 'Time', _fullTime(order.createdAt)),
-              _Row(AppIcons.paymentRounded, 'Payment',
-                  '${order.paymentMethod} · ${order.customerType}'),
-            ]),
-            const SizedBox(height: 14),
-
-            // Items
-            const Text('Items', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800,
-                color: kMuted, letterSpacing: 0.3)),
-            const SizedBox(height: 8),
-            if (order.items.isEmpty)
-              const Text('No items loaded', style: TextStyle(fontSize: 12, color: kMuted))
-            else
-              ...order.items.map((item) => Container(
-                margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: kCard, borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: kBorder)),
-                child: Row(children: [
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(item.itemName,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kText)),
-                    if (item.size.isNotEmpty)
-                      Text(item.size, style: const TextStyle(fontSize: 10, color: kMuted)),
-                  ])),
-                  Text('× ${item.qty}', style: const TextStyle(fontSize: 12, color: kSub)),
-                  const SizedBox(width: 8),
-                  Text(formatMoney(item.totalPrice),
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: kPrimary)),
-                ]),
-              )),
-            const SizedBox(height: 14),
-
-            // Bill
-            _Card(children: [
-              _BillRow('Subtotal', formatMoney(order.subtotal), kText),
-              if (order.discountAmt > 0)
-                _BillRow('Discount', '− ${formatMoney(order.discountAmt)}', kPrimary),
-              _BillRow('Tax (${order.taxPct.toStringAsFixed(0)}%)',
-                  formatMoney(order.taxAmt), kSub),
-              if (order.deliveryFee > 0)
-                _BillRow('Delivery charge', formatMoney(order.deliveryFee), kSub),
-              const Divider(color: kBorder, height: 16),
-              _BillRow('TOTAL', formatMoney(order.total), kPrimary, bold: true),
-            ]),
-
-            if (order.notes.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: kPrimary.withValues(alpha: 0.07),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: kPrimary.withValues(alpha: 0.25)),
-                ),
-                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const SvgIcon(AppIcons.stickyNote2Outlined, size: 14, color: kPrimary),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(order.notes,
-                      style: const TextStyle(fontSize: 12, color: kSub))),
-                ]),
               ),
             ],
-            const SizedBox(height: 16),
-
-            // Status actions
-            if (order.status == 'pending') ...[
-              const Text('Update Order Status', style: TextStyle(fontSize: 12,
-                  fontWeight: FontWeight.w800, color: kMuted, letterSpacing: 0.3)),
-              const SizedBox(height: 8),
-              Row(children: [
-                Expanded(child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(backgroundColor: kPrimary,
-                      foregroundColor: Colors.white, elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: updating ? null : () => onUpdateStatus('completed'),
-                  icon: const SvgIcon(AppIcons.checkRounded, size: 15),
-                  label: const Text('Complete', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                )),
-                const SizedBox(width: 8),
-                Expanded(child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(foregroundColor: kPrimary,
-                      side: BorderSide(color: kPrimary.withValues(alpha: 0.4)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                  onPressed: updating ? null : () => onUpdateStatus('cancelled'),
-                  icon: const SvgIcon(AppIcons.cancelOutlined, size: 15),
-                  label: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                )),
-              ]),
-              const SizedBox(height: 12),
-            ],
-
-            // Payment actions
-            if (order.paymentStatus != 'Paid') ...[
-              const Text('Update Payment', style: TextStyle(fontSize: 12,
-                  fontWeight: FontWeight.w800, color: kMuted, letterSpacing: 0.3)),
-              const SizedBox(height: 8),
-              Row(children: [
-                if (order.paymentStatus == 'Unpaid') ...[
-                  Expanded(child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: kPrimary,
-                        foregroundColor: Colors.white, elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                    onPressed: updating ? null : () => onUpdatePayment('Paid'),
-                    icon: const SvgIcon(AppIcons.paymentsRounded, size: 15),
-                    label: const Text('Mark Paid', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  )),
-                  const SizedBox(width: 8),
-                  Expanded(child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: kPrimary,
-                        foregroundColor: Colors.white, elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                    onPressed: updating ? null : () => onUpdatePayment('Partial'),
-                    child: const Text('Partial', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  )),
-                ],
-                if (order.paymentStatus == 'Partial')
-                  Expanded(child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: kPrimary,
-                        foregroundColor: Colors.white, elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                    onPressed: updating ? null : () => onUpdatePayment('Paid'),
-                    icon: const SvgIcon(AppIcons.paymentsRounded, size: 15),
-                    label: const Text('Mark Paid', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  )),
-              ]),
-            ],
-          ]),
+          ),
         ),
       ),
-    ]),
-  );
-
-  String _fullTime(DateTime d) =>
-      '${d.day}/${d.month}/${d.year}  ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+    );
+  }
 }
 
-class _Card extends StatelessWidget {
-  final List<Widget> children;
-  const _Card({required this.children});
+/// Slide-in checkbox panel for payment, order type and status.
+class _FilterPanel extends StatefulWidget {
+  final Set<String> pay;
+  final Set<String> type;
+  final Set<String> status;
+  final VoidCallback onChanged;
+  final VoidCallback onClose;
+  const _FilterPanel({
+    required this.pay,
+    required this.type,
+    required this.status,
+    required this.onChanged,
+    required this.onClose,
+  });
+
+  @override
+  State<_FilterPanel> createState() => _FilterPanelState();
+}
+
+class _FilterPanelState extends State<_FilterPanel> {
+  Widget group(List<(String, String)> items, Set<String> set) => Wrap(
+    spacing: 6,
+    runSpacing: 6,
+    children: [
+      for (final (key, label) in items)
+        SizedBox(
+          width: 225,
+          height: 66,
+          child: Material(
+            color: Colors.white,
+            elevation: 2,
+            child: InkWell(
+              onTap: () {
+                setState(
+                  () => set.contains(key) ? set.remove(key) : set.add(key),
+                );
+                widget.onChanged();
+              },
+              child: Row(
+                children: [
+                  const SizedBox(width: 12),
+                  _Tick(
+                    value: set.contains(key),
+                    onChanged: (_) {
+                      setState(
+                        () =>
+                            set.contains(key) ? set.remove(key) : set.add(key),
+                      );
+                      widget.onChanged();
+                    },
+                  ),
+                  Expanded(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                  ),
+                  const SizedBox(width: 36),
+                ],
+              ),
+            ),
+          ),
+        ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.white,
+    elevation: 8,
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(8, 60, 8, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  group(const [
+                    ('cash', 'Cash'),
+                    ('card', 'Card payment'),
+                    ('cash_due', 'Cash Due'),
+                    ('online', 'Paid Online'),
+                  ], widget.pay),
+                  const SizedBox(height: 36),
+                  group(const [
+                    ('Takeaway', 'Collection'),
+                    ('Dine-in', 'Dine'),
+                    ('Delivery', 'Home Delivery'),
+                  ], widget.type),
+                  const SizedBox(height: 36),
+                  group([
+                    for (final s in _statusOptions) (s.$1, s.$2),
+                  ], widget.status),
+                ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: widget.onClose,
+              icon: const SvgIcon(
+                AppIcons.closeRounded,
+                size: 18,
+                color: Colors.black,
+              ),
+              label: const Text(
+                'Close',
+                style: TextStyle(color: Colors.black, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+// ── One order ─────────────────────────────────────────────────────────────────
+
+class _OrderDetail extends ConsumerWidget {
+  final OrderModel order;
+  final OrderNotifier notifier;
+  final VoidCallback onBack;
+  const _OrderDetail({
+    required this.order,
+    required this.notifier,
+    required this.onBack,
+  });
+
+  Future<void> _comment(BuildContext context, WidgetRef ref) async {
+    final ctrl = TextEditingController(text: order.notes);
+    final text = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Comment'),
+        content: SizedBox(
+          width: 420,
+          child: TextField(
+            controller: ctrl,
+            minLines: 3,
+            maxLines: 5,
+            autofocus: true,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (text == null) return;
+    try {
+      await ref.read(orderDatasourceProvider).updateNotes(order.id, text);
+      await notifier.load(silent: true);
+    } catch (e) {
+      if (context.mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not save: $e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final at = order.createdAt.toLocal();
+    final paid = order.paymentStatus == 'Paid';
+    final lines = [
+      if (order.customerName.isNotEmpty) order.customerName,
+      if (order.customerPhone.isNotEmpty) order.customerPhone,
+      if (order.tableNumber.isNotEmpty) 'Table ${order.tableNumber}',
+      if (order.notes.isNotEmpty) order.notes,
+    ];
+
+    return Container(
+      color: _barBg,
+      child: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: 340,
+                    child: Column(
+                      children: [
+                        _Box(
+                          header: Row(
+                            children: [
+                              Text(
+                                '# ${order.orderNumber}',
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                              const Spacer(),
+                              Text(
+                                DateFormat('yyyy-MM-dd HH:mm:ss').format(at),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          height: 190,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              lines.join('\n'),
+                              style: const TextStyle(fontSize: 13, height: 1.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _Box(
+                          header: Text(
+                            order.paymentMethod,
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                          height: 190,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  paid ? 'Paid' : order.paymentStatus,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: paid
+                                        ? const Color(0xFF2E7D32)
+                                        : const Color(0xFFB91C1C),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                if (!paid)
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF38C73A),
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    onPressed: () => notifier
+                                        .updatePaymentStatus(order.id, 'Paid'),
+                                    child: const Text('Mark as paid'),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _Box(
+                          header: Row(
+                            children: [
+                              Column(
+                                children: [
+                                  SvgIcon(
+                                    _typeIcon(order.orderType),
+                                    size: 26,
+                                    color: _typeColor(order.orderType),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    order.orderType == 'Dine-in'
+                                        ? 'Dine'
+                                        : order.orderType,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    DateFormat('hh:mm a').format(at),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('dd-MM-yyyy').format(at),
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          height: 220,
+                          child: const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 5,
+                    child: Container(
+                      color: _bg,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Items',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF111827),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '${order.items.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  width: 176,
+                                  color: _statusColor(order.status),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 1,
+                                  ),
+                                  child: Text(
+                                    _statusLabel(order.status),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              color: Colors.white,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              child: ListView(
+                                children: [
+                                  for (final i in order.items) _ItemLine(i),
+                                  const Divider(height: 24),
+                                  _Sum('Sub Total', order.subtotal),
+                                  if (order.discountAmt > 0)
+                                    _Sum('Discount', -order.discountAmt),
+                                  if (order.taxAmt > 0)
+                                    _Sum('Tax', order.taxAmt),
+                                  if (order.deliveryFee > 0)
+                                    _Sum('Delivery', order.deliveryFee),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                const Text(
+                                  'Total',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(width: 60),
+                                Text(
+                                  formatMoney(order.total),
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 6,
+                    child: Container(
+                      color: _bg,
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: _Box(
+                              header: const Text(
+                                'History',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              child: ListView(
+                                padding: const EdgeInsets.all(12),
+                                children: [
+                                  Text(
+                                    '${DateFormat('dd-MM-yyyy hh:mm a').format(at)}  ·  Ordered',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Payment: ${order.paymentMethod}, ${order.paymentStatus}',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Now: ${_statusLabel(order.status)}',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          PopupMenuButton<String>(
+                            onSelected: (s) =>
+                                notifier.updateStatus(order.id, s),
+                            itemBuilder: (_) => [
+                              for (final s in _statusOptions)
+                                PopupMenuItem(value: s.$1, child: Text(s.$2)),
+                            ],
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              color: _statusColor(order.status),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _statusLabel(order.status),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  const Icon(
+                                    Icons.arrow_drop_up,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
+            child: Row(
+              children: [
+                const TimeBox(),
+                const SizedBox(width: 10),
+                _BarButton(
+                  label: 'BACK',
+                  icon: AppIcons.arrowBackRounded,
+                  color: Colors.black,
+                  onTap: onBack,
+                ),
+                const SizedBox(width: 6),
+                _BarButton(
+                  label: 'COMMENT',
+                  icon: AppIcons.stickyNote2Rounded,
+                  color: Colors.white,
+                  dark: true,
+                  onTap: () => _comment(context, ref),
+                ),
+                const SizedBox(width: 6),
+                _BarButton(
+                  label: 'PRINT',
+                  icon: AppIcons.printRounded,
+                  color: const Color(0xFFFF7A00),
+                  onTap: () => showDialog(
+                    context: context,
+                    builder: (_) => ReceiptPrintDialog(order: order),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Box extends StatelessWidget {
+  final Widget header;
+  final Widget child;
+  final double? height;
+  const _Box({required this.header, required this.child, this.height});
+
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: kBorder)),
-    child: Column(children: children),
+    height: height,
+    color: _bg,
+    child: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+          child: header,
+        ),
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            color: Colors.white,
+            child: child,
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    ),
   );
 }
 
-class _Row extends StatelessWidget {
-  final AppIcon icon; final String label, value;
-  const _Row(this.icon, this.label, this.value);
+class _ItemLine extends StatelessWidget {
+  final OrderItemModel item;
+  const _ItemLine(this.item);
+
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: const BoxDecoration(
+      border: Border(top: BorderSide(color: Color(0xFF2C73B8), width: 3)),
+    ),
+    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              flex: 5,
+              child: Text(
+                item.itemName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                '${item.qty}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                formatMoney(item.totalPrice),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (item.size.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 30, top: 4),
+            child: Text(item.size, style: const TextStyle(fontSize: 12)),
+          ),
+      ],
+    ),
+  );
+}
+
+class _Sum extends StatelessWidget {
+  final String label;
+  final double value;
+  const _Sum(this.label, this.value);
+
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(children: [
-      SvgIcon(icon, size: 13, color: kMuted), const SizedBox(width: 6),
-      Text(label, style: const TextStyle(fontSize: 12, color: kMuted)),
-      const Spacer(),
-      Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kText)),
-    ]),
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 3),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 5,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(label, style: const TextStyle(fontSize: 14)),
+          ),
+        ),
+        const Expanded(flex: 2, child: SizedBox.shrink()),
+        Expanded(
+          flex: 2,
+          child: Text(formatMoney(value), style: const TextStyle(fontSize: 14)),
+        ),
+      ],
+    ),
   );
 }
 
-class _BillRow extends StatelessWidget {
-  final String label, value; final Color color; final bool bold;
-  const _BillRow(this.label, this.value, this.color, {this.bold = false});
+class _Tick extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _Tick({required this.value, required this.onChanged});
+
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(children: [
-      Text(label, style: TextStyle(fontSize: bold ? 13 : 12,
-          fontWeight: bold ? FontWeight.w900 : FontWeight.w400, color: bold ? kText : kSub)),
-      const Spacer(),
-      Text(value, style: TextStyle(fontSize: bold ? 15 : 12,
-          fontWeight: FontWeight.w800, color: color)),
-    ]),
+  Widget build(BuildContext context) => InkWell(
+    onTap: () => onChanged(!value),
+    child: Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFBBBBBB)),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: value
+          ? const Icon(Icons.check, size: 20, color: Color(0xFF1E5FC4))
+          : null,
+    ),
   );
 }
 
-// ── Empty State ───────────────────────────────────────────────────────────────
-class _EmptyState extends StatelessWidget {
-  final bool hasFilters;
-  const _EmptyState({required this.hasFilters});
+class _SmallButton extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _SmallButton({required this.child, required this.onTap});
+
   @override
-  Widget build(BuildContext context) => Center(child: Column(
-      mainAxisAlignment: MainAxisAlignment.center, children: [
-    Container(padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), shape: BoxShape.circle),
-        child: const SvgIcon(AppIcons.receiptLongRounded, size: 48, color: kPrimary)),
-    const SizedBox(height: 16),
-    Text(hasFilters ? 'No orders match the filter' : 'No orders yet',
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: kText)),
-    const SizedBox(height: 6),
-    Text(hasFilters ? 'Try changing or clearing the filters'
-        : 'Orders will appear here after placement',
-        style: const TextStyle(fontSize: 13, color: kMuted)),
-  ]));
+  Widget build(BuildContext context) => Material(
+    color: Colors.white,
+    shape: Border.all(color: const Color(0xFFDDDDDD)),
+    child: InkWell(
+      onTap: onTap,
+      child: SizedBox(width: 56, height: 40, child: Center(child: child)),
+    ),
+  );
+}
+
+class _PageBtn extends StatelessWidget {
+  final String label;
+  final VoidCallback? onTap;
+  const _PageBtn(this.label, this.onTap);
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: SizedBox(
+      width: 30,
+      height: 34,
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 18,
+            color: onTap == null ? Colors.black26 : const Color(0xFF1E7BC6),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _BarButton extends StatelessWidget {
+  final String label;
+  final AppIcon icon;
+  final Color color;
+  final double width;
+  final bool dark;
+  final VoidCallback onTap;
+  const _BarButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+    this.width = 150,
+    this.dark = false,
+  });
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: color,
+    elevation: 4,
+    shadowColor: Colors.black,
+    borderRadius: BorderRadius.circular(3),
+    child: InkWell(
+      onTap: onTap,
+      child: SizedBox(
+        width: width,
+        height: 80,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgIcon(
+              icon,
+              size: 26,
+              color: dark ? Colors.black87 : Colors.white,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: dark ? Colors.black87 : Colors.white,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

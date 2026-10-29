@@ -26,7 +26,12 @@ class RiderProfileScreen extends ConsumerWidget {
     };
 
     return ListView(
-      padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 24, 16, 24),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        MediaQuery.paddingOf(context).top + 24,
+        16,
+        24,
+      ),
       children: [
         // ── Identity ──
         Center(
@@ -37,17 +42,28 @@ class RiderProfileScreen extends ConsumerWidget {
                 backgroundColor: kPrimary.withValues(alpha: 0.12),
                 child: Text(
                   me.name.isEmpty ? '?' : me.name[0].toUpperCase(),
-                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: kPrimary),
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w800,
+                    color: kPrimary,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 me.name,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: kText),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: kText,
+                ),
               ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
@@ -58,12 +74,19 @@ class RiderProfileScreen extends ConsumerWidget {
                     Container(
                       width: 8,
                       height: 8,
-                      decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       statusLabel,
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: statusColor),
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: statusColor,
+                      ),
                     ),
                   ],
                 ),
@@ -76,9 +99,17 @@ class RiderProfileScreen extends ConsumerWidget {
         // ── All-time totals ──
         Row(
           children: [
-            _Total(label: 'Total deliveries', value: '${me.totalDeliveries}', icon: AppIcons.deliveryDiningRounded),
+            _Total(
+              label: 'Total deliveries',
+              value: '${me.totalDeliveries}',
+              icon: AppIcons.deliveryDiningRounded,
+            ),
             const SizedBox(width: 12),
-            _Total(label: 'Total earned', value: _rs(me.totalEarnings), icon: AppIcons.savingsRounded),
+            _Total(
+              label: 'Total earned',
+              value: _rs(me.totalEarnings),
+              icon: AppIcons.savingsRounded,
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -86,9 +117,21 @@ class RiderProfileScreen extends ConsumerWidget {
         // ── Details ──
         _Section(
           children: [
-            _Row(AppIcons.phoneRounded, 'Phone (your login)', me.phone.isEmpty ? '—' : me.phone),
-            _Row(AppIcons.directionsBikeRounded, 'Vehicle', me.vehicle.isEmpty ? '—' : me.vehicle),
-            _Row(AppIcons.paymentsRounded, 'Charge per delivery', _rs(me.chargePerDelivery)),
+            _Row(
+              AppIcons.phoneRounded,
+              'Phone (your login)',
+              me.phone.isEmpty ? '—' : me.phone,
+            ),
+            _Row(
+              AppIcons.directionsBikeRounded,
+              'Vehicle',
+              me.vehicle.isEmpty ? '—' : me.vehicle,
+            ),
+            _Row(
+              AppIcons.paymentsRounded,
+              'Charge per delivery',
+              _rs(me.chargePerDelivery),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -107,7 +150,10 @@ class RiderProfileScreen extends ConsumerWidget {
             _Action(
               icon: AppIcons.lockOutlineRounded,
               label: 'Change password',
-              onTap: () => showDialog(context: context, builder: (_) => const _ChangePasswordDialog()),
+              onTap: () => showDialog(
+                context: context,
+                builder: (_) => const _ChangePasswordDialog(),
+              ),
             ),
             _Action(
               icon: AppIcons.restaurantRounded,
@@ -132,10 +178,18 @@ Future<void> _confirmSwitch(BuildContext context) async {
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: const Text('Switch app?'),
-      content: const Text('You will be signed out and taken back to the start screen.'),
+      content: const Text(
+        'You will be signed out and taken back to the start screen.',
+      ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-        TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Switch')),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text('Switch'),
+        ),
       ],
     ),
   );
@@ -166,7 +220,11 @@ class _Total extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: kText),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: kText,
+              ),
             ),
           ),
           Text(label, style: const TextStyle(fontSize: 12, color: kMuted)),
@@ -212,7 +270,10 @@ class _Row extends StatelessWidget {
         Container(
           width: 38,
           height: 38,
-          decoration: BoxDecoration(color: kPrimary.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(11)),
+          decoration: BoxDecoration(
+            color: kPrimary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(11),
+          ),
           alignment: Alignment.center,
           child: SvgIcon(icon, size: 19, color: kPrimary),
         ),
@@ -225,7 +286,11 @@ class _Row extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: kText,
+                ),
               ),
             ],
           ),
@@ -240,7 +305,12 @@ class _Action extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _Action({required this.icon, required this.label, required this.onTap, this.color = kText});
+  const _Action({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = kText,
+  });
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -263,7 +333,11 @@ class _Action extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: color),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
           ),
           const SvgIcon(AppIcons.chevronRightRounded, size: 20, color: kMuted),
@@ -277,7 +351,8 @@ class _ChangePasswordDialog extends ConsumerStatefulWidget {
   const _ChangePasswordDialog();
 
   @override
-  ConsumerState<_ChangePasswordDialog> createState() => _ChangePasswordDialogState();
+  ConsumerState<_ChangePasswordDialog> createState() =>
+      _ChangePasswordDialogState();
 }
 
 class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
@@ -311,9 +386,14 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
       await ref.read(riderDsProvider).changePassword(_pass.text);
       if (!mounted) return;
       Navigator.pop(context);
-      riderToast(context, 'Password changed. Use it next time you sign in.', kGreen);
+      riderToast(
+        context,
+        'Password changed. Use it next time you sign in.',
+        kGreen,
+      );
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (mounted)
+        setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -337,14 +417,17 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
     ),
     suffixIcon: IconButton(
       onPressed: () => setState(() => _hide = !_hide),
-      icon: SvgIcon(_hide ? AppIcons.visibilityRounded : AppIcons.visibilityOffRounded, size: 20, color: kMuted),
+      icon: SvgIcon(
+        _hide ? AppIcons.visibilityRounded : AppIcons.visibilityOffRounded,
+        size: 20,
+        color: kMuted,
+      ),
     ),
   );
 
   @override
   Widget build(BuildContext context) => AlertDialog(
     backgroundColor: kCard,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     title: const Text(
       'Change password',
       style: TextStyle(fontWeight: FontWeight.w800, color: kText),
@@ -370,7 +453,11 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
           const SizedBox(height: 10),
           Text(
             _error!,
-            style: const TextStyle(fontSize: 13, color: kRed, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: 13,
+              color: kRed,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ],
@@ -386,7 +473,9 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
           backgroundColor: kPrimary,
           foregroundColor: Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: Text(_busy ? 'Saving…' : 'Save'),
       ),

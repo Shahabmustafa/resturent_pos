@@ -34,89 +34,125 @@ class _OrderCardSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: kBorder, width: 1.5),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // ── Header ──
-        Container(
-          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8F9FC),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-          ),
-          child: const Shimmer(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                ShimmerBox(width: 30, height: 30, radius: 8),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    ShimmerBox(width: 70, height: 16),
-                    SizedBox(height: 6),
-                    ShimmerBox(width: 50, height: 10),
-                  ]),
-                ),
-                SizedBox(width: 8),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  ShimmerBox(width: 46, height: 18),
-                  SizedBox(height: 4),
-                  ShimmerBox(width: 40, height: 9),
-                ]),
-              ]),
-              SizedBox(height: 10),
-              Row(children: [
-                ShimmerBox(width: 54, height: 20, radius: 6),
-                SizedBox(width: 6),
-                ShimmerBox(width: 70, height: 20, radius: 6),
-                Spacer(),
-                ShimmerBox(width: 76, height: 20, radius: 6),
-              ]),
-            ]),
-          ),
-        ),
-
-        // ── Items ──
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-            child: Shimmer(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Row(children: [
-                  ShimmerBox(width: 34, height: 10),
-                  Spacer(),
-                  ShimmerBox(width: 24, height: 10),
-                ]),
-                const SizedBox(height: 8),
-                for (var i = 0; i < 3; i++)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 5),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(color: kBg, borderRadius: BorderRadius.circular(8)),
-                    child: const Row(children: [
-                      ShimmerBox(width: 18, height: 18, radius: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header ──
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8F9FC),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+            ),
+            child: const Shimmer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      ShimmerBox(width: 30, height: 30, radius: 8),
                       SizedBox(width: 8),
-                      Expanded(child: ShimmerBox(width: double.infinity, height: 12)),
-                      SizedBox(width: 6),
-                      ShimmerBox(width: 22, height: 14, radius: 4),
-                    ]),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ShimmerBox(width: 70, height: 16),
+                            SizedBox(height: 6),
+                            ShimmerBox(width: 50, height: 10),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          ShimmerBox(width: 46, height: 18),
+                          SizedBox(height: 4),
+                          ShimmerBox(width: 40, height: 9),
+                        ],
+                      ),
+                    ],
                   ),
-              ]),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      ShimmerBox(width: 54, height: 20, radius: 6),
+                      SizedBox(width: 6),
+                      ShimmerBox(width: 70, height: 20, radius: 6),
+                      Spacer(),
+                      ShimmerBox(width: 76, height: 20, radius: 6),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
-        const SizedBox(height: 10),
-
-        // ── Action button ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          child: Shimmer(
-            child: Column(children: [
-              ShimmerBox(width: double.infinity, height: 42, radius: 11),
-              const SizedBox(height: 6),
-              ShimmerBox(width: double.infinity, height: 32, radius: 10),
-            ]),
+          // ── Items ──
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+              child: Shimmer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        ShimmerBox(width: 34, height: 10),
+                        Spacer(),
+                        ShimmerBox(width: 24, height: 10),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    for (var i = 0; i < 3; i++)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: kBg,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Row(
+                          children: [
+                            ShimmerBox(width: 18, height: 18, radius: 4),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: ShimmerBox(
+                                width: double.infinity,
+                                height: 12,
+                              ),
+                            ),
+                            SizedBox(width: 6),
+                            ShimmerBox(width: 22, height: 14, radius: 4),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ]),
+
+          const SizedBox(height: 10),
+
+          // ── Action button ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Shimmer(
+              child: Column(
+                children: [
+                  ShimmerBox(width: double.infinity, height: 42, radius: 11),
+                  const SizedBox(height: 6),
+                  ShimmerBox(width: double.infinity, height: 32, radius: 10),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

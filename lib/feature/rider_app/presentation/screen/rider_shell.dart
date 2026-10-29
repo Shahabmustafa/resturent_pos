@@ -58,7 +58,11 @@ class _RiderShellState extends ConsumerState<RiderShell> {
         // IndexedStack keeps each tab's scroll position when switching.
         body: IndexedStack(
           index: _tab,
-          children: const [RiderDeliveriesScreen(), RiderEarningsScreen(), RiderProfileScreen()],
+          children: const [
+            RiderDeliveriesScreen(),
+            RiderEarningsScreen(),
+            RiderProfileScreen(),
+          ],
         ),
         bottomNavigationBar: DecoratedBox(
           decoration: const BoxDecoration(
@@ -88,7 +92,10 @@ class _RiderShellState extends ConsumerState<RiderShell> {
               ),
               NavigationDestination(
                 icon: icon(AppIcons.accountBalanceWalletOutlined, kSub),
-                selectedIcon: icon(AppIcons.accountBalanceWalletRounded, kPrimary),
+                selectedIcon: icon(
+                  AppIcons.accountBalanceWalletRounded,
+                  kPrimary,
+                ),
                 label: 'Earnings',
               ),
               NavigationDestination(
@@ -110,7 +117,11 @@ class _LoadError extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
   final VoidCallback onSignOut;
-  const _LoadError({required this.message, required this.onRetry, required this.onSignOut});
+  const _LoadError({
+    required this.message,
+    required this.onRetry,
+    required this.onSignOut,
+  });
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -121,14 +132,25 @@ class _LoadError extends StatelessWidget {
         Container(
           width: 84,
           height: 84,
-          decoration: BoxDecoration(color: kRed.withValues(alpha: 0.1), shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: kRed.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
           alignment: Alignment.center,
-          child: const SvgIcon(AppIcons.errorOutlineRounded, size: 40, color: kRed),
+          child: const SvgIcon(
+            AppIcons.errorOutlineRounded,
+            size: 40,
+            color: kRed,
+          ),
         ),
         const SizedBox(height: 16),
         const Text(
           "Couldn't load your profile",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: kText),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: kText,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
@@ -146,9 +168,14 @@ class _LoadError extends StatelessWidget {
               backgroundColor: kPrimary,
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
-            child: const Text('Try again', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            child: const Text(
+              'Try again',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            ),
           ),
         ),
         const SizedBox(height: 6),

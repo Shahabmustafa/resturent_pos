@@ -15,8 +15,10 @@ class CustomerApp extends StatelessWidget {
       themeAnimationDuration: Duration.zero,
       // The website is fully static: every motion effect (reveal, parallax, tilt,
       // float, tab fade) checks this flag and renders at rest.
-      builder: (context, child) =>
-          MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: true), child: child!),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: child!,
+      ),
       home: const CustomerShell(),
     );
   }

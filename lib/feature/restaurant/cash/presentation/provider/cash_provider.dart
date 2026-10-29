@@ -6,14 +6,19 @@ import '../../data/datasource/cash_datasource.dart';
 import '../../data/model/cash_model.dart';
 import '../../data/repository/cash_repository.dart';
 
-
 // ─── Infrastructure ───────────────────────────────────────────────────────────
 
-final _supabaseProvider = Provider<SupabaseClient>((_) => Supabase.instance.client);
+final _supabaseProvider = Provider<SupabaseClient>(
+  (_) => Supabase.instance.client,
+);
 
-final _cashDsProvider = Provider<CashRemoteDatasource>((ref) => CashRemoteDatasource(ref.watch(_supabaseProvider)),);
+final _cashDsProvider = Provider<CashRemoteDatasource>(
+  (ref) => CashRemoteDatasource(ref.watch(_supabaseProvider)),
+);
 
-final cashRepoProvider = Provider<CashRepository>((ref) => CashRepository(ref.watch(_cashDsProvider)),);
+final cashRepoProvider = Provider<CashRepository>(
+  (ref) => CashRepository(ref.watch(_cashDsProvider)),
+);
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -25,7 +30,7 @@ class CashState {
 
   const CashState({
     this.cash,
-    this.txs    = const [],
+    this.txs = const [],
     this.loading = false,
     this.error,
   });
@@ -33,15 +38,15 @@ class CashState {
   double get balance => cash?.balance ?? 0.0;
 
   CashState copyWith({
-    BranchCash?  cash,
+    BranchCash? cash,
     List<CashTx>? txs,
-    bool?         loading,
-    String?       error,
+    bool? loading,
+    String? error,
   }) => CashState(
-    cash:    cash    ?? this.cash,
-    txs:     txs     ?? this.txs,
+    cash: cash ?? this.cash,
+    txs: txs ?? this.txs,
     loading: loading ?? this.loading,
-    error:   error,
+    error: error,
   );
 }
 
@@ -64,8 +69,8 @@ class CashNotifier extends StateNotifier<CashState> {
       ]);
       state = state.copyWith(
         loading: false,
-        cash:    results[0] as BranchCash,
-        txs:     results[1] as List<CashTx>,
+        cash: results[0] as BranchCash,
+        txs: results[1] as List<CashTx>,
       );
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());
@@ -78,9 +83,9 @@ class CashNotifier extends StateNotifier<CashState> {
     try {
       final updated = await _repo.updateCash(
         branchId: branchId,
-        amount:   amount,
-        type:     CashTxType.manualIn,
-        note:     note,
+        amount: amount,
+        type: CashTxType.manualIn,
+        note: note,
       );
       await _refreshTxs(updated);
     } catch (e) {
@@ -98,9 +103,9 @@ class CashNotifier extends StateNotifier<CashState> {
     try {
       final updated = await _repo.updateCash(
         branchId: branchId,
-        amount:   -amount,
-        type:     CashTxType.manualOut,
-        note:     note,
+        amount: -amount,
+        type: CashTxType.manualOut,
+        note: note,
       );
       await _refreshTxs(updated);
     } catch (e) {
@@ -118,9 +123,9 @@ class CashNotifier extends StateNotifier<CashState> {
     try {
       final updated = await _repo.updateCash(
         branchId: branchId,
-        amount:   -amount,
-        type:     CashTxType.expense,
-        note:     note,
+        amount: -amount,
+        type: CashTxType.expense,
+        note: note,
       );
       await _refreshTxs(updated);
     } catch (e) {
@@ -130,13 +135,17 @@ class CashNotifier extends StateNotifier<CashState> {
 
   // ── Sale Cash In (called from Order flow) ─────────────────────────────────
 
-  Future<void> recordSale(double amount, {int? orderId, String? orderLabel}) async {
+  Future<void> recordSale(
+    double amount, {
+    int? orderId,
+    String? orderLabel,
+  }) async {
     try {
       final updated = await _repo.updateCash(
         branchId: branchId,
-        amount:   amount,
-        type:     CashTxType.saleIn,
-        refId:    orderId,
+        amount: amount,
+        type: CashTxType.saleIn,
+        refId: orderId,
         refLabel: orderLabel,
       );
       await _refreshTxs(updated);
@@ -148,7 +157,10 @@ class CashNotifier extends StateNotifier<CashState> {
   // ── Supplier Payment Out (called from Inventory flow) ─────────────────────
 
   Future<void> recordSupplierPayment(
-      double amount, int supplierId, String supplierName) async {
+    double amount,
+    int supplierId,
+    String supplierName,
+  ) async {
     if (amount > state.balance) {
       state = state.copyWith(error: 'Not enough cash — payment cannot be made');
       return;
@@ -156,9 +168,9 @@ class CashNotifier extends StateNotifier<CashState> {
     try {
       final updated = await _repo.updateCash(
         branchId: branchId,
-        amount:   -amount,
-        type:     CashTxType.supplierPayment,
-        refId:    supplierId,
+        amount: -amount,
+        type: CashTxType.supplierPayment,
+        refId: supplierId,
         refLabel: 'Supplier: $supplierName',
       );
       await _refreshTxs(updated);
@@ -188,10 +200,11 @@ class CashNotifier extends StateNotifier<CashState> {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
-final cashProvider = StateNotifierProvider.family<CashNotifier, CashState, String>(
+final cashProvider =
+    StateNotifierProvider.family<CashNotifier, CashState, String>(
       (ref, branchId) => CashNotifier(ref.watch(cashRepoProvider), branchId),
-);
+    );
 
 final cashBalanceProvider = Provider.family<double, String>(
-      (ref, bid) => ref.watch(cashProvider(bid)).balance,
+  (ref, bid) => ref.watch(cashProvider(bid)).balance,
 );

@@ -25,7 +25,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     void openMenu([String? categoryId]) {
-      if (categoryId != null) ref.read(menuCategoryProvider.notifier).state = categoryId;
+      if (categoryId != null)
+        ref.read(menuCategoryProvider.notifier).state = categoryId;
       ref.read(customerTabProvider.notifier).state = CustomerTab.menu;
     }
 
@@ -74,7 +75,9 @@ class _Section extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-        child: reveal ? Reveal(rotateX: 3, fromScale: 0.98, child: child) : child,
+        child: reveal
+            ? Reveal(rotateX: 3, fromScale: 0.98, child: child)
+            : child,
       ),
     );
   }
@@ -113,7 +116,10 @@ class _HeroSliderState extends State<_HeroSlider> {
   /// (Re)starts the timer, so a dot tap gets a full interval before moving on.
   void _restart() {
     _timer?.cancel();
-    _timer = Timer.periodic(_interval, (_) => setState(() => _index = (_index + 1) % _images.length));
+    _timer = Timer.periodic(
+      _interval,
+      (_) => setState(() => _index = (_index + 1) % _images.length),
+    );
   }
 
   @override
@@ -152,9 +158,13 @@ class _HeroSliderState extends State<_HeroSlider> {
                       width: i == _index ? 24 : 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: i == _index ? Colors.white : Colors.white.withValues(alpha: .55),
+                        color: i == _index
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: .55),
                         borderRadius: BorderRadius.circular(8),
-                        boxShadow: const [BoxShadow(color: Color(0x40000000), blurRadius: 4)],
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x40000000), blurRadius: 4),
+                        ],
                       ),
                     ),
                   ),
@@ -196,11 +206,19 @@ class _Hero extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SvgIcon(AppIcons.starRounded, size: 15, color: CColors.gold),
+                const SvgIcon(
+                  AppIcons.starRounded,
+                  size: 15,
+                  color: CColors.gold,
+                ),
                 const SizedBox(width: 7),
                 Text(
                   'Walton Road, Woking',
-                  style: CText.body(12.5, color: CColors.inkSoft, weight: FontWeight.w600),
+                  style: CText.body(
+                    12.5,
+                    color: CColors.inkSoft,
+                    weight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -214,7 +232,11 @@ class _Hero extends StatelessWidget {
                 const TextSpan(text: "Woking's Favourite "),
                 TextSpan(
                   text: 'Pak-Afghan',
-                  style: CText.display(wide ? 60 : 38, color: CColors.rust, style: FontStyle.italic),
+                  style: CText.display(
+                    wide ? 60 : 38,
+                    color: CColors.rust,
+                    style: FontStyle.italic,
+                  ),
                 ),
                 const TextSpan(text: ' Restaurant'),
               ],
@@ -223,7 +245,12 @@ class _Hero extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        enter(Text('Bold Flavours, Cooked Fresh Daily.', style: CText.body(17.5, color: CColors.muted, height: 1.6))),
+        enter(
+          Text(
+            'Bold Flavours, Cooked Fresh Daily.',
+            style: CText.body(17.5, color: CColors.muted, height: 1.6),
+          ),
+        ),
         const SizedBox(height: 30),
         if (wide)
           enter(
@@ -231,8 +258,16 @@ class _Hero extends StatelessWidget {
               spacing: 14,
               runSpacing: 12,
               children: [
-                PillButton(label: 'Order Online Now', icon: AppIcons.arrowForwardRounded, onPressed: onOrder),
-                PillButton(label: 'View Our Menu', style: PillStyle.outlineDark, onPressed: onOrder),
+                PillButton(
+                  label: 'Order Online Now',
+                  icon: AppIcons.arrowForwardRounded,
+                  onPressed: onOrder,
+                ),
+                PillButton(
+                  label: 'View Our Menu',
+                  style: PillStyle.outlineDark,
+                  onPressed: onOrder,
+                ),
               ],
             ),
           )
@@ -249,7 +284,12 @@ class _Hero extends StatelessWidget {
                   onPressed: onOrder,
                 ),
                 const SizedBox(height: 12),
-                PillButton(label: 'View Our Menu', style: PillStyle.outlineDark, expand: true, onPressed: onOrder),
+                PillButton(
+                  label: 'View Our Menu',
+                  style: PillStyle.outlineDark,
+                  expand: true,
+                  onPressed: onOrder,
+                ),
               ],
             ),
           ),
@@ -325,12 +365,18 @@ class _Hero extends StatelessWidget {
             Positioned(
               top: -180,
               right: -180,
-              child: ParallaxLayer(depth: 6, child: _Ring(520, CColors.gold.withValues(alpha: .25))),
+              child: ParallaxLayer(
+                depth: 6,
+                child: _Ring(520, CColors.gold.withValues(alpha: .25)),
+              ),
             ),
             Positioned(
               top: -120,
               right: -120,
-              child: ParallaxLayer(depth: 10, child: _Ring(340, CColors.rust.withValues(alpha: .15))),
+              child: ParallaxLayer(
+                depth: 10,
+                child: _Ring(340, CColors.rust.withValues(alpha: .15)),
+              ),
             ),
             _Section(
               reveal: false, // the hero has its own entrance animation
@@ -386,7 +432,11 @@ class _Trust extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           label,
-          style: CText.body(13.5, color: CColors.inkSoft, weight: FontWeight.w600),
+          style: CText.body(
+            13.5,
+            color: CColors.inkSoft,
+            weight: FontWeight.w600,
+          ),
         ),
       ],
     );
@@ -404,7 +454,8 @@ class _ExploreMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final menuAsync = ref.watch(customerMenuProvider);
     final menu = menuAsync.value;
-    final dishes = menu?.dishes.where((d) => d.isSignature).toList() ?? const <Dish>[];
+    final dishes =
+        menu?.dishes.where((d) => d.isSignature).toList() ?? const <Dish>[];
     // "See all" opens the category the signature dishes belong to.
     final categoryId = dishes.isEmpty ? null : dishes.first.categoryId;
     return Column(
@@ -413,11 +464,15 @@ class _ExploreMenu extends ConsumerWidget {
         const SectionHeader(
           eyebrow: 'Our Menus',
           title: 'Signature Menu',
-          subtitle: 'Our Pak Afghan signature dishes — made fresh when you order.',
+          subtitle:
+              'Our Pak Afghan signature dishes — made fresh when you order.',
         ),
         const SizedBox(height: 30),
         if (menuAsync.hasError && menu == null)
-          MenuStatus.error(error: '${menuAsync.error}', onRetry: () => ref.invalidate(customerMenuProvider))
+          MenuStatus.error(
+            error: '${menuAsync.error}',
+            onRetry: () => ref.invalidate(customerMenuProvider),
+          )
         else if (menuAsync.isLoading && menu == null)
           const MenuStatus.loading()
         else if (dishes.isEmpty)
@@ -455,10 +510,18 @@ class _SignatureDish extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: CColors.gold.withValues(alpha: .5), width: 1.5),
+            border: Border.all(
+              color: CColors.gold.withValues(alpha: .5),
+              width: 1.5,
+            ),
           ),
           padding: const EdgeInsets.all(14),
-          child: ClipOval(child: ScrollDepth(spin: 10, child: FoodImage(MenuData.signatureImage))),
+          child: ClipOval(
+            child: ScrollDepth(
+              spin: 10,
+              child: FoodImage(MenuData.signatureImage),
+            ),
+          ),
         ),
       ),
     );
@@ -496,7 +559,10 @@ class _SignatureDish extends StatelessWidget {
               )
             : Column(
                 children: [
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 30), child: image),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: image,
+                  ),
                   const SizedBox(height: 36),
                   copy,
                 ],
@@ -567,7 +633,10 @@ class _About extends StatelessWidget {
             child: ScrollDepth(
               shiftY: -10,
               rotateX: 4,
-              child: ClipRRect(borderRadius: BorderRadius.circular(22), child: FoodImage(MenuData.aboutImages[0])),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: FoodImage(MenuData.aboutImages[0]),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -620,10 +689,17 @@ class _About extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: Row(
               children: [
-                const SvgIcon(AppIcons.checkCircleRounded, size: 20, color: CColors.olive),
+                const SvgIcon(
+                  AppIcons.checkCircleRounded,
+                  size: 20,
+                  color: CColors.olive,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(t, style: CText.body(14.5, weight: FontWeight.w500)),
+                  child: Text(
+                    t,
+                    style: CText.body(14.5, weight: FontWeight.w500),
+                  ),
                 ),
               ],
             ),
@@ -671,7 +747,8 @@ class _HotSellingState extends ConsumerState<_HotSelling> {
         const SectionHeader(
           eyebrow: 'Order Online',
           title: 'Fresh From Our Kitchen',
-          subtitle: 'Tap a category, add your favourites to the cart and order in a minute.',
+          subtitle:
+              'Tap a category, add your favourites to the cart and order in a minute.',
           align: CrossAxisAlignment.center,
         ),
         const SizedBox(height: 26),
@@ -732,7 +809,12 @@ class CategoryChips extends StatelessWidget {
             onTap: () => onSelected(id),
             child: AnimatedContainer(
               duration: Duration.zero,
-              padding: EdgeInsets.fromLTRB(id == null || image.isEmpty ? 18 : 5, 5, 18, 5),
+              padding: EdgeInsets.fromLTRB(
+                id == null || image.isEmpty ? 18 : 5,
+                5,
+                18,
+                5,
+              ),
               decoration: BoxDecoration(
                 color: active ? CColors.ink : CColors.paper,
                 borderRadius: BorderRadius.circular(50),
@@ -742,15 +824,33 @@ class CategoryChips extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (id == null)
-                    SvgIcon(AppIcons.menuBookRounded, size: 17, color: active ? CColors.goldLight : CColors.rust)
+                    SvgIcon(
+                      AppIcons.menuBookRounded,
+                      size: 17,
+                      color: active ? CColors.goldLight : CColors.rust,
+                    )
                   else if (image.isNotEmpty)
-                    ClipOval(child: SizedBox(width: 32, height: 32, child: FoodImage(image)))
+                    ClipOval(
+                      child: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: FoodImage(image),
+                      ),
+                    )
                   else
-                    SvgIcon(AppIcons.restaurantRounded, size: 17, color: active ? CColors.goldLight : CColors.rust),
+                    SvgIcon(
+                      AppIcons.restaurantRounded,
+                      size: 17,
+                      color: active ? CColors.goldLight : CColors.rust,
+                    ),
                   const SizedBox(width: 8),
                   Text(
                     name,
-                    style: CText.body(13.5, color: active ? Colors.white : CColors.ink, weight: FontWeight.w600),
+                    style: CText.body(
+                      13.5,
+                      color: active ? Colors.white : CColors.ink,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -768,7 +868,12 @@ class DishGrid extends StatelessWidget {
   final bool shrinkWrap;
   final EdgeInsets padding;
 
-  const DishGrid({super.key, required this.dishes, this.shrinkWrap = false, this.padding = EdgeInsets.zero});
+  const DishGrid({
+    super.key,
+    required this.dishes,
+    this.shrinkWrap = false,
+    this.padding = EdgeInsets.zero,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -814,8 +919,16 @@ class _WhyUs extends StatelessWidget {
       'Cooked Fresh Daily',
       'Every order is prepared fresh when you place it — nothing sits under a heat lamp.',
     ),
-    (AppIcons.deliveryDiningRounded, '30-Min Delivery Promise', 'Hot food at your door across Woking, fast.'),
-    (AppIcons.setMealRounded, 'Generous Portions', 'Proper Pak-Afghan portions made for sharing — or not.'),
+    (
+      AppIcons.deliveryDiningRounded,
+      '30-Min Delivery Promise',
+      'Hot food at your door across Woking, fast.',
+    ),
+    (
+      AppIcons.setMealRounded,
+      'Generous Portions',
+      'Proper Pak-Afghan portions made for sharing — or not.',
+    ),
   ];
 
   @override
@@ -838,14 +951,20 @@ class _WhyUs extends StatelessWidget {
                 Container(
                   width: 52,
                   height: 52,
-                  decoration: BoxDecoration(gradient: CColors.goldGradient, borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(
+                    gradient: CColors.goldGradient,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   alignment: Alignment.center,
                   child: SvgIcon(icon, size: 24, color: CColors.ink),
                 ),
                 const SizedBox(height: 18),
                 Text(title, style: CText.display(20)),
                 const SizedBox(height: 8),
-                Text(body, style: CText.body(14, color: CColors.muted, height: 1.6)),
+                Text(
+                  body,
+                  style: CText.body(14, color: CColors.muted, height: 1.6),
+                ),
               ],
             ),
           ),
@@ -906,7 +1025,11 @@ class _Reviews extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SectionHeader(eyebrow: 'Reviews', title: 'What Our Customers Say', align: CrossAxisAlignment.center),
+          const SectionHeader(
+            eyebrow: 'Reviews',
+            title: 'What Our Customers Say',
+            align: CrossAxisAlignment.center,
+          ),
           const SizedBox(height: 14),
           Center(
             child: Wrap(
@@ -915,7 +1038,10 @@ class _Reviews extends ConsumerWidget {
               alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(summary.average.toStringAsFixed(1), style: CText.display(28)),
+                Text(
+                  summary.average.toStringAsFixed(1),
+                  style: CText.display(28),
+                ),
                 StarRow(rating: summary.average.round(), size: 20),
                 Text(
                   'from ${summary.count} ${summary.count == 1 ? 'rating' : 'ratings'}',
@@ -940,7 +1066,10 @@ class _Reviews extends ConsumerWidget {
                         width: width,
                         child: Reveal(
                           delay: Duration(milliseconds: 100 * (i % cols)),
-                          child: Tilt3D(maxTilt: 5, child: _ReviewCard(feedback: summary.latest[i])),
+                          child: Tilt3D(
+                            maxTilt: 5,
+                            child: _ReviewCard(feedback: summary.latest[i]),
+                          ),
                         ),
                       ),
                   ],
@@ -990,7 +1119,11 @@ class _ReviewCard extends StatelessWidget {
                 backgroundColor: CColors.goldPale,
                 child: Text(
                   feedback.name.isEmpty ? '?' : feedback.name[0].toUpperCase(),
-                  style: CText.body(14, color: CColors.rustDeep, weight: FontWeight.w700),
+                  style: CText.body(
+                    14,
+                    color: CColors.rustDeep,
+                    weight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -999,10 +1132,17 @@ class _ReviewCard extends StatelessWidget {
                   feedback.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: CText.body(14, color: CColors.ink, weight: FontWeight.w600),
+                  style: CText.body(
+                    14,
+                    color: CColors.ink,
+                    weight: FontWeight.w600,
+                  ),
                 ),
               ),
-              Text(DateFormat('d MMM yyyy').format(feedback.createdAt), style: CText.body(12, color: CColors.muted)),
+              Text(
+                DateFormat('d MMM yyyy').format(feedback.createdAt),
+                style: CText.body(12, color: CColors.muted),
+              ),
             ],
           ),
         ],
@@ -1023,7 +1163,10 @@ class _HoursCta extends StatelessWidget {
     final cta = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Hungry? We\'re cooking right now.', style: CText.display(wide ? 40 : 30, color: Colors.white)),
+        Text(
+          'Hungry? We\'re cooking right now.',
+          style: CText.display(wide ? 40 : 30, color: Colors.white),
+        ),
         const SizedBox(height: 12),
         Text(
           'Order online for delivery across Woking or collect from Walton Road.',
@@ -1034,11 +1177,16 @@ class _HoursCta extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            PillButton(label: 'Order Online Now', style: PillStyle.gold, onPressed: onOrder),
+            PillButton(
+              label: 'Order Online Now',
+              style: PillStyle.gold,
+              onPressed: onOrder,
+            ),
             PillButton(
               label: 'Call ${MenuData.phone}',
               style: PillStyle.outlineLight,
-              onPressed: () => copyToClipboard(context, MenuData.phone, 'Phone number'),
+              onPressed: () =>
+                  copyToClipboard(context, MenuData.phone, 'Phone number'),
             ),
           ],
         ),
@@ -1057,7 +1205,11 @@ class _HoursCta extends StatelessWidget {
         children: [
           Row(
             children: [
-              const IconBadge(AppIcons.accessTimeRounded, size: 40, background: CColors.cream),
+              const IconBadge(
+                AppIcons.accessTimeRounded,
+                size: 40,
+                background: CColors.cream,
+              ),
               const SizedBox(width: 12),
               Expanded(child: Text('Opening Hours', style: CText.display(22))),
             ],
@@ -1111,11 +1263,18 @@ class OpeningHours extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text(rows[i].$1, style: CText.body(14, color: CColors.muted)),
+                child: Text(
+                  rows[i].$1,
+                  style: CText.body(14, color: CColors.muted),
+                ),
               ),
               Text(
                 rows[i].$2,
-                style: CText.body(14, color: CColors.ink, weight: FontWeight.w600),
+                style: CText.body(
+                  14,
+                  color: CColors.ink,
+                  weight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -1135,7 +1294,10 @@ class CustomerFooter extends ConsumerWidget {
 
     Widget heading(String t) => Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Text(t.toUpperCase(), style: CText.eyebrow(color: CColors.goldLight)),
+      child: Text(
+        t.toUpperCase(),
+        style: CText.eyebrow(color: CColors.goldLight),
+      ),
     );
 
     Widget row(AppIcon icon, String text, [VoidCallback? onTap]) => Padding(
@@ -1149,7 +1311,10 @@ class CustomerFooter extends ConsumerWidget {
             SvgIcon(icon, size: 18, color: CColors.goldLight),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(text, style: CText.body(14, color: CColors.mutedLight, height: 1.5)),
+              child: Text(
+                text,
+                style: CText.body(14, color: CColors.mutedLight, height: 1.5),
+              ),
             ),
           ],
         ),
@@ -1179,16 +1344,27 @@ class CustomerFooter extends ConsumerWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final t in const ['100% Halal', 'Delivery & Collection', 'Catering'])
+            for (final t in const [
+              '100% Halal',
+              'Delivery & Collection',
+              'Catering',
+            ])
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(color: CColors.inkElev),
                 ),
                 child: Text(
                   t,
-                  style: CText.body(12, color: CColors.goldPale, weight: FontWeight.w500),
+                  style: CText.body(
+                    12,
+                    color: CColors.goldPale,
+                    weight: FontWeight.w500,
+                  ),
                 ),
               ),
           ],
@@ -1211,9 +1387,21 @@ class CustomerFooter extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heading('Visit Us'),
-        row(AppIcons.locationOnOutlined, MenuData.address, () => copyToClipboard(context, MenuData.address, 'Address')),
-        row(AppIcons.phoneRounded, MenuData.phone, () => copyToClipboard(context, MenuData.phone, 'Phone number')),
-        row(AppIcons.alternateEmailRounded, MenuData.email, () => copyToClipboard(context, MenuData.email, 'Email')),
+        row(
+          AppIcons.locationOnOutlined,
+          MenuData.address,
+          () => copyToClipboard(context, MenuData.address, 'Address'),
+        ),
+        row(
+          AppIcons.phoneRounded,
+          MenuData.phone,
+          () => copyToClipboard(context, MenuData.phone, 'Phone number'),
+        ),
+        row(
+          AppIcons.alternateEmailRounded,
+          MenuData.email,
+          () => copyToClipboard(context, MenuData.email, 'Email'),
+        ),
       ],
     );
 
@@ -1221,7 +1409,9 @@ class CustomerFooter extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         heading('Hours'),
-        for (final (day, time) in OpeningHours.rowsFor(ref.watch(openingHoursProvider).value))
+        for (final (day, time) in OpeningHours.rowsFor(
+          ref.watch(openingHoursProvider).value,
+        ))
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Column(
@@ -1230,7 +1420,11 @@ class CustomerFooter extends ConsumerWidget {
                 Text(day, style: CText.body(13, color: CColors.muted)),
                 Text(
                   time,
-                  style: CText.body(14.5, color: Colors.white, weight: FontWeight.w600),
+                  style: CText.body(
+                    14.5,
+                    color: Colors.white,
+                    weight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -1287,7 +1481,10 @@ class CustomerFooter extends ConsumerWidget {
                     '© ${DateTime.now().year} Pak Afghan & Woking Shawarma',
                     style: CText.body(12.5, color: CColors.muted),
                   ),
-                  Text('Cooked fresh in Woking, Surrey', style: CText.body(12.5, color: CColors.muted)),
+                  Text(
+                    'Cooked fresh in Woking, Surrey',
+                    style: CText.body(12.5, color: CColors.muted),
+                  ),
                 ],
               ),
             ),
@@ -1312,7 +1509,10 @@ class BrandMark extends StatelessWidget {
         Container(
           width: 42,
           height: 42,
-          decoration: const BoxDecoration(shape: BoxShape.circle, gradient: CColors.goldGradient),
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: CColors.goldGradient,
+          ),
           clipBehavior: Clip.antiAlias,
           child: const FoodImage(MenuData.logoImage),
         ),
@@ -1321,7 +1521,13 @@ class BrandMark extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Pak Afghan', style: CText.display(18, color: light ? Colors.white : CColors.ink)),
+            Text(
+              'Pak Afghan',
+              style: CText.display(
+                18,
+                color: light ? Colors.white : CColors.ink,
+              ),
+            ),
             Text(
               '& WOKING SHAWARMA',
               style: CText.body(

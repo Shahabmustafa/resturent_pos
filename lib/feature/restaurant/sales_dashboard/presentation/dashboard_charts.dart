@@ -42,20 +42,34 @@ double _niceMax(double v) {
   return 10 * exp;
 }
 
-const _axisStyle = TextStyle(fontSize: 10.5, color: DashColors.axis, fontFeatures: [FontFeature.tabularFigures()]);
+const _axisStyle = TextStyle(
+  fontSize: 10.5,
+  color: DashColors.axis,
+  fontFeatures: [FontFeature.tabularFigures()],
+);
 
 /// Revenue over the period (blue area) against the previous period (grey line).
 class SalesTrendChart extends StatelessWidget {
   final List<TrendPoint> points;
   final bool hourly;
 
-  const SalesTrendChart({super.key, required this.points, required this.hourly});
+  const SalesTrendChart({
+    super.key,
+    required this.points,
+    required this.hourly,
+  });
 
-  String _label(DateTime t) => hourly ? DateFormat('h a').format(t) : DateFormat('d MMM').format(t);
+  String _label(DateTime t) =>
+      hourly ? DateFormat('h a').format(t) : DateFormat('d MMM').format(t);
 
   @override
   Widget build(BuildContext context) {
-    final maxY = _niceMax(points.fold<double>(0, (m, p) => math.max(m, math.max(p.current, p.previous))));
+    final maxY = _niceMax(
+      points.fold<double>(
+        0,
+        (m, p) => math.max(m, math.max(p.current, p.previous)),
+      ),
+    );
     final every = math.max(1, (points.length / 7).ceil());
     return LineChart(
       LineChartData(
@@ -66,9 +80,13 @@ class SalesTrendChart extends StatelessWidget {
         gridData: FlGridData(
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
-          getDrawingHorizontalLine: (_) => const FlLine(color: DashColors.grid, strokeWidth: 1),
+          getDrawingHorizontalLine: (_) =>
+              const FlLine(color: DashColors.grid, strokeWidth: 1),
         ),
-        borderData: FlBorderData(show: true, border: const Border(bottom: BorderSide(color: DashColors.grid))),
+        borderData: FlBorderData(
+          show: true,
+          border: const Border(bottom: BorderSide(color: DashColors.grid)),
+        ),
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(),
           rightTitles: const AxisTitles(),
@@ -87,8 +105,12 @@ class SalesTrendChart extends StatelessWidget {
               interval: 1,
               getTitlesWidget: (v, meta) {
                 final i = v.round();
-                if (i != v || i < 0 || i >= points.length || i % every != 0) return const SizedBox.shrink();
-                return Padding(padding: const EdgeInsets.only(top: 6), child: Text(_label(points[i].at), style: _axisStyle));
+                if (i != v || i < 0 || i >= points.length || i % every != 0)
+                  return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(_label(points[i].at), style: _axisStyle),
+                );
               },
             ),
           ),
@@ -120,9 +142,13 @@ class SalesTrendChart extends StatelessWidget {
                       ? '${_label(points[s.x.round()].at)}\nThis period  ${rs(s.y)}'
                       : 'Previous  ${rs(s.y)}',
                   TextStyle(
-                    color: s.barIndex == 0 ? Colors.white : const Color(0xFFC3C2B7),
+                    color: s.barIndex == 0
+                        ? Colors.white
+                        : const Color(0xFFC3C2B7),
                     fontSize: 12,
-                    fontWeight: s.barIndex == 0 ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: s.barIndex == 0
+                        ? FontWeight.w700
+                        : FontWeight.w500,
                   ),
                 ),
             ],
@@ -130,7 +156,10 @@ class SalesTrendChart extends StatelessWidget {
         ),
         lineBarsData: [
           LineChartBarData(
-            spots: [for (var i = 0; i < points.length; i++) FlSpot(i.toDouble(), points[i].current)],
+            spots: [
+              for (var i = 0; i < points.length; i++)
+                FlSpot(i.toDouble(), points[i].current),
+            ],
             color: DashColors.series1,
             barWidth: 2,
             isCurved: true,
@@ -141,12 +170,18 @@ class SalesTrendChart extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [DashColors.series1.withValues(alpha: 0.18), DashColors.series1.withValues(alpha: 0.0)],
+                colors: [
+                  DashColors.series1.withValues(alpha: 0.18),
+                  DashColors.series1.withValues(alpha: 0.0),
+                ],
               ),
             ),
           ),
           LineChartBarData(
-            spots: [for (var i = 0; i < points.length; i++) FlSpot(i.toDouble(), points[i].previous)],
+            spots: [
+              for (var i = 0; i < points.length; i++)
+                FlSpot(i.toDouble(), points[i].previous),
+            ],
             color: DashColors.context,
             barWidth: 2,
             isCurved: true,
@@ -165,11 +200,14 @@ class BusyHoursChart extends StatelessWidget {
 
   const BusyHoursChart({super.key, required this.hours});
 
-  static String hourLabel(int h) => DateFormat('h a').format(DateTime(2000, 1, 1, h));
+  static String hourLabel(int h) =>
+      DateFormat('h a').format(DateTime(2000, 1, 1, h));
 
   @override
   Widget build(BuildContext context) {
-    final maxY = _niceMax(hours.fold<double>(0, (m, h) => math.max(m, h.revenue)));
+    final maxY = _niceMax(
+      hours.fold<double>(0, (m, h) => math.max(m, h.revenue)),
+    );
     return BarChart(
       BarChartData(
         maxY: maxY,
@@ -177,9 +215,13 @@ class BusyHoursChart extends StatelessWidget {
         gridData: FlGridData(
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
-          getDrawingHorizontalLine: (_) => const FlLine(color: DashColors.grid, strokeWidth: 1),
+          getDrawingHorizontalLine: (_) =>
+              const FlLine(color: DashColors.grid, strokeWidth: 1),
         ),
-        borderData: FlBorderData(show: true, border: const Border(bottom: BorderSide(color: DashColors.grid))),
+        borderData: FlBorderData(
+          show: true,
+          border: const Border(bottom: BorderSide(color: DashColors.grid)),
+        ),
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(),
           rightTitles: const AxisTitles(),
@@ -198,7 +240,10 @@ class BusyHoursChart extends StatelessWidget {
               getTitlesWidget: (v, _) {
                 final h = v.toInt();
                 if (h % 3 != 0) return const SizedBox.shrink();
-                return Padding(padding: const EdgeInsets.only(top: 6), child: Text(hourLabel(h), style: _axisStyle));
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(hourLabel(h), style: _axisStyle),
+                );
               },
             ),
           ),
@@ -216,8 +261,13 @@ class BusyHoursChart extends StatelessWidget {
                 const TextStyle(color: Color(0xFFC3C2B7), fontSize: 11.5),
                 children: [
                   TextSpan(
-                    text: '${rs(h.revenue)} · ${h.orders} ${h.orders == 1 ? 'order' : 'orders'}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w700),
+                    text:
+                        '${rs(h.revenue)} · ${h.orders} ${h.orders == 1 ? 'order' : 'orders'}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               );
@@ -226,14 +276,19 @@ class BusyHoursChart extends StatelessWidget {
         ),
         barGroups: [
           for (final h in hours)
-            BarChartGroupData(x: h.hour, barRods: [
-              BarChartRodData(
-                toY: h.revenue,
-                width: 10,
-                color: DashColors.series1,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-            ]),
+            BarChartGroupData(
+              x: h.hour,
+              barRods: [
+                BarChartRodData(
+                  toY: h.revenue,
+                  width: 10,
+                  color: DashColors.series1,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(4),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -253,27 +308,37 @@ class SplitBar extends StatelessWidget {
     final total = parts.fold<double>(0, (s, p) => s + p.$1);
     final visible = parts.where((p) => p.$1 > 0).toList();
     if (total <= 0 || visible.isEmpty) {
-      return Container(height: height, decoration: BoxDecoration(color: DashColors.grid, borderRadius: BorderRadius.circular(4)));
+      return Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: DashColors.grid,
+          borderRadius: BorderRadius.circular(4),
+        ),
+      );
     }
     return SizedBox(
       height: height,
-      child: Row(children: [
-        for (var i = 0; i < visible.length; i++) ...[
-          if (i > 0) const SizedBox(width: 2),
-          Expanded(
-            flex: math.max(1, (visible[i].$1 / total * 1000).round()),
-            child: Container(
-              decoration: BoxDecoration(
-                color: visible[i].$2,
-                borderRadius: BorderRadius.horizontal(
-                  left: i == 0 ? const Radius.circular(4) : Radius.zero,
-                  right: i == visible.length - 1 ? const Radius.circular(4) : Radius.zero,
+      child: Row(
+        children: [
+          for (var i = 0; i < visible.length; i++) ...[
+            if (i > 0) const SizedBox(width: 2),
+            Expanded(
+              flex: math.max(1, (visible[i].$1 / total * 1000).round()),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: visible[i].$2,
+                  borderRadius: BorderRadius.horizontal(
+                    left: i == 0 ? const Radius.circular(4) : Radius.zero,
+                    right: i == visible.length - 1
+                        ? const Radius.circular(4)
+                        : Radius.zero,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }
@@ -286,12 +351,20 @@ class RankBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 6,
-        alignment: Alignment.centerLeft,
-        decoration: BoxDecoration(color: const Color(0xFFF1F0EC), borderRadius: BorderRadius.circular(4)),
-        child: FractionallySizedBox(
-          widthFactor: fraction.clamp(0.0, 1.0),
-          child: Container(decoration: BoxDecoration(color: DashColors.series1, borderRadius: BorderRadius.circular(4))),
+    height: 6,
+    alignment: Alignment.centerLeft,
+    decoration: BoxDecoration(
+      color: const Color(0xFFF1F0EC),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: FractionallySizedBox(
+      widthFactor: fraction.clamp(0.0, 1.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: DashColors.series1,
+          borderRadius: BorderRadius.circular(4),
         ),
-      );
+      ),
+    ),
+  );
 }

@@ -38,23 +38,36 @@ class StatusPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        if (dot)
-          Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle))
-        else if (icon != null)
-          SvgIcon(icon!, size: 12, color: color),
-        if (dot || icon != null) const SizedBox(width: 5),
-        Flexible(
-          child: Text(label,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (dot)
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            )
+          else if (icon != null)
+            SvgIcon(icon!, size: 12, color: color),
+          if (dot || icon != null) const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
-        ),
-        if (trailing != null) ...[
-          const SizedBox(width: 4),
-          SvgIcon(trailing!, size: 11, color: color.withValues(alpha: 0.6)),
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(width: 4),
+            SvgIcon(trailing!, size: 11, color: color.withValues(alpha: 0.6)),
+          ],
         ],
-      ]),
+      ),
     );
 
     if (onTap != null) {

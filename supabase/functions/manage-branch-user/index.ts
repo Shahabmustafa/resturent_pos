@@ -3,7 +3,7 @@
 // Only the branch admin/manager or the company owner may call it.
 //
 // Body:
-//   { action: "create", branch_id, email, password, name, username, phone?, role, status?, avatar_url? }
+//   { action: "create", email, password, name, username, phone?, role, status?, avatar_url? }
 //   { action: "update", user_id, email?, password?, name?, username?, phone?, role?, status?, avatar_url? }
 //   { action: "delete", user_id }
 
@@ -53,6 +53,13 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
 
+    // There is a single branch; its row only carries the restaurant settings.
+    const theBranchId = async (): Promise<string> => {
+      const { data, error } = await admin.from("branches").select("id").limit(1).maybeSingle();
+      if (error || !data) throw new HttpError(500, "Branch not found");
+      return data.id as string;
+    };
+
     const assertCanManage = async (branchId: string, touchesAdmin: boolean) => {
       const { data: canManage, error } = await caller.rpc("can_manage_branch", { p_branch_id: branchId });
       if (error) throw new HttpError(500, error.message);
@@ -77,11 +84,11 @@ Deno.serve(async (req) => {
 
     switch (body.action) {
       case "create": {
-        const { branch_id, email, password } = body;
-        if (!branch_id || !email || !password || !body.name || !body.username) {
-          throw new HttpError(400, "branch_id, email, password, name and username are required");
+        const { email, password } = body;
+        if (!email || !password || !body.name || !body.username) {
+          throw new HttpError(400, "email, password, name and username are required");
         }
-        await assertCanManage(branch_id, body.role === "admin");
+        await assertCanManage(await theBranchId(), body.role === "admin");
 
         const { data: created, error: authErr } = await admin.auth.admin.createUser({
           email: String(email).trim().toLowerCase(),
@@ -94,7 +101,6 @@ Deno.serve(async (req) => {
           .from("branch_users")
           .insert({
             ...pickProfile(body),
-            branch_id,
             email: created.user.email,
             auth_user_id: created.user.id,
           })
@@ -117,7 +123,7 @@ Deno.serve(async (req) => {
         if (findErr) throw new HttpError(500, findErr.message);
         if (!target) throw new HttpError(404, "User not found");
 
-        await assertCanManage(target.branch_id, target.role === "admin" || body.role === "admin");
+        await assertCanManage(await theBranchId(), target.role === "admin" || body.role === "admin");
 
         const email = body.email ? String(body.email).trim().toLowerCase() : undefined;
         const authChanges: Record<string, unknown> = {};
@@ -156,7 +162,7 @@ Deno.serve(async (req) => {
         if (!target) throw new HttpError(404, "User not found");
         if (target.auth_user_id === callerAuthId) throw new HttpError(400, "You cannot delete your own account");
 
-        await assertCanManage(target.branch_id, target.role === "admin");
+        await assertCanManage(await theBranchId(), target.role === "admin");
 
         const { error: delErr } = await admin.from("branch_users").delete().eq("id", target.id);
         if (delErr) throw new HttpError(400, delErr.message);

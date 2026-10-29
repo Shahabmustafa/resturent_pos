@@ -8,10 +8,12 @@ class FinancialReportsNotifier extends StateNotifier<FinancialReportsState> {
   final String _branchId;
 
   FinancialReportsNotifier(this._ds, this._branchId)
-      : super(FinancialReportsState(
+    : super(
+        FinancialReportsState(
           startDate: DateFilter.today.range.$1,
           endDate: DateFilter.today.range.$2,
-        )) {
+        ),
+      ) {
     loadAll();
   }
 
@@ -20,10 +22,26 @@ class FinancialReportsNotifier extends StateNotifier<FinancialReportsState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final results = await Future.wait([
-        _ds.fetchSummary(branchId: _branchId, start: state.startDate, end: state.endDate),
-        _ds.fetchProductReports(branchId: _branchId, start: state.startDate, end: state.endDate),
-        _ds.fetchDailySales(branchId: _branchId, start: state.startDate, end: state.endDate),
-        _ds.fetchExpenseReports(branchId: _branchId, start: state.startDate, end: state.endDate),
+        _ds.fetchSummary(
+          branchId: _branchId,
+          start: state.startDate,
+          end: state.endDate,
+        ),
+        _ds.fetchProductReports(
+          branchId: _branchId,
+          start: state.startDate,
+          end: state.endDate,
+        ),
+        _ds.fetchDailySales(
+          branchId: _branchId,
+          start: state.startDate,
+          end: state.endDate,
+        ),
+        _ds.fetchExpenseReports(
+          branchId: _branchId,
+          start: state.startDate,
+          end: state.endDate,
+        ),
       ]);
       if (!mounted) return;
       state = state.copyWith(
@@ -42,7 +60,11 @@ class FinancialReportsNotifier extends StateNotifier<FinancialReportsState> {
   void applyFilter(DateFilter filter) {
     if (filter == DateFilter.custom) return;
     final (start, end) = filter.range;
-    state = state.copyWith(selectedFilter: filter, startDate: start, endDate: end);
+    state = state.copyWith(
+      selectedFilter: filter,
+      startDate: start,
+      endDate: end,
+    );
     loadAll();
   }
 

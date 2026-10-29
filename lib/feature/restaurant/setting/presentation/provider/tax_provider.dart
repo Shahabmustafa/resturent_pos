@@ -13,48 +13,48 @@ final _taxDsProvider = Provider<TaxDatasource>(
 // ── State ─────────────────────────────────────────────────────────────────────
 class TaxState {
   final BranchTaxSettings? settings;
-  final bool    loading;
-  final bool    saving;
-  final bool    testingFbr;
-  final bool?   fbrTestResult;  // null=untested, true=ok, false=fail
+  final bool loading;
+  final bool saving;
+  final bool testingFbr;
+  final bool? fbrTestResult; // null=untested, true=ok, false=fail
   final String? error;
-  final bool    saved;
+  final bool saved;
 
   const TaxState({
     this.settings,
-    this.loading      = true,
-    this.saving       = false,
-    this.testingFbr   = false,
+    this.loading = true,
+    this.saving = false,
+    this.testingFbr = false,
     this.fbrTestResult,
     this.error,
-    this.saved        = false,
+    this.saved = false,
   });
 
   TaxState copyWith({
     BranchTaxSettings? settings,
-    bool?   loading,
-    bool?   saving,
-    bool?   testingFbr,
-    bool?   fbrTestResult,
-    bool    clearFbrResult = false,
+    bool? loading,
+    bool? saving,
+    bool? testingFbr,
+    bool? fbrTestResult,
+    bool clearFbrResult = false,
     String? error,
-    bool    clearError     = false,
-    bool?   saved,
+    bool clearError = false,
+    bool? saved,
   }) => TaxState(
-    settings:      settings      ?? this.settings,
-    loading:       loading       ?? this.loading,
-    saving:        saving        ?? this.saving,
-    testingFbr:    testingFbr    ?? this.testingFbr,
+    settings: settings ?? this.settings,
+    loading: loading ?? this.loading,
+    saving: saving ?? this.saving,
+    testingFbr: testingFbr ?? this.testingFbr,
     fbrTestResult: clearFbrResult ? null : fbrTestResult ?? this.fbrTestResult,
-    error:         clearError ? null : error ?? this.error,
-    saved:         saved         ?? false,
+    error: clearError ? null : error ?? this.error,
+    saved: saved ?? false,
   );
 }
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
 class TaxNotifier extends StateNotifier<TaxState> {
   final TaxDatasource _ds;
-  final String        _branchId;
+  final String _branchId;
 
   TaxNotifier(this._ds, this._branchId) : super(const TaxState()) {
     load();
@@ -77,7 +77,7 @@ class TaxNotifier extends StateNotifier<TaxState> {
   void addSlab() {
     final s = state.settings;
     if (s == null) return;
-    final newSlab = TaxSlab(branchId: _branchId, name: '', rate: 0, isActive: false);
+    final newSlab = TaxSlab(name: '', rate: 0, isActive: false);
     state = state.copyWith(settings: s.copyWith(slabs: [...s.slabs, newSlab]));
   }
 
@@ -103,7 +103,7 @@ class TaxNotifier extends StateNotifier<TaxState> {
     state = state.copyWith(saving: true, clearError: true);
     try {
       await _ds.saveSettings(s);
-      final updatedSlabs = await _ds.saveSlabs(_branchId, s.slabs);
+      final updatedSlabs = await _ds.saveSlabs(s.slabs);
       final updated = s.copyWith(slabs: updatedSlabs);
       state = state.copyWith(saving: false, settings: updated, saved: true);
       return true;

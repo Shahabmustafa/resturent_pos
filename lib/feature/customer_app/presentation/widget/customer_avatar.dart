@@ -17,11 +17,18 @@ class CustomerAvatar extends StatelessWidget {
     final initial = Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(gradient: CColors.goldGradient, shape: BoxShape.circle),
+      decoration: const BoxDecoration(
+        gradient: CColors.goldGradient,
+        shape: BoxShape.circle,
+      ),
       alignment: Alignment.center,
       child: Text(
         name.isEmpty ? '?' : name[0].toUpperCase(),
-        style: CText.body(size * 0.42, color: CColors.ink, weight: FontWeight.w700),
+        style: CText.body(
+          size * 0.42,
+          color: CColors.ink,
+          weight: FontWeight.w700,
+        ),
       ),
     );
     if (user.avatarUrl.isEmpty) return initial;
@@ -32,7 +39,8 @@ class CustomerAvatar extends StatelessWidget {
         height: size,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => initial,
-        loadingBuilder: (_, child, progress) => progress == null ? child : initial,
+        loadingBuilder: (_, child, progress) =>
+            progress == null ? child : initial,
       ),
     );
   }

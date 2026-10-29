@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../auth/presentation/provider/branch_auth_provider.dart';
 import '../../data/datasource/table_datasource.dart';
 import '../../data/model/table_model.dart';
 
@@ -11,7 +10,6 @@ final tableDatasourceProvider = Provider<TableDatasource>((ref) {
 });
 
 final tablesRefreshProvider = StateProvider<int>((ref) => 0);
-
 
 // ── State ──────────────────────────────────────────────────────────────────
 class TableState {
@@ -32,8 +30,8 @@ class TableState {
     bool clearError = false,
   }) {
     return TableState(
-      tables:       tables       ?? this.tables,
-      isLoading:    isLoading    ?? this.isLoading,
+      tables: tables ?? this.tables,
+      isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
@@ -42,17 +40,16 @@ class TableState {
 // ── Notifier ───────────────────────────────────────────────────────────────
 class TableNotifier extends StateNotifier<TableState> {
   final TableDatasource _datasource;
-  final String _branchId;
   final Ref _ref; // 👈 added
 
-  TableNotifier(this._datasource, this._branchId, this._ref) : super(const TableState()) {
+  TableNotifier(this._datasource, this._ref) : super(const TableState()) {
     fetchTables();
   }
 
   Future<void> fetchTables() async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final tables = await _datasource.fetchTables(_branchId);
+      final tables = await _datasource.fetchTables();
       state = state.copyWith(tables: tables, isLoading: false);
     } catch (e) {
       state = state.copyWith(
@@ -62,24 +59,10 @@ class TableNotifier extends StateNotifier<TableState> {
     }
   }
 
-  Future<void> addTable(TableModel table) async {
+  Future<void> addTable(String tableNumber) async {
     try {
-      final added = await _datasource.addTable(table, _branchId);
+      final added = await _datasource.addTable(tableNumber);
       state = state.copyWith(tables: [...state.tables, added]);
-      _ref.read(tablesRefreshProvider.notifier).state++; // 👈 notify POS
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-    }
-  }
-
-  Future<void> updateStatus(String tableId, TableStatus newStatus) async {
-    try {
-      await _datasource.updateStatus(tableId, newStatus);
-      final updated = state.tables.map((t) {
-        if (t.id == tableId) t.status = newStatus;
-        return t;
-      }).toList();
-      state = state.copyWith(tables: updated);
       _ref.read(tablesRefreshProvider.notifier).state++; // 👈 notify POS
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
@@ -102,6 +85,5 @@ class TableNotifier extends StateNotifier<TableState> {
 // ── Provider ───────────────────────────────────────────────────────────────
 final tableProvider = StateNotifierProvider<TableNotifier, TableState>((ref) {
   final datasource = ref.watch(tableDatasourceProvider);
-  final branch = ref.watch(branchAuthProvider).branch!;
-  return TableNotifier(datasource, branch.branchId, ref); // 👈 ref passed
+  return TableNotifier(datasource, ref);
 });

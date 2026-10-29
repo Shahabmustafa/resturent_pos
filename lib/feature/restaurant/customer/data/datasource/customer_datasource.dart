@@ -12,7 +12,6 @@ class CustomerDatasource {
     final res = await _client
         .from(_table)
         .select()
-        .eq('branch_id', branchId)
         .order('created_at', ascending: false);
 
     return (res as List)
@@ -21,10 +20,13 @@ class CustomerDatasource {
   }
 
   // ── Add ───────────────────────────────────────────────────────────
-  Future<CustomerModel> addCustomer(CustomerModel customer, String branchId) async {
+  Future<CustomerModel> addCustomer(
+    CustomerModel customer,
+    String branchId,
+  ) async {
     final res = await _client
         .from(_table)
-        .insert(customer.toInsertMap(branchId))
+        .insert(customer.toInsertMap())
         .select()
         .single();
 
@@ -45,9 +47,6 @@ class CustomerDatasource {
 
   // ── Delete ────────────────────────────────────────────────────────
   Future<void> deleteCustomer(String customerId) async {
-    await _client
-        .from(_table)
-        .delete()
-        .eq('id', customerId);
+    await _client.from(_table).delete().eq('id', customerId);
   }
 }

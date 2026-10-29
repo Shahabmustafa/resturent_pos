@@ -19,9 +19,22 @@ class _MainLayoutState extends State<MainLayout> {
     NavItem(icon: AppIcons.dashboardOutlined, label: 'Dashboard'),
     NavItem(icon: AppIcons.tableRestaurantOutlined, label: 'Table Management'),
     NavItem(icon: AppIcons.menuBookOutlined, label: 'Menu & Categories'),
-    NavItem(icon: AppIcons.receiptLongOutlined, label: 'POS / Orders', badge: '3'),
-    NavItem(icon: AppIcons.kitchenOutlined, label: 'Kitchen Display', badge: '5'),
-    NavItem(icon: AppIcons.inventory2Outlined, label: 'Inventory', badge: '!', badgeDanger: true),
+    NavItem(
+      icon: AppIcons.receiptLongOutlined,
+      label: 'POS / Orders',
+      badge: '3',
+    ),
+    NavItem(
+      icon: AppIcons.kitchenOutlined,
+      label: 'Kitchen Display',
+      badge: '5',
+    ),
+    NavItem(
+      icon: AppIcons.inventory2Outlined,
+      label: 'Inventory',
+      badge: '!',
+      badgeDanger: true,
+    ),
     NavItem(icon: AppIcons.deliveryDiningOutlined, label: 'Delivery'),
     NavItem(icon: AppIcons.barChartOutlined, label: 'Financial Reports'),
     NavItem(icon: AppIcons.peopleOutline, label: 'Customers'),
@@ -65,6 +78,9 @@ class _PlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-    child: Text(label, style: const TextStyle(fontSize: 22, color: AppColors.textGrey)),
+    child: Text(
+      label,
+      style: const TextStyle(fontSize: 22, color: AppColors.textGrey),
+    ),
   );
 }

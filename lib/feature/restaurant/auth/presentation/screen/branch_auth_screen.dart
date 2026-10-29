@@ -1,12 +1,23 @@
-import 'package:resturent_application/core/constants/app_info.dart';
-import 'package:resturent_application/core/constants/app_icons.dart';
-import 'package:resturent_application/core/widget/svg_icon.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../core/constants/app_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:resturent_application/core/constants/app_info.dart';
+import 'package:resturent_application/core/desktop_window.dart';
 import '../../../../../core/widget/drawer.dart';
 import '../provider/branch_auth_provider.dart';
 
+const _bg = Color(0xFFD4D4D2);
+const _header = Color(0xFF2A75E6);
+const _panel = Color(0xFFEBEBEB);
+const _key = Color(0xFF5BC0DE);
+const _green = Color(0xFF5CB85C);
+const _orange = Color(0xFFF0AD4E);
+const _clock = Color(0xFF006064);
+const _red = Color(0xFFB91C1C);
+
+/// Staff sign in: username and password, with an on-screen keypad for touch tills.
 class BranchLoginScreen extends ConsumerStatefulWidget {
   const BranchLoginScreen({super.key});
 
@@ -15,155 +26,289 @@ class BranchLoginScreen extends ConsumerStatefulWidget {
 }
 
 class _BranchLoginScreenState extends ConsumerState<BranchLoginScreen> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  final _usernameFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  // The keypad types into whichever field was focused last.
+  late TextEditingController _target = _usernameController;
+  bool _stay = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameFocus.addListener(() {
+      if (_usernameFocus.hasFocus) _target = _usernameController;
+    });
+    _passwordFocus.addListener(() {
+      if (_passwordFocus.hasFocus) _target = _passwordController;
+    });
+  }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
+    _usernameFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: _red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Email and Password are required'),
-          backgroundColor: AppColors.danger,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
+  void _digit(String d) => _target.text += d;
+
+  void _clear() => _target.clear();
+
+  Future<void> _login() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+    if (username.isEmpty || password.isEmpty) {
+      _showError('Username and Password are required');
       return;
     }
-
-    await ref.read(branchAuthProvider.notifier).login(
-      email: email,
-      password: password,
-    );
+    await ref
+        .read(branchAuthProvider.notifier)
+        .login(username: username, password: password, stay: _stay);
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(branchAuthProvider);
+    final loading = ref.watch(branchAuthProvider.select((s) => s.isLoading));
     ref.listen<BranchAuthState>(branchAuthProvider, (prev, next) {
       if (next.isLoggedIn) {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => MainScreen()));
-      }
-      if (next.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage!),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => MainScreen()),
         );
       }
+      if (next.errorMessage != null) _showError(next.errorMessage!);
     });
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: Row(
+      backgroundColor: _bg,
+      body: Column(
         children: [
-          // ── Left Panel (Branding) ──────────────────────────────────
+          Container(
+            height: 76,
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            color: _header,
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  'assets/branding/app_icon.svg',
+                  width: 48,
+                  height: 48,
+                ),
+                const SizedBox(width: 14),
+                const Text(
+                  kAppName,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Expanded(
-            flex: 5,
-            child: Container(
-              color: AppColors.sidebar,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
               child: Stack(
                 children: [
-                  Positioned.fill(
-                    child: CustomPaint(painter: _DotPatternPainter()),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(48),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: SingleChildScrollView(
+                      child: Container(
+                        width: 340,
+                        color: _panel,
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const SvgIcon(AppIcons.storefrontRounded,
-                                  color: Colors.white, size: 22),
-                            ),
-                            const SizedBox(width: 12),
                             const Text(
-                              kAppName,
+                              'Login details',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
+                                color: Color(0xFF2A6496),
+                                fontSize: 15,
                                 fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
                               ),
                             ),
-                          ],
-                        ),
-                        const Spacer(),
-                        Text(
-                          'Branch Portal',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.95),
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            height: 1.3,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Sign in to manage your branch\norders, tables, and staff.',
-                          style: TextStyle(
-                            color: AppColors.sidebarText,
-                            fontSize: 14,
-                            height: 1.6,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        ...[
-                          (AppIcons.tableRestaurantOutlined, 'Table Management'),
-                          (AppIcons.receiptLongOutlined, 'Order Tracking'),
-                          (AppIcons.peopleOutlineRounded, 'Staff Control'),
-                        ].map(
-                              (item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: SvgIcon(item.$1,
-                                      color: AppColors.primary, size: 15),
+                            const SizedBox(height: 14),
+                            _Field(
+                              controller: _usernameController,
+                              focusNode: _usernameFocus,
+                              hint: 'Username',
+                              icon: Icons.person,
+                              autofocus: true,
+                              onSubmitted: (_) => _passwordFocus.requestFocus(),
+                            ),
+                            const SizedBox(height: 10),
+                            _Field(
+                              controller: _passwordController,
+                              focusNode: _passwordFocus,
+                              hint: 'Password',
+                              icon: Icons.password_rounded,
+                              obscure: true,
+                              onSubmitted: (_) => loading ? null : _login(),
+                            ),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: _Key(
+                                width: 62,
+                                height: 56,
+                                color: _green,
+                                onTap: loading ? null : _login,
+                                child: loading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.login_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          Text(
+                                            'Login',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Container(
+                              width: 30,
+                              height: 28,
+                              color: _orange,
+                              child: const Icon(
+                                Icons.lock_outline_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+                            for (final row in const [
+                              ['1', '2', '3'],
+                              ['4', '5', '6'],
+                              ['7', '8', '9'],
+                            ])
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [for (final d in row) _digitKey(d)],
                                 ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  item.$2,
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 13,
+                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _Key(
+                                  width: 62,
+                                  height: 52,
+                                  color: Colors.white,
+                                  onTap: _clear,
+                                  child: const Text(
+                                    'C',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                                _digitKey('0'),
+                                _Key(
+                                  width: 62,
+                                  height: 52,
+                                  color: _green,
+                                  onTap: loading ? null : _login,
+                                  child: const Icon(
+                                    Icons.login_rounded,
+                                    color: Colors.white,
+                                    size: 24,
                                   ),
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 14),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: Checkbox(
+                                    value: _stay,
+                                    onChanged: (v) =>
+                                        setState(() => _stay = v ?? false),
+                                    side: const BorderSide(
+                                      color: Colors.black45,
+                                    ),
+                                    fillColor: WidgetStateProperty.resolveWith(
+                                      (s) => s.contains(WidgetState.selected)
+                                          ? _header
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Stay signed in',
+                                  style: TextStyle(
+                                    color: Color(0xFF1B7F8C),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _ClockBox(),
+                        const SizedBox(width: 8),
+                        _Key(
+                          width: 56,
+                          height: 44,
+                          color: Colors.white,
+                          onTap: closeApp,
+                          child: const Icon(
+                            Icons.power_settings_new_rounded,
+                            size: 28,
                           ),
                         ),
-                        const SizedBox(height: 48),
                       ],
                     ),
                   ),
@@ -171,144 +316,118 @@ class _BranchLoginScreenState extends ConsumerState<BranchLoginScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // ── Right Panel (Login Form) ────────────────────────────────
+  Widget _digitKey(String d) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 0),
+    child: _Key(
+      width: 62,
+      height: 52,
+      color: _key,
+      onTap: () => _digit(d),
+      child: Text(
+        d,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    ),
+  );
+}
+
+/// Flat coloured button with a hard bottom-right shadow, like the till keypad.
+class _Key extends StatelessWidget {
+  final double width;
+  final double height;
+  final Color color;
+  final VoidCallback? onTap;
+  final Widget child;
+
+  const _Key({
+    required this.width,
+    required this.height,
+    required this.color,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(2),
+    child: Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+        boxShadow: const [
+          BoxShadow(color: Colors.black87, offset: Offset(2, 2)),
+        ],
+      ),
+      child: InkWell(
+        canRequestFocus: false,
+        onTap: onTap,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Center(child: child),
+        ),
+      ),
+    ),
+  );
+}
+
+class _Field extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final String hint;
+  final IconData icon;
+  final bool obscure;
+  final bool autofocus;
+  final ValueChanged<String>? onSubmitted;
+
+  const _Field({
+    required this.controller,
+    required this.focusNode,
+    required this.hint,
+    required this.icon,
+    this.obscure = false,
+    this.autofocus = false,
+    this.onSubmitted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 42,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFCCCCCC)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: double.infinity,
+            color: const Color(0xFFEEEEEE),
+            child: Icon(icon, size: 18, color: Colors.black87),
+          ),
           Expanded(
-            flex: 4,
-            child: Container(
-              color: AppColors.white,
-              child: Center(
-                child: SizedBox(
-                  width: 380,
-                  child: Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Branch Login',
-                          style: TextStyle(
-                            color: AppColors.textDark,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Sign in with your branch credentials',
-                          style: TextStyle(
-                              color: AppColors.textGrey, fontSize: 13.5),
-                        ),
-                        const SizedBox(height: 36),
-
-                        const _FieldLabel(label: 'Email'),
-                        const SizedBox(height: 6),
-                        _LoginField(
-                          controller: _emailController,
-                          hint: 'you@example.com',
-                          icon: AppIcons.alternateEmailRounded,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        const _FieldLabel(label: 'Password'),
-                        const SizedBox(height: 6),
-                        _LoginField(
-                          controller: _passwordController,
-                          hint: '••••••••',
-                          icon: AppIcons.lockOutlineRounded,
-                          isPassword: true,
-                          obscure: _obscurePassword,
-                          onToggleObscure: () => setState(
-                                  () => _obscurePassword = !_obscurePassword),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 46,
-                          child: ElevatedButton(
-                            onPressed: authState.isLoading ? null : _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor:
-                              AppColors.primary.withOpacity(0.5),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: authState.isLoading
-                                ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
-                            )
-                                : const Text('Login',
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Row(
-                          children: [
-                            const Expanded(
-                                child:
-                                Divider(color: AppColors.border, height: 1)),
-                            Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text('Branch Portal',
-                                  style: const TextStyle(
-                                      color: AppColors.textGrey, fontSize: 11)),
-                            ),
-                            const Expanded(
-                                child:
-                                Divider(color: AppColors.border, height: 1)),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: AppColors.primary.withOpacity(0.2)),
-                          ),
-                          child: const Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SvgIcon(AppIcons.infoOutlineRounded,
-                                  color: AppColors.primary, size: 16),
-                              SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Your branch credentials are provided by your company administrator.',
-                                  style: TextStyle(
-                                      color: AppColors.primary,
-                                      fontSize: 12.5,
-                                      height: 1.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              autofocus: autofocus,
+              obscureText: obscure,
+              onSubmitted: onSubmitted,
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: const TextStyle(color: Colors.black45, fontSize: 14),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
               ),
             ),
           ),
@@ -318,97 +437,51 @@ class _BranchLoginScreenState extends ConsumerState<BranchLoginScreen> {
   }
 }
 
-// ── Reusable Widgets (same as before) ─────────────────────────────────────────
-
-class _FieldLabel extends StatelessWidget {
-  final String label;
-  const _FieldLabel({required this.label});
+/// Day and time box in the bottom-left corner.
+class _ClockBox extends StatefulWidget {
+  const _ClockBox();
 
   @override
-  Widget build(BuildContext context) {
-    return Text(label,
-        style: const TextStyle(
-            color: AppColors.textDark,
-            fontSize: 13,
-            fontWeight: FontWeight.w600));
-  }
+  State<_ClockBox> createState() => _ClockBoxState();
 }
 
-class _LoginField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final AppIcon icon;
-  final bool isPassword;
-  final bool obscure;
-  final VoidCallback? onToggleObscure;
-  final TextInputType? keyboardType;
+class _ClockBoxState extends State<_ClockBox> {
+  late final Timer _timer = Timer.periodic(
+    const Duration(seconds: 15),
+    (_) => setState(() {}),
+  );
 
-  const _LoginField({
-    required this.controller,
-    required this.hint,
-    required this.icon,
-    this.keyboardType,
-    this.isPassword = false,
-    this.obscure = false,
-    this.onToggleObscure,
-  });
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: isPassword ? obscure : false,
-      style: const TextStyle(color: AppColors.textDark, fontSize: 14),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textGrey, fontSize: 14),
-        prefixIcon: SvgIcon(icon, color: AppColors.textGrey, size: 18),
-        suffixIcon: isPassword
-            ? IconButton(
-          icon: SvgIcon(
-              obscure
-                  ? AppIcons.visibilityOffOutlined
-                  : AppIcons.visibilityOutlined,
-              color: AppColors.textGrey,
-              size: 18),
-          onPressed: onToggleObscure,
-        )
-            : null,
-        filled: true,
-        fillColor: AppColors.bg,
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.border)),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: AppColors.border)),
-        focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide:
-            const BorderSide(color: AppColors.primary, width: 1.5)),
+    final now = DateTime.now();
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      color: _clock,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            DateFormat('EEE dd.MM.yy').format(now),
+            style: const TextStyle(color: Colors.white, fontSize: 11),
+          ),
+          Text(
+            DateFormat('h:mm a').format(now),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _DotPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.04)
-      ..style = PaintingStyle.fill;
-    const spacing = 24.0;
-    const radius = 1.5;
-    for (double x = 0; x < size.width; x += spacing) {
-      for (double y = 0; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), radius, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_) => false;
 }

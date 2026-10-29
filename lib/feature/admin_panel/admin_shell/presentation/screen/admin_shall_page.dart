@@ -26,7 +26,9 @@ class _AdminShellState extends ConsumerState<AdminShell> {
   /// Branch the Detailed Reports page opens on (set by tapping a branch row).
   String? _detailBranchId;
 
-  late final BranchDatasource _datasource = BranchDatasource(Supabase.instance.client);
+  late final BranchDatasource _datasource = BranchDatasource(
+    Supabase.instance.client,
+  );
 
   @override
   void initState() {
@@ -69,20 +71,30 @@ class _AdminShellState extends ConsumerState<AdminShell> {
     // The dashboard reloads (and so picks up branch changes) each time it is opened.
     final content = switch (_page) {
       0 => DashboardPage(
-          companyId: companyId,
-          datasource: _datasource,
-          onBranchesLoaded: (b) => setState(() => _branches = b),
-          onBranchTap: (id) => setState(() {
-            _detailBranchId = id;
-            _page = 2;
-          }),
-        ),
-      2 => BranchDetailReportPage(branches: _branches, initialBranchId: _detailBranchId),
+        companyId: companyId,
+        datasource: _datasource,
+        onBranchesLoaded: (b) => setState(() => _branches = b),
+        onBranchTap: (id) => setState(() {
+          _detailBranchId = id;
+          _page = 2;
+        }),
+      ),
+      2 => BranchDetailReportPage(
+        branches: _branches,
+        initialBranchId: _detailBranchId,
+      ),
       _ => BranchesPage(companyId: companyId, datasource: _datasource),
     };
 
     if (wide) {
-      return Scaffold(body: Row(children: [sidebar(), Expanded(child: content)]));
+      return Scaffold(
+        body: Row(
+          children: [
+            sidebar(),
+            Expanded(child: content),
+          ],
+        ),
+      );
     }
     return Scaffold(
       appBar: AppBar(
@@ -94,11 +106,21 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           builder: (context) => IconButton(
             tooltip: 'Menu',
             onPressed: () => Scaffold.of(context).openDrawer(),
-            icon: const SvgIcon(AppIcons.menuRounded, size: 22, color: Colors.white),
+            icon: const SvgIcon(
+              AppIcons.menuRounded,
+              size: 22,
+              color: Colors.white,
+            ),
           ),
         ),
-        title: Text(company?.name ?? 'Admin Panel',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
+        title: Text(
+          company?.name ?? 'Admin Panel',
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
       ),
       drawer: Drawer(width: 210, child: sidebar(inDrawer: true)),
       body: content,

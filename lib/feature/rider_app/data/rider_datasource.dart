@@ -12,7 +12,8 @@ class RiderDatasource {
   /// `<digits>@rider.pos` (made by the manage-rider-login Edge Function — keep in sync).
   static String? emailForPhone(String phone) {
     var digits = phone.replaceAll(RegExp(r'\D'), '');
-    if (digits.startsWith('92') && digits.length == 12) digits = '0${digits.substring(2)}';
+    if (digits.startsWith('92') && digits.length == 12)
+      digits = '0${digits.substring(2)}';
     if (digits.length == 10 && digits.startsWith('3')) digits = '0$digits';
     return digits.length >= 7 ? '$digits@rider.pos' : null;
   }
@@ -39,7 +40,11 @@ class RiderDatasource {
   Future<Rider?> fetchMe() async {
     final uid = _db.auth.currentUser?.id;
     if (uid == null) return null;
-    final res = await _db.from('riders').select().eq('auth_user_id', uid).maybeSingle();
+    final res = await _db
+        .from('riders')
+        .select()
+        .eq('auth_user_id', uid)
+        .maybeSingle();
     return res == null ? null : Rider.fromJson(res);
   }
 
@@ -54,7 +59,10 @@ class RiderDatasource {
 
   /// Deliveries finished since [since] — for the Earnings screen, which can
   /// reach further back than the live list's 100 rows.
-  Future<List<DeliveryOrder>> fetchDelivered(String riderId, DateTime since) async {
+  Future<List<DeliveryOrder>> fetchDelivered(
+    String riderId,
+    DateTime since,
+  ) async {
     final res = await _db
         .from('delivery_orders')
         .select()
@@ -74,10 +82,13 @@ class RiderDatasource {
   }
 
   /// Returns the rider's status after the change ('busy' stays busy).
-  Future<String> setOnline(bool online) async =>
-      (await _db.rpc('rider_set_online', params: {'p_online': online})).toString();
+  Future<String> setOnline(bool online) async => (await _db.rpc(
+    'rider_set_online',
+    params: {'p_online': online},
+  )).toString();
 
-  Future<void> startTrip(String deliveryId) => _db.rpc('rider_start_trip', params: {'p_delivery_id': deliveryId});
+  Future<void> startTrip(String deliveryId) =>
+      _db.rpc('rider_start_trip', params: {'p_delivery_id': deliveryId});
 
   Future<void> markDelivered(String deliveryId) =>
       _db.rpc('rider_mark_delivered', params: {'p_delivery_id': deliveryId});

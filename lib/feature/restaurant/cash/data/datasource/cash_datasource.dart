@@ -10,21 +10,16 @@ class CashRemoteDatasource {
   // ── Cash Balance ──────────────────────────────────────────────────────────
 
   Future<BranchCash> fetchCash(String branchId) async {
-    final res = await _db
-        .from('branch_cash')
-        .select()
-        .eq('branch_id', branchId)
-        .maybeSingle();
+    final res = await _db.from('branch_cash').select().maybeSingle();
 
     if (res == null) {
       // First time — insert zero balance
       final inserted = await _db
           .from('branch_cash')
           .insert({
-        'branch_id': branchId,
-        'balance':   0.0,
-        'updated_at': DateTime.now().toIso8601String(),
-      })
+            'balance': 0.0,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .select()
           .single();
       return BranchCash.fromJson(inserted);
@@ -38,7 +33,6 @@ class CashRemoteDatasource {
     final res = await _db
         .from('cash_transactions')
         .select()
-        .eq('branch_id', branchId)
         .order('created_at', ascending: false)
         .limit(limit);
     return (res as List).map((e) => CashTx.fromJson(e)).toList();
@@ -49,20 +43,22 @@ class CashRemoteDatasource {
 
   Future<BranchCash> updateCash({
     required String branchId,
-    required double amount,      // positive = in, negative = out
+    required double amount, // positive = in, negative = out
     required String type,
-    int?    refId,
+    int? refId,
     String? refLabel,
     String? note,
   }) async {
-    await _db.rpc('update_branch_cash', params: {
-      'p_branch_id':  branchId,
-      'p_amount':     amount,
-      'p_type':       type,
-      'p_ref_id':     refId,
-      'p_ref_label':  refLabel,
-      'p_note':       note,
-    });
+    await _db.rpc(
+      'update_branch_cash',
+      params: {
+        'p_amount': amount,
+        'p_type': type,
+        'p_ref_id': refId,
+        'p_ref_label': refLabel,
+        'p_note': note,
+      },
+    );
     return fetchCash(branchId);
   }
 
@@ -71,14 +67,14 @@ class CashRemoteDatasource {
   Future<BranchCash> setOpeningBalance(String branchId, double amount) async {
     // Fetch current, calculate diff
     final current = await fetchCash(branchId);
-    final diff    = amount - current.balance;
+    final diff = amount - current.balance;
     if (diff == 0) return current;
 
     return updateCash(
       branchId: branchId,
-      amount:   diff,
-      type:     diff > 0 ? CashTxType.manualIn : CashTxType.manualOut,
-      note:     'Opening balance set',
+      amount: diff,
+      type: diff > 0 ? CashTxType.manualIn : CashTxType.manualOut,
+      note: 'Opening balance set',
     );
   }
 }

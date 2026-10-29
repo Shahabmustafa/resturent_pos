@@ -9,7 +9,11 @@ class Shimmer extends StatefulWidget {
   final Widget child;
   final Duration period;
 
-  const Shimmer({super.key, required this.child, this.period = const Duration(milliseconds: 1400)});
+  const Shimmer({
+    super.key,
+    required this.child,
+    this.period = const Duration(milliseconds: 1400),
+  });
 
   static const baseColor = Color(0xFFEBEDF3);
   static const highlightColor = Color(0xFFF8F9FC);
@@ -19,7 +23,10 @@ class Shimmer extends StatefulWidget {
 }
 
 class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(vsync: this, duration: widget.period);
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: widget.period,
+  );
 
   @override
   void didChangeDependencies() {
@@ -48,7 +55,11 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
           shaderCallback: (bounds) => LinearGradient(
             begin: const Alignment(-1, -0.3),
             end: const Alignment(1, 0.3),
-            colors: const [Shimmer.baseColor, Shimmer.highlightColor, Shimmer.baseColor],
+            colors: const [
+              Shimmer.baseColor,
+              Shimmer.highlightColor,
+              Shimmer.baseColor,
+            ],
             stops: const [0.35, 0.5, 0.65],
             transform: _SlideGradient(-1 + 2 * _controller.value),
           ).createShader(bounds),
@@ -75,7 +86,13 @@ class ShimmerBox extends StatelessWidget {
   final double radius;
   final bool circle;
 
-  const ShimmerBox({super.key, this.width, this.height, this.radius = 6, this.circle = false});
+  const ShimmerBox({
+    super.key,
+    this.width,
+    this.height,
+    this.radius = 6,
+    this.circle = false,
+  });
 
   @override
   Widget build(BuildContext context) {

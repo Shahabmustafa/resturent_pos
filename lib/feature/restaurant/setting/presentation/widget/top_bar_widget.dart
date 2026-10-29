@@ -17,7 +17,14 @@ class TopBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
+            ),
+          ),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
@@ -28,23 +35,41 @@ class TopBar extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                SvgIcon(AppIcons.calendarTodayOutlined, size: 14, color: AppColors.primary),
+                SvgIcon(
+                  AppIcons.calendarTodayOutlined,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
                 SizedBox(width: 6),
-                Text('Today — Jun 10, 2026', style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w500)),
+                Text(
+                  'Today — Jun 10, 2026',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(width: 12),
           Stack(
             children: [
-              const SvgIcon(AppIcons.notificationsOutlined, size: 24, color: AppColors.textGrey),
+              const SvgIcon(
+                AppIcons.notificationsOutlined,
+                size: 24,
+                color: AppColors.textGrey,
+              ),
               Positioned(
                 right: 0,
                 top: 0,
                 child: Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ],
@@ -53,7 +78,14 @@ class TopBar extends StatelessWidget {
           CircleAvatar(
             radius: 16,
             backgroundColor: AppColors.primary,
-            child: const Text('A', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+            child: const Text(
+              'A',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),

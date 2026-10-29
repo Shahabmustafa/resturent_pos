@@ -41,7 +41,11 @@ class Dish {
   /// `menu_items` row with its nested `menu_item_sizes`.
   factory Dish.fromMenuItemJson(Map<String, dynamic> j) {
     final sizes = [...(j['menu_item_sizes'] as List? ?? const [])]
-      ..sort((a, b) => ((a['sort_order'] as int?) ?? 0).compareTo((b['sort_order'] as int?) ?? 0));
+      ..sort(
+        (a, b) => ((a['sort_order'] as int?) ?? 0).compareTo(
+          (b['sort_order'] as int?) ?? 0,
+        ),
+      );
     return Dish(
       id: j['id'] as String,
       name: j['name'] as String,
@@ -51,11 +55,19 @@ class Dish {
       image: (j['image_url'] as String?) ?? '',
       options: sizes.isEmpty
           ? [DishOption('Regular', (j['price'] as num).toDouble())]
-          : [for (final s in sizes) DishOption(s['name'] as String, (s['price'] as num).toDouble(), isSize: true)],
+          : [
+              for (final s in sizes)
+                DishOption(
+                  s['name'] as String,
+                  (s['price'] as num).toDouble(),
+                  isSize: true,
+                ),
+            ],
     );
   }
 
-  double get fromPrice => options.map((o) => o.price).reduce((a, b) => a < b ? a : b);
+  double get fromPrice =>
+      options.map((o) => o.price).reduce((a, b) => a < b ? a : b);
   bool get hasOptions => options.length > 1;
 }
 

@@ -61,13 +61,14 @@ Deno.serve(async (req) => {
 
     const { data: rider, error: findErr } = await admin
       .from("riders")
-      .select("id, branch_id, phone, auth_user_id")
+      .select("id, phone, auth_user_id")
       .eq("id", body.rider_id)
       .maybeSingle();
     if (findErr) throw new HttpError(500, findErr.message);
     if (!rider) throw new HttpError(404, "Rider not found");
 
-    const { data: canManage, error: rpcErr } = await caller.rpc("can_manage_branch", { p_branch_id: rider.branch_id });
+    const { data: branchRow } = await admin.from("branches").select("id").limit(1).maybeSingle();
+    const { data: canManage, error: rpcErr } = await caller.rpc("can_manage_branch", { p_branch_id: branchRow?.id });
     if (rpcErr) throw new HttpError(500, rpcErr.message);
     if (!canManage) throw new HttpError(403, "You can't manage riders for this branch");
 

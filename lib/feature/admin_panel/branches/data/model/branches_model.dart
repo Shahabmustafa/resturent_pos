@@ -4,7 +4,6 @@ import '../../../../../core/constants/app_colors.dart';
 // ─── Branch User (branch_users table) ────────────────────────────────────────
 class BranchUser {
   final String id;
-  final String branchId;
   final String name;
   final String username;
   final String email;
@@ -16,7 +15,6 @@ class BranchUser {
 
   const BranchUser({
     required this.id,
-    required this.branchId,
     required this.name,
     required this.username,
     required this.email,
@@ -29,7 +27,6 @@ class BranchUser {
 
   factory BranchUser.fromJson(Map<String, dynamic> json) => BranchUser(
     id: json['id'] as String,
-    branchId: json['branch_id'] as String,
     name: json['name'] as String? ?? '',
     username: json['username'] as String? ?? '',
     email: json['email'] as String? ?? '',
@@ -37,8 +34,8 @@ class BranchUser {
     role: json['role'] as String? ?? 'admin',
     status: json['status'] as String? ?? 'active',
     avatarUrl: json['avatar_url'] as String?,
-    createdAt: DateTime.tryParse(
-        json['created_at'] as String? ?? '') ??
+    createdAt:
+        DateTime.tryParse(json['created_at'] as String? ?? '') ??
         DateTime.now(),
   );
 
@@ -49,19 +46,17 @@ class BranchUser {
     String? phone,
     String? role,
     String? status,
-  }) =>
-      BranchUser(
-        id: id,
-        branchId: branchId,
-        name: name ?? this.name,
-        username: username ?? this.username,
-        email: email ?? this.email,
-        phone: phone ?? this.phone,
-        role: role ?? this.role,
-        status: status ?? this.status,
-        avatarUrl: avatarUrl,
-        createdAt: createdAt,
-      );
+  }) => BranchUser(
+    id: id,
+    name: name ?? this.name,
+    username: username ?? this.username,
+    email: email ?? this.email,
+    phone: phone ?? this.phone,
+    role: role ?? this.role,
+    status: status ?? this.status,
+    avatarUrl: avatarUrl,
+    createdAt: createdAt,
+  );
 }
 
 // ─── Branch (branches table) ──────────────────────────────────────────────────
@@ -102,8 +97,11 @@ class Branch {
 
   double get targetPct => (monthSales / target).clamp(0.0, 1.0);
 
-  factory Branch.fromJson(Map<String, dynamic> json,
-      {Color? color, BranchUser? adminUser}) {
+  factory Branch.fromJson(
+    Map<String, dynamic> json, {
+    Color? color,
+    BranchUser? adminUser,
+  }) {
     return Branch(
       id: json['id'] as String,
       companyId: json['company_id'] as String,
@@ -133,21 +131,20 @@ class Branch {
     bool? isOpen,
     bool? isActive,
     BranchUser? adminUser,
-  }) =>
-      Branch(
-        id: id,
-        companyId: companyId,
-        name: name ?? this.name,
-        city: city ?? this.city,
-        address: address ?? this.address,
-        phone: phone ?? this.phone,
-        ntn: ntn ?? this.ntn,
-        tables: tables ?? this.tables,
-        color: color ?? this.color,
-        isOpen: isOpen ?? this.isOpen,
-        isActive: isActive ?? this.isActive,
-        monthSales: monthSales,
-        target: target,
-        adminUser: adminUser ?? this.adminUser,
-      );
+  }) => Branch(
+    id: id,
+    companyId: companyId,
+    name: name ?? this.name,
+    city: city ?? this.city,
+    address: address ?? this.address,
+    phone: phone ?? this.phone,
+    ntn: ntn ?? this.ntn,
+    tables: tables ?? this.tables,
+    color: color ?? this.color,
+    isOpen: isOpen ?? this.isOpen,
+    isActive: isActive ?? this.isActive,
+    monthSales: monthSales,
+    target: target,
+    adminUser: adminUser ?? this.adminUser,
+  );
 }

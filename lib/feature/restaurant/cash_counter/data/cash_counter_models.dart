@@ -33,17 +33,19 @@ class CashCounter {
   factory CashCounter.fromJson(Map<String, dynamic> j) {
     final closed = j['status'] == 'closed';
     return CashCounter(
-      id:           j['id'] as String,
-      isOpen:       !closed,
-      openedAt:     DateTime.parse(j['opened_at'] as String).toLocal(),
+      id: j['id'] as String,
+      isOpen: !closed,
+      openedAt: DateTime.parse(j['opened_at'] as String).toLocal(),
       openedByName: (j['opened_by_name'] as String?) ?? '',
-      openingCash:  _num(j['opening_cash']),
-      closedAt:     j['closed_at'] == null ? null : DateTime.parse(j['closed_at'] as String).toLocal(),
+      openingCash: _num(j['opening_cash']),
+      closedAt: j['closed_at'] == null
+          ? null
+          : DateTime.parse(j['closed_at'] as String).toLocal(),
       closedByName: (j['closed_by_name'] as String?) ?? '',
-      notes:        (j['notes'] as String?) ?? '',
-      report:       closed ? CounterSummary.fromJson(j) : null,
-      countedCash:  closed ? _num(j['counted_cash']) : null,
-      difference:   closed ? _num(j['difference']) : null,
+      notes: (j['notes'] as String?) ?? '',
+      report: closed ? CounterSummary.fromJson(j) : null,
+      countedCash: closed ? _num(j['counted_cash']) : null,
+      difference: closed ? _num(j['difference']) : null,
     );
   }
 }
@@ -80,19 +82,19 @@ class CounterSummary {
   });
 
   factory CounterSummary.fromJson(Map<String, dynamic> j) => CounterSummary(
-        cashSales:     _num(j['cash_sales']),
-        cardSales:     _num(j['card_sales']),
-        onlineSales:   _num(j['online_sales']),
-        totalSales:    _num(j['total_sales']),
-        orderCount:    _num(j['order_count']).toInt(),
-        discountTotal: _num(j['discount_total']),
-        taxTotal:      _num(j['tax_total']),
-        unpaidCount:   _num(j['unpaid_count']).toInt(),
-        unpaidAmount:  _num(j['unpaid_amount']),
-        cashIn:        _num(j['cash_in']),
-        cashOut:       _num(j['cash_out']),
-        expectedCash:  _num(j['expected_cash']),
-      );
+    cashSales: _num(j['cash_sales']),
+    cardSales: _num(j['card_sales']),
+    onlineSales: _num(j['online_sales']),
+    totalSales: _num(j['total_sales']),
+    orderCount: _num(j['order_count']).toInt(),
+    discountTotal: _num(j['discount_total']),
+    taxTotal: _num(j['tax_total']),
+    unpaidCount: _num(j['unpaid_count']).toInt(),
+    unpaidAmount: _num(j['unpaid_amount']),
+    cashIn: _num(j['cash_in']),
+    cashOut: _num(j['cash_out']),
+    expectedCash: _num(j['expected_cash']),
+  );
 }
 
 /// Cash added to (in) or taken from (out) the drawer during a shift.
@@ -114,11 +116,11 @@ class CounterEntry {
   });
 
   factory CounterEntry.fromJson(Map<String, dynamic> j) => CounterEntry(
-        id:     j['id'] as String,
-        isIn:   j['kind'] == 'in',
-        amount: _num(j['amount']),
-        reason: (j['reason'] as String?) ?? '',
-        byName: (j['created_by_name'] as String?) ?? '',
-        at:     DateTime.parse(j['created_at'] as String).toLocal(),
-      );
+    id: j['id'] as String,
+    isIn: j['kind'] == 'in',
+    amount: _num(j['amount']),
+    reason: (j['reason'] as String?) ?? '',
+    byName: (j['created_by_name'] as String?) ?? '',
+    at: DateTime.parse(j['created_at'] as String).toLocal(),
+  );
 }

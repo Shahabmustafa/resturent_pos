@@ -5,7 +5,6 @@ import '../../../auth/presentation/provider/branch_auth_provider.dart';
 import '../../data/datasource/user_role_datasource.dart';
 import '../../data/model/user_model.dart';
 
-
 final branchUserDatasourceProvider = Provider<BranchUserDatasource>((ref) {
   return BranchUserDatasource(Supabase.instance.client);
 });
@@ -27,8 +26,8 @@ class BranchUserState {
     String? errorMessage,
     bool clearError = false,
   }) => BranchUserState(
-    users:        users        ?? this.users,
-    isLoading:    isLoading    ?? this.isLoading,
+    users: users ?? this.users,
+    isLoading: isLoading ?? this.isLoading,
     errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
   );
 }
@@ -37,7 +36,8 @@ class BranchUserNotifier extends StateNotifier<BranchUserState> {
   final BranchUserDatasource _ds;
   final String _branchId;
 
-  BranchUserNotifier(this._ds, this._branchId) : super(const BranchUserState()) {
+  BranchUserNotifier(this._ds, this._branchId)
+    : super(const BranchUserState()) {
     fetchUsers();
   }
 
@@ -48,8 +48,9 @@ class BranchUserNotifier extends StateNotifier<BranchUserState> {
       state = state.copyWith(users: users, isLoading: false);
     } catch (e) {
       state = state.copyWith(
-          isLoading: false,
-          errorMessage: e.toString().replaceAll('Exception: ', ''));
+        isLoading: false,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      );
     }
   }
 
@@ -66,7 +67,9 @@ class BranchUserNotifier extends StateNotifier<BranchUserState> {
     try {
       final updated = await _ds.updateUser(user);
       state = state.copyWith(
-        users: state.users.map((u) => u.id == updated.id ? updated : u).toList(),
+        users: state.users
+            .map((u) => u.id == updated.id ? updated : u)
+            .toList(),
       );
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
@@ -91,7 +94,8 @@ class BranchUserNotifier extends StateNotifier<BranchUserState> {
     try {
       await _ds.deleteUser(userId);
       state = state.copyWith(
-          users: state.users.where((u) => u.id != userId).toList());
+        users: state.users.where((u) => u.id != userId).toList(),
+      );
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
     }
@@ -99,8 +103,8 @@ class BranchUserNotifier extends StateNotifier<BranchUserState> {
 }
 
 final branchUserProvider =
-StateNotifierProvider<BranchUserNotifier, BranchUserState>((ref) {
-  final ds = ref.watch(branchUserDatasourceProvider);
-  final branch = ref.watch(branchAuthProvider).branch!;
-  return BranchUserNotifier(ds, branch.branchId);
-});
+    StateNotifierProvider<BranchUserNotifier, BranchUserState>((ref) {
+      final ds = ref.watch(branchUserDatasourceProvider);
+      final branch = ref.watch(branchAuthProvider).branch!;
+      return BranchUserNotifier(ds, branch.branchId);
+    });

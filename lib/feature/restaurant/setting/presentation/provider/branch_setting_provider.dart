@@ -7,7 +7,7 @@ import '../../data/model/branch_setting_model.dart';
 
 // ── Datasource ────────────────────────────────────────────────────────────────
 final _dsProvider = Provider<BranchSettingsDatasource>(
-      (ref) => BranchSettingsDatasource(Supabase.instance.client),
+  (ref) => BranchSettingsDatasource(Supabase.instance.client),
 );
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -21,9 +21,9 @@ class BranchSettingsState {
   const BranchSettingsState({
     this.branch,
     this.loading = false,
-    this.saving  = false,
+    this.saving = false,
     this.error,
-    this.saved   = false,
+    this.saved = false,
   });
 
   BranchSettingsState copyWith({
@@ -33,11 +33,11 @@ class BranchSettingsState {
     String? error,
     bool? saved,
   }) => BranchSettingsState(
-    branch:  branch  ?? this.branch,
+    branch: branch ?? this.branch,
     loading: loading ?? this.loading,
-    saving:  saving  ?? this.saving,
-    error:   error,
-    saved:   saved   ?? false,
+    saving: saving ?? this.saving,
+    error: error,
+    saved: saved ?? false,
   );
 }
 
@@ -47,7 +47,7 @@ class BranchSettingsNotifier extends StateNotifier<BranchSettingsState> {
   final String _branchId;
 
   BranchSettingsNotifier(this._ds, this._branchId)
-      : super(const BranchSettingsState()) {
+    : super(const BranchSettingsState()) {
     load();
   }
 
@@ -76,7 +76,7 @@ class BranchSettingsNotifier extends StateNotifier<BranchSettingsState> {
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 final branchSettingsProvider =
-StateNotifierProvider<BranchSettingsNotifier, BranchSettingsState>((ref) {
-  final branchId = ref.watch(branchAuthProvider).branch?.branchId ?? '';
-  return BranchSettingsNotifier(ref.read(_dsProvider), branchId);
-});
+    StateNotifierProvider<BranchSettingsNotifier, BranchSettingsState>((ref) {
+      final branchId = ref.watch(branchAuthProvider).branch?.branchId ?? '';
+      return BranchSettingsNotifier(ref.read(_dsProvider), branchId);
+    });

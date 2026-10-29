@@ -16,13 +16,26 @@ class VoiceBannerWidget extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: [kPrimary, kPrimary.withOpacity(0.8)]),
       ),
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const SvgIcon(AppIcons.campaignRounded, color: Colors.white, size: 20),
-        const SizedBox(width: 10),
-        Text('ORDER $orderNum IS READY — Please collect from reception!',
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SvgIcon(
+            AppIcons.campaignRounded,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'ORDER $orderNum IS READY — Please collect from reception!',
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 0.3)),
-      ]),
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -61,32 +74,52 @@ class KDSFilterBarWidget extends StatelessWidget {
               onTap: () => onSelect(t.$1),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: isActive ? t.$3.withOpacity(0.15) : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: isActive ? t.$3.withOpacity(0.4) : kBorder),
-                ),
-                child: Row(children: [
-                  Text(t.$1,
-                      style: TextStyle(
-                          color: isActive ? t.$3 : kSub,
-                          fontWeight: isActive ? FontWeight.w800 : FontWeight.w400,
-                          fontSize: 13)),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: isActive ? t.$3.withOpacity(0.2) : kMuted.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text('${t.$2}',
-                        style: TextStyle(
-                            color: isActive ? t.$3 : kMuted,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800)),
+                  border: Border.all(
+                    color: isActive ? t.$3.withOpacity(0.4) : kBorder,
                   ),
-                ]),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      t.$1,
+                      style: TextStyle(
+                        color: isActive ? t.$3 : kSub,
+                        fontWeight: isActive
+                            ? FontWeight.w800
+                            : FontWeight.w400,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? t.$3.withOpacity(0.2)
+                            : kMuted.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${t.$2}',
+                        style: TextStyle(
+                          color: isActive ? t.$3 : kMuted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -102,19 +135,37 @@ class EmptyKitchenWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(
-          padding: const EdgeInsets.all(28),
-          decoration: BoxDecoration(color: kPrimary.withOpacity(0.08), shape: BoxShape.circle),
-          child: const SvgIcon(AppIcons.checkCircleOutlineRounded, size: 56, color: kPrimary),
-        ),
-        const SizedBox(height: 20),
-        const Text('All orders complete! 🎉',
-            style: TextStyle(color: kText, fontSize: 18, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 6),
-        const Text('No pending orders in the kitchen',
-            style: TextStyle(color: kSub, fontSize: 13)),
-      ]),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              color: kPrimary.withOpacity(0.08),
+              shape: BoxShape.circle,
+            ),
+            child: const SvgIcon(
+              AppIcons.checkCircleOutlineRounded,
+              size: 56,
+              color: kPrimary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'All orders complete! 🎉',
+            style: TextStyle(
+              color: kText,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'No pending orders in the kitchen',
+            style: TextStyle(color: kSub, fontSize: 13),
+          ),
+        ],
+      ),
     );
   }
 }

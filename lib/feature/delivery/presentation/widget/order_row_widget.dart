@@ -59,114 +59,172 @@ class OrderRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: order.status == DeliveryOrderStatus.pending
-            ? kRed.withOpacity(0.02)
-            : order.status == DeliveryOrderStatus.onTheWay
-                ? kBlue.withOpacity(0.02)
-                : null,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-        child: Row(children: [
-          Expanded(
-              flex: 2,
-              child: Text(order.orderNum,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: kPrimary))),
-          Expanded(
-              flex: 3,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(order.customerName,
-                        style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: kText)),
-                    Text(order.phone,
-                        style:
-                            const TextStyle(fontSize: 11, color: kMuted)),
-                  ])),
-          Expanded(
-              flex: 4,
-              child: Row(children: [
-                const SvgIcon(AppIcons.locationOnOutlined,
-                    size: 12, color: kMuted),
-                const SizedBox(width: 3),
-                Expanded(
-                    child: Text(order.address,
-                        style:
-                            const TextStyle(fontSize: 11, color: kSub),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2)),
-              ])),
-          Expanded(
-              flex: 4,
-              child: Text(order.items,
+    color: order.status == DeliveryOrderStatus.pending
+        ? kRed.withOpacity(0.02)
+        : order.status == DeliveryOrderStatus.onTheWay
+        ? kBlue.withOpacity(0.02)
+        : null,
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            order.orderNum,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: kPrimary,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                order.customerName,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: kText,
+                ),
+              ),
+              Text(
+                order.phone,
+                style: const TextStyle(fontSize: 11, color: kMuted),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 4,
+          child: Row(
+            children: [
+              const SvgIcon(
+                AppIcons.locationOnOutlined,
+                size: 12,
+                color: kMuted,
+              ),
+              const SizedBox(width: 3),
+              Expanded(
+                child: Text(
+                  order.address,
                   style: const TextStyle(fontSize: 11, color: kSub),
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 2)),
-          Expanded(
-              flex: 2,
-              child: Text(formatMoney(order.amount),
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: kText))),
-          Expanded(
-              flex: 2,
-              child: order.riderId == null
-                  ? const Text('—',
-                      style: TextStyle(fontSize: 12, color: kMuted))
-                  : Row(children: [
-                      const SvgIcon(AppIcons.personRounded,
-                          size: 12, color: kSub),
-                      const SizedBox(width: 3),
-                      Expanded(
-                          child: Text(riderName,
-                              style: const TextStyle(
-                                  fontSize: 11, color: kSub),
-                              overflow: TextOverflow.ellipsis))
-                    ])),
-          Expanded(flex: 2, child: StatusBadgeWidget(_sl, _sc)),
-          Expanded(
-              flex: 2,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  maxLines: 2,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 4,
+          child: Text(
+            order.items,
+            style: const TextStyle(fontSize: 11, color: kSub),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text(
+            formatMoney(order.amount),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: kText,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: order.riderId == null
+              ? const Text('—', style: TextStyle(fontSize: 12, color: kMuted))
+              : Row(
                   children: [
-                    Text(_ago(order.createdAt),
-                        style: const TextStyle(
-                            fontSize: 11, color: kMuted)),
-                    if (order.notes.isNotEmpty)
-                      Row(children: [
-                        const SvgIcon(AppIcons.stickyNote2Outlined,
-                            size: 10, color: kYellow),
-                        const SizedBox(width: 2),
-                        Expanded(
-                            child: Text(order.notes,
-                                style: const TextStyle(
-                                    fontSize: 10, color: kYellow),
-                                overflow: TextOverflow.ellipsis))
-                      ]),
-                  ])),
-          Expanded(
-              flex: 3,
-              child: Row(children: [
-                if (onAssign != null)
-                  ABtnWidget('Assign', kBlue,
-                      AppIcons.personAddRounded, onAssign!),
-                if (onOnTheWay != null)
-                  ABtnWidget('On Way', kPurple,
-                      AppIcons.directionsBikeRounded, onOnTheWay!),
-                if (onDeliver != null)
-                  ABtnWidget('Deliver', kGreen,
-                      AppIcons.checkCircleRounded, onDeliver!),
-                if (onCancel != null) ...[
-                  const SizedBox(width: 4),
-                  IBtnWidget(
-                      AppIcons.cancelOutlined, kMuted, onCancel!),
-                ],
-              ])),
-        ]),
-      );
+                    const SvgIcon(
+                      AppIcons.personRounded,
+                      size: 12,
+                      color: kSub,
+                    ),
+                    const SizedBox(width: 3),
+                    Expanded(
+                      child: Text(
+                        riderName,
+                        style: const TextStyle(fontSize: 11, color: kSub),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+        Expanded(flex: 2, child: StatusBadgeWidget(_sl, _sc)),
+        Expanded(
+          flex: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _ago(order.createdAt),
+                style: const TextStyle(fontSize: 11, color: kMuted),
+              ),
+              if (order.notes.isNotEmpty)
+                Row(
+                  children: [
+                    const SvgIcon(
+                      AppIcons.stickyNote2Outlined,
+                      size: 10,
+                      color: kYellow,
+                    ),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        order.notes,
+                        style: const TextStyle(fontSize: 10, color: kYellow),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Row(
+            children: [
+              if (onAssign != null)
+                ABtnWidget(
+                  'Assign',
+                  kBlue,
+                  AppIcons.personAddRounded,
+                  onAssign!,
+                ),
+              if (onOnTheWay != null)
+                ABtnWidget(
+                  'On Way',
+                  kPurple,
+                  AppIcons.directionsBikeRounded,
+                  onOnTheWay!,
+                ),
+              if (onDeliver != null)
+                ABtnWidget(
+                  'Deliver',
+                  kGreen,
+                  AppIcons.checkCircleRounded,
+                  onDeliver!,
+                ),
+              if (onCancel != null) ...[
+                const SizedBox(width: 4),
+                IBtnWidget(AppIcons.cancelOutlined, kMuted, onCancel!),
+              ],
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }

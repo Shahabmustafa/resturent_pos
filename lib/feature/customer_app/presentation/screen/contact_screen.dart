@@ -44,9 +44,14 @@ class ContactScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const IconBadge(AppIcons.accessTimeRounded, background: CColors.cream),
+                  const IconBadge(
+                    AppIcons.accessTimeRounded,
+                    background: CColors.cream,
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: Text('Opening Hours', style: CText.display(18))),
+                  Expanded(
+                    child: Text('Opening Hours', style: CText.display(18)),
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -69,7 +74,8 @@ class ContactScreen extends StatelessWidget {
             child: SectionHeader(
               eyebrow: 'Contact',
               title: 'Get In Touch',
-              subtitle: 'Questions, catering or feedback — we\'d love to hear from you.',
+              subtitle:
+                  'Questions, catering or feedback — we\'d love to hear from you.',
               light: true,
               align: CrossAxisAlignment.center,
             ),
@@ -89,7 +95,13 @@ class ContactScreen extends StatelessWidget {
                         const Expanded(child: _ContactForm()),
                       ],
                     )
-                  : Column(children: [info, const SizedBox(height: 14), const _ContactForm()]),
+                  : Column(
+                      children: [
+                        info,
+                        const SizedBox(height: 14),
+                        const _ContactForm(),
+                      ],
+                    ),
             ),
           ),
         ),
@@ -111,7 +123,12 @@ class _InfoCard extends StatelessWidget {
   final String value;
   final VoidCallback onTap;
 
-  const _InfoCard({required this.icon, required this.title, required this.value, required this.onTap});
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,16 +150,27 @@ class _InfoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title.toUpperCase(), style: CText.eyebrow(color: CColors.muted)),
+                      Text(
+                        title.toUpperCase(),
+                        style: CText.eyebrow(color: CColors.muted),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         value,
-                        style: CText.body(14.5, color: CColors.ink, weight: FontWeight.w600),
+                        style: CText.body(
+                          14.5,
+                          color: CColors.ink,
+                          weight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SvgIcon(AppIcons.fileCopyRounded, size: 18, color: CColors.mutedLight),
+                const SvgIcon(
+                  AppIcons.fileCopyRounded,
+                  size: 18,
+                  color: CColors.mutedLight,
+                ),
               ],
             ),
           ),
@@ -159,10 +187,17 @@ class _CateringCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(gradient: CColors.goldGradient, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        gradient: CColors.goldGradient,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         children: [
-          const SvgIcon(AppIcons.emojiEventsRounded, size: 34, color: CColors.ink),
+          const SvgIcon(
+            AppIcons.emojiEventsRounded,
+            size: 34,
+            color: CColors.ink,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -205,12 +240,15 @@ class _ContactFormState extends State<_ContactForm> {
     super.dispose();
   }
 
-  String? _required(String? v) => (v == null || v.trim().isEmpty) ? 'Required' : null;
+  String? _required(String? v) =>
+      (v == null || v.trim().isEmpty) ? 'Required' : null;
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     // TODO: send to Supabase / email once a backend endpoint exists.
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Thanks! We\'ll get back to you soon.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Thanks! We\'ll get back to you soon.')),
+    );
     _formKey.currentState!.reset();
     for (final c in [_name, _email, _phone, _message]) {
       c.clear();
@@ -248,7 +286,9 @@ class _ContactFormState extends State<_ContactForm> {
               keyboardType: TextInputType.emailAddress,
               validator: (v) {
                 if (_required(v) != null) return 'Required';
-                return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v!.trim()) ? null : 'Enter a valid email';
+                return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v!.trim())
+                    ? null
+                    : 'Enter a valid email';
               },
               decoration: const InputDecoration(hintText: 'you@example.com'),
             ),
@@ -267,7 +307,12 @@ class _ContactFormState extends State<_ContactForm> {
               decoration: const InputDecoration(hintText: 'How can we help?'),
             ),
             const SizedBox(height: 22),
-            PillButton(label: 'Send Message', icon: AppIcons.sendRounded, expand: true, onPressed: _submit),
+            PillButton(
+              label: 'Send Message',
+              icon: AppIcons.sendRounded,
+              expand: true,
+              onPressed: _submit,
+            ),
           ],
         ),
       ),

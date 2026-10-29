@@ -1,3 +1,4 @@
+import 'package:resturent_application/core/widget/old_dialog_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -6,7 +7,9 @@ import 'data/rider_datasource.dart';
 import 'presentation/screen/rider_shell.dart';
 import 'presentation/screen/rider_login_screen.dart';
 
-final riderDsProvider = Provider<RiderDatasource>((_) => RiderDatasource(Supabase.instance.client));
+final riderDsProvider = Provider<RiderDatasource>(
+  (_) => RiderDatasource(Supabase.instance.client),
+);
 
 /// Phone app for delivery riders: sign in, see assigned deliveries, update them.
 class RiderApp extends StatelessWidget {
@@ -14,20 +17,30 @@ class RiderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Rider', debugShowCheckedModeBanner: false, theme: _theme, home: const _AuthGate());
+    return MaterialApp(
+      title: 'Rider',
+      debugShowCheckedModeBanner: false,
+      theme: _theme,
+      home: const _AuthGate(),
+    );
   }
 }
 
-OutlineInputBorder _inputBorder(Color color, [double width = 1]) => OutlineInputBorder(
-  borderRadius: BorderRadius.circular(14),
-  borderSide: BorderSide(color: color, width: width),
-);
+OutlineInputBorder _inputBorder(Color color, [double width = 1]) =>
+    OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: color, width: width),
+    );
 
 /// One look for every rider screen: inputs, buttons, dialogs, sheets and the bottom bar.
 final _theme = ThemeData(
   useMaterial3: true,
   scaffoldBackgroundColor: kBg,
-  colorScheme: ColorScheme.fromSeed(seedColor: kPrimary, primary: kPrimary, surface: kCard),
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: kPrimary,
+    primary: kPrimary,
+    surface: kCard,
+  ),
   fontFamily: 'Roboto',
   splashFactory: InkSparkle.splashFactory,
   textSelectionTheme: TextSelectionThemeData(
@@ -60,20 +73,19 @@ final _theme = ThemeData(
       textStyle: const TextStyle(fontWeight: FontWeight.w700),
     ),
   ),
-  dialogTheme: DialogThemeData(
+  dialogTheme: kOldStyleDialogTheme,
+  bottomSheetTheme: const BottomSheetThemeData(
     backgroundColor: kCard,
     surfaceTintColor: kCard,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    titleTextStyle: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: kText),
-    contentTextStyle: const TextStyle(fontSize: 14.5, color: kSub, height: 1.5),
   ),
-  bottomSheetTheme: const BottomSheetThemeData(backgroundColor: kCard, surfaceTintColor: kCard),
   navigationBarTheme: NavigationBarThemeData(
     height: 68,
     labelTextStyle: WidgetStateProperty.resolveWith(
       (states) => TextStyle(
         fontSize: 12,
-        fontWeight: states.contains(WidgetState.selected) ? FontWeight.w800 : FontWeight.w600,
+        fontWeight: states.contains(WidgetState.selected)
+            ? FontWeight.w800
+            : FontWeight.w600,
         color: states.contains(WidgetState.selected) ? kPrimary : kSub,
       ),
     ),
@@ -89,7 +101,9 @@ class _AuthGate extends StatelessWidget {
     final auth = Supabase.instance.client.auth;
     return StreamBuilder<AuthState>(
       stream: auth.onAuthStateChange,
-      builder: (context, _) => auth.currentSession == null ? const RiderLoginScreen() : const RiderShell(),
+      builder: (context, _) => auth.currentSession == null
+          ? const RiderLoginScreen()
+          : const RiderShell(),
     );
   }
 }

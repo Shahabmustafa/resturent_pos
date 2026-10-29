@@ -15,7 +15,13 @@ class SvgIcon extends StatelessWidget {
   final Color? color;
   final String? semanticLabel;
 
-  const SvgIcon(this.icon, {super.key, this.size, this.color, this.semanticLabel});
+  const SvgIcon(
+    this.icon, {
+    super.key,
+    this.size,
+    this.color,
+    this.semanticLabel,
+  });
 
   @override
   Widget build(BuildContext context) {

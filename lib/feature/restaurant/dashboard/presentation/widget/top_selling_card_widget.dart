@@ -24,7 +24,13 @@ class TopSellingCard extends StatelessWidget {
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE8EAF0)),
-        boxShadow: [BoxShadow(color: Color(0x0D000030), blurRadius: 10, offset: Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0D000030),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,19 +43,35 @@ class TopSellingCard extends StatelessWidget {
                   color: _accent.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const SvgIcon(AppIcons.emojiEventsRounded, color: _accent, size: 16),
+                child: const SvgIcon(
+                  AppIcons.emojiEventsRounded,
+                  color: _accent,
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 10),
-              const Text('Top Selling Products', style: TextStyle(color: Color(0xFF1A1D3A), fontSize: 15, fontWeight: FontWeight.w700)),
+              const Text(
+                'Top Selling Products',
+                style: TextStyle(
+                  color: Color(0xFF1A1D3A),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
-              const Text('by revenue', style: TextStyle(color: Color(0xFF9396B0), fontSize: 11)),
+              const Text(
+                'by revenue',
+                style: TextStyle(color: Color(0xFF9396B0), fontSize: 11),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           ..._products.asMap().entries.map((e) {
             final i = e.key;
             final p = e.value;
-            final color = _accent.withOpacity(_opacities[i % _opacities.length]);
+            final color = _accent.withOpacity(
+              _opacities[i % _opacities.length],
+            );
             return Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Row(
@@ -59,7 +81,9 @@ class TopSellingCard extends StatelessWidget {
                     height: 24,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: i == 0 ? _accent.withOpacity(0.2) : const Color(0xFFF0F2F8),
+                      color: i == 0
+                          ? _accent.withOpacity(0.2)
+                          : const Color(0xFFF0F2F8),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -77,7 +101,14 @@ class TopSellingCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(p.$1, style: const TextStyle(color: Color(0xFF3D4060), fontSize: 13, fontWeight: FontWeight.w500)),
+                        Text(
+                          p.$1,
+                          style: const TextStyle(
+                            color: Color(0xFF3D4060),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
@@ -92,7 +123,14 @@ class TopSellingCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(p.$2, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w700)),
+                  Text(
+                    p.$2,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
             );

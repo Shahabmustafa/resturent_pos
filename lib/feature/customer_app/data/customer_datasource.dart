@@ -8,7 +8,8 @@ class CustomerMenu {
 
   const CustomerMenu({required this.categories, required this.dishes});
 
-  List<Dish> byCategory(String id) => dishes.where((d) => d.categoryId == id).toList();
+  List<Dish> byCategory(String id) =>
+      dishes.where((d) => d.categoryId == id).toList();
 
   MenuCategory? category(String? id) {
     for (final c in categories) {
@@ -45,7 +46,12 @@ class CardPayment {
   /// What was in the cart: (menu item id, size or '', qty).
   final List<({String menuItemId, String size, int qty})> items;
 
-  const CardPayment({required this.status, required this.orderNumber, required this.delivery, required this.items});
+  const CardPayment({
+    required this.status,
+    required this.orderNumber,
+    required this.delivery,
+    required this.items,
+  });
 
   bool get isPaid => status == 'paid';
 
@@ -55,7 +61,11 @@ class CardPayment {
     delivery: j['delivery'] as bool? ?? false,
     items: [
       for (final l in (j['lines'] as List? ?? const []))
-        (menuItemId: l['menu_item_id'] as String, size: (l['size'] as String?) ?? '', qty: (l['qty'] as num).toInt()),
+        (
+          menuItemId: l['menu_item_id'] as String,
+          size: (l['size'] as String?) ?? '',
+          qty: (l['qty'] as num).toInt(),
+        ),
     ],
   );
 }
@@ -66,7 +76,11 @@ class CustomerOrderLine {
   final int qty;
   final double total;
 
-  const CustomerOrderLine({required this.name, required this.qty, required this.total});
+  const CustomerOrderLine({
+    required this.name,
+    required this.qty,
+    required this.total,
+  });
 }
 
 /// An order as the customer sees it on "My Orders".
@@ -74,12 +88,14 @@ class CustomerOrder {
   final String id;
   final String number;
   final String type; // Delivery | Takeaway
-  final String status; // pending | completed | cancelled (| legacy kitchen statuses)
+  final String
+  status; // pending | completed | cancelled (| legacy kitchen statuses)
   final String paymentStatus;
   final double total;
   final DateTime createdAt;
   final List<CustomerOrderLine> lines;
-  final int? myRating; // stars the customer gave this order, null if not rated yet
+  final int?
+  myRating; // stars the customer gave this order, null if not rated yet
 
   const CustomerOrder({
     required this.id,
@@ -93,11 +109,18 @@ class CustomerOrder {
     this.myRating,
   });
 
-  bool get isOpen => status != 'completed' && status != 'cancelled' && status != 'delivered';
+  bool get isOpen =>
+      status != 'completed' && status != 'cancelled' && status != 'delivered';
 
-  bool get canRate => myRating == null && (status == 'completed' || status == 'delivered' || status == 'served');
+  bool get canRate =>
+      myRating == null &&
+      (status == 'completed' || status == 'delivered' || status == 'served');
 
-  factory CustomerOrder.fromJson(Map<String, dynamic> j, List<CustomerOrderLine> lines, int? myRating) => CustomerOrder(
+  factory CustomerOrder.fromJson(
+    Map<String, dynamic> j,
+    List<CustomerOrderLine> lines,
+    int? myRating,
+  ) => CustomerOrder(
     id: j['id'] as String,
     number: (j['order_number'] as String?) ?? '',
     type: (j['order_type'] as String?) ?? 'Takeaway',
@@ -117,7 +140,12 @@ class PublicFeedback {
   final String comment;
   final DateTime createdAt;
 
-  const PublicFeedback({required this.name, required this.rating, required this.comment, required this.createdAt});
+  const PublicFeedback({
+    required this.name,
+    required this.rating,
+    required this.comment,
+    required this.createdAt,
+  });
 
   factory PublicFeedback.fromJson(Map<String, dynamic> j) => PublicFeedback(
     name: (j['display_name'] as String?) ?? 'Customer',
@@ -133,7 +161,11 @@ class OpeningHoursInfo {
   final String closing;
   final bool is24Hours;
 
-  const OpeningHoursInfo({required this.opening, required this.closing, required this.is24Hours});
+  const OpeningHoursInfo({
+    required this.opening,
+    required this.closing,
+    required this.is24Hours,
+  });
 
   /// "11:00 AM – 11:30 PM", or "Open 24 hours".
   String get range => is24Hours ? 'Open 24 hours' : '$opening – $closing';
@@ -145,7 +177,11 @@ class FeedbackSummary {
   final int count;
   final List<PublicFeedback> latest;
 
-  const FeedbackSummary({required this.average, required this.count, required this.latest});
+  const FeedbackSummary({
+    required this.average,
+    required this.count,
+    required this.latest,
+  });
 }
 
 class CustomerDatasource {
@@ -157,16 +193,17 @@ class CustomerDatasource {
   Future<CustomerMenu> fetchMenu() async {
     final results = await Future.wait([
       // Oldest first = printed-menu order (postgrest orders descending by default).
-      _db.from('categories').select().eq('branch_id', kWebsiteBranchId).order('created_at', ascending: true),
+      _db.from('categories').select().order('created_at', ascending: true),
       _db
           .from('menu_items')
           .select('*, menu_item_sizes(*)')
-          .eq('branch_id', kWebsiteBranchId)
           .eq('is_available', true)
           .order('created_at', ascending: true), // printed-menu order
     ]);
 
-    final dishes = [for (final j in results[1] as List) Dish.fromMenuItemJson(j)];
+    final dishes = [
+      for (final j in results[1] as List) Dish.fromMenuItemJson(j),
+    ];
     final categories = <MenuCategory>[];
     for (final j in results[0] as List) {
       final items = dishes.where((d) => d.categoryId == j['id']).toList();
@@ -176,7 +213,9 @@ class CustomerDatasource {
           id: j['id'] as String,
           name: j['name'] as String,
           tagline: (j['description'] as String?)?.trim() ?? '',
-          image: items.firstWhere((d) => d.image.isNotEmpty, orElse: () => items.first).image,
+          image: items
+              .firstWhere((d) => d.image.isNotEmpty, orElse: () => items.first)
+              .image,
           dishCount: items.length,
         ),
       );
@@ -201,7 +240,11 @@ class CustomerDatasource {
         'p_notes': details.notes,
         'p_items': [
           for (final l in lines)
-            {'menu_item_id': l.dish.id, 'size': l.option.isSize ? l.option.label : '', 'qty': l.qty},
+            {
+              'menu_item_id': l.dish.id,
+              'size': l.option.isSize ? l.option.label : '',
+              'qty': l.qty,
+            },
         ],
       },
     );
@@ -227,13 +270,20 @@ class CustomerDatasource {
         'notes': details.notes,
         'items': [
           for (final l in lines)
-            {'menu_item_id': l.dish.id, 'size': l.option.isSize ? l.option.label : '', 'qty': l.qty},
+            {
+              'menu_item_id': l.dish.id,
+              'size': l.option.isSize ? l.option.label : '',
+              'qty': l.qty,
+            },
         ],
         'return_url': returnUrl.toString(),
       },
     );
     final data = res.data as Map<String, dynamic>;
-    return (url: Uri.parse(data['url'] as String), paymentId: data['payment_id'] as String);
+    return (
+      url: Uri.parse(data['url'] as String),
+      paymentId: data['payment_id'] as String,
+    );
   }
 
   /// A card checkout of the signed-in customer, checked every 2 seconds until
@@ -241,7 +291,11 @@ class CustomerDatasource {
   /// Emits null if it isn't theirs (RLS) or doesn't exist.
   Stream<CardPayment?> watchCardPayment(String paymentId) async* {
     for (var i = 0; i < 60; i++) {
-      final row = await _db.from('website_payments').select().eq('id', paymentId).maybeSingle();
+      final row = await _db
+          .from('website_payments')
+          .select()
+          .eq('id', paymentId)
+          .maybeSingle();
       final payment = row == null ? null : CardPayment.fromJson(row);
       yield payment;
       if (payment == null || payment.status != 'open') return;
@@ -270,7 +324,11 @@ class CustomerDatasource {
         'p_notes': notes,
         'p_items': [
           for (final l in lines)
-            {'menu_item_id': l.dish.id, 'size': l.option.isSize ? l.option.label : '', 'qty': l.qty},
+            {
+              'menu_item_id': l.dish.id,
+              'size': l.option.isSize ? l.option.label : '',
+              'qty': l.qty,
+            },
         ],
       },
     );
@@ -281,57 +339,83 @@ class CustomerDatasource {
   /// restaurant changes one (e.g. marks it completed). RLS limits rows to the
   /// customer's own orders.
   Stream<List<CustomerOrder>> watchMyOrders(String userId) {
-    return _db.from('orders').stream(primaryKey: ['id']).eq('customer_user_id', userId).order('created_at').asyncMap((
-      rows,
-    ) async {
-      final ids = [for (final r in rows) r['id'] as String];
-      final linesByOrder = <String, List<CustomerOrderLine>>{};
-      final ratingByOrder = <String, int>{};
-      if (ids.isNotEmpty) {
-        final results = await Future.wait([
-          _db.from('order_items').select('order_id, item_name, qty, total_price').inFilter('order_id', ids),
-          _db.from('order_feedback').select('order_id, rating').inFilter('order_id', ids),
-        ]);
-        final items = results[0];
-        for (final f in results[1]) {
-          ratingByOrder[f['order_id'] as String] = (f['rating'] as num).toInt();
-        }
-        for (final i in items) {
-          linesByOrder
-              .putIfAbsent(i['order_id'] as String, () => [])
-              .add(
-                CustomerOrderLine(
-                  name: i['item_name'] as String,
-                  qty: (i['qty'] as num).toInt(),
-                  total: (i['total_price'] as num).toDouble(),
-                ),
-              );
-        }
-      }
-      return [
-        for (final r in rows) CustomerOrder.fromJson(r, linesByOrder[r['id']] ?? const [], ratingByOrder[r['id']]),
-      ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    });
+    return _db
+        .from('orders')
+        .stream(primaryKey: ['id'])
+        .eq('customer_user_id', userId)
+        .order('created_at')
+        .asyncMap((rows) async {
+          final ids = [for (final r in rows) r['id'] as String];
+          final linesByOrder = <String, List<CustomerOrderLine>>{};
+          final ratingByOrder = <String, int>{};
+          if (ids.isNotEmpty) {
+            final results = await Future.wait([
+              _db
+                  .from('order_items')
+                  .select('order_id, item_name, qty, total_price')
+                  .inFilter('order_id', ids),
+              _db
+                  .from('order_feedback')
+                  .select('order_id, rating')
+                  .inFilter('order_id', ids),
+            ]);
+            final items = results[0];
+            for (final f in results[1]) {
+              ratingByOrder[f['order_id'] as String] = (f['rating'] as num)
+                  .toInt();
+            }
+            for (final i in items) {
+              linesByOrder
+                  .putIfAbsent(i['order_id'] as String, () => [])
+                  .add(
+                    CustomerOrderLine(
+                      name: i['item_name'] as String,
+                      qty: (i['qty'] as num).toInt(),
+                      total: (i['total_price'] as num).toDouble(),
+                    ),
+                  );
+            }
+          }
+          return [
+            for (final r in rows)
+              CustomerOrder.fromJson(
+                r,
+                linesByOrder[r['id']] ?? const [],
+                ratingByOrder[r['id']],
+              ),
+          ]..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        });
   }
 
   /// Rates one of the customer's own completed orders (once). The database
   /// function checks ownership and status and stores only a short public name.
-  Future<void> submitFeedback({required String orderId, required int rating, required String comment}) async {
+  Future<void> submitFeedback({
+    required String orderId,
+    required int rating,
+    required String comment,
+  }) async {
     await _db.rpc(
       'submit_order_feedback',
-      params: {'p_order_id': orderId, 'p_rating': rating, 'p_comment': comment.trim()},
+      params: {
+        'p_order_id': orderId,
+        'p_rating': rating,
+        'p_comment': comment.trim(),
+      },
     );
   }
 
   /// Delivery charge set in the POS (Settings → Company Info → Delivery). Only
   /// shown here; the order functions add it on the server.
-  Future<double> fetchDeliveryFee() async => ((await _db.rpc('website_delivery_fee')) as num?)?.toDouble() ?? 0;
+  Future<double> fetchDeliveryFee() async =>
+      ((await _db.rpc('website_delivery_fee')) as num?)?.toDouble() ?? 0;
 
   /// Hours from the website branch, read through `website_hours()` so the rest of
   /// the branch row stays private.
   Future<OpeningHoursInfo> fetchOpeningHours() async {
     final rows = await _db.rpc('website_hours') as List;
-    final j = rows.isEmpty ? const <String, dynamic>{} : rows.first as Map<String, dynamic>;
+    final j = rows.isEmpty
+        ? const <String, dynamic>{}
+        : rows.first as Map<String, dynamic>;
     String clean(Object? v, String fallback) {
       final s = (v as String?)?.trim() ?? '';
       return s.isEmpty ? fallback : s;
@@ -350,11 +434,12 @@ class CustomerDatasource {
     final rows = await _db
         .from('order_feedback')
         .select('display_name, rating, comment, created_at')
-        .eq('branch_id', kWebsiteBranchId)
         .order('created_at', ascending: false)
         .limit(500);
     final all = [for (final r in rows) PublicFeedback.fromJson(r)];
-    final average = all.isEmpty ? 0.0 : all.fold<int>(0, (sum, f) => sum + f.rating) / all.length;
+    final average = all.isEmpty
+        ? 0.0
+        : all.fold<int>(0, (sum, f) => sum + f.rating) / all.length;
     return FeedbackSummary(
       average: average,
       count: all.length,

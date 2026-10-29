@@ -42,36 +42,38 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
       // On success the auth gate swaps to the home screen.
       await ref.read(riderDsProvider).signIn(_phone.text.trim(), _pass.text);
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (mounted)
+        setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  InputDecoration _dec(String hint, AppIcon icon, {Widget? suffix}) => InputDecoration(
-    hintText: hint,
-    hintStyle: const TextStyle(color: kMuted, fontSize: 15),
-    prefixIcon: Padding(
-      padding: const EdgeInsets.all(14),
-      child: SvgIcon(icon, size: 20, color: kSub),
-    ),
-    suffixIcon: suffix,
-    filled: true,
-    fillColor: kLight,
-    contentPadding: const EdgeInsets.symmetric(vertical: 18),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: kBorder),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: kBorder),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: kPrimary, width: 1.5),
-    ),
-  );
+  InputDecoration _dec(String hint, AppIcon icon, {Widget? suffix}) =>
+      InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: kMuted, fontSize: 15),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(14),
+          child: SvgIcon(icon, size: 20, color: kSub),
+        ),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: kLight,
+        contentPadding: const EdgeInsets.symmetric(vertical: 18),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: kBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: kBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: kPrimary, width: 1.5),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -101,17 +103,28 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                                 borderRadius: BorderRadius.circular(24),
                               ),
                               alignment: Alignment.center,
-                              child: const SvgIcon(AppIcons.deliveryDiningRounded, size: 42, color: Colors.white),
+                              child: const SvgIcon(
+                                AppIcons.deliveryDiningRounded,
+                                size: 42,
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(height: 18),
                             const Text(
                               'Rider App',
-                              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               'Sign in to see your deliveries',
-                              style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8)),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
                             ),
                           ],
                         ),
@@ -124,7 +137,9 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                           padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
                           decoration: const BoxDecoration(
                             color: kCard,
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(28),
+                            ),
                           ),
                           // AutofillGroup lets password managers fill and save phone + password together.
                           child: AutofillGroup(
@@ -133,21 +148,38 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                               children: [
                                 const Text(
                                   'Phone number',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kSub),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: kSub,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 TextField(
                                   controller: _phone,
                                   keyboardType: TextInputType.phone,
                                   textInputAction: TextInputAction.next,
-                                  autofillHints: const [AutofillHints.telephoneNumber],
-                                  style: const TextStyle(fontSize: 16, color: kText, fontWeight: FontWeight.w600),
-                                  decoration: _dec('0300 1234567', AppIcons.phoneRounded),
+                                  autofillHints: const [
+                                    AutofillHints.telephoneNumber,
+                                  ],
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: kText,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  decoration: _dec(
+                                    '0300 1234567',
+                                    AppIcons.phoneRounded,
+                                  ),
                                 ),
                                 const SizedBox(height: 18),
                                 const Text(
                                   'Password',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: kSub),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: kSub,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 TextField(
@@ -156,14 +188,22 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                                   textInputAction: TextInputAction.done,
                                   autofillHints: const [AutofillHints.password],
                                   onSubmitted: (_) => _submit(),
-                                  style: const TextStyle(fontSize: 16, color: kText, fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: kText,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                   decoration: _dec(
                                     'Your password',
                                     AppIcons.lockOutlineRounded,
                                     suffix: IconButton(
-                                      onPressed: () => setState(() => _hidePass = !_hidePass),
+                                      onPressed: () => setState(
+                                        () => _hidePass = !_hidePass,
+                                      ),
                                       icon: SvgIcon(
-                                        _hidePass ? AppIcons.visibilityRounded : AppIcons.visibilityOffRounded,
+                                        _hidePass
+                                            ? AppIcons.visibilityRounded
+                                            : AppIcons.visibilityOffRounded,
                                         size: 20,
                                         color: kMuted,
                                       ),
@@ -180,7 +220,11 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                                     ),
                                     child: Row(
                                       children: [
-                                        const SvgIcon(AppIcons.errorOutlineRounded, size: 18, color: kRed),
+                                        const SvgIcon(
+                                          AppIcons.errorOutlineRounded,
+                                          size: 18,
+                                          color: kRed,
+                                        ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
@@ -204,19 +248,28 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: kPrimary,
                                       foregroundColor: Colors.white,
-                                      disabledBackgroundColor: kPrimary.withValues(alpha: 0.6),
+                                      disabledBackgroundColor: kPrimary
+                                          .withValues(alpha: 0.6),
                                       elevation: 0,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
                                     ),
                                     child: _busy
                                         ? const SizedBox(
                                             width: 22,
                                             height: 22,
-                                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              color: Colors.white,
+                                            ),
                                           )
                                         : const Text(
                                             'Sign In',
-                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                           ),
                                   ),
                                 ),
@@ -224,15 +277,27 @@ class _RiderLoginScreenState extends ConsumerState<RiderLoginScreen> {
                                 const Text(
                                   'No password yet? Ask the restaurant manager to set one for you in the POS.',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 12.5, color: kMuted, height: 1.5),
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: kMuted,
+                                    height: 1.5,
+                                  ),
                                 ),
                                 const Spacer(),
                                 TextButton.icon(
                                   onPressed: AppModeController.reset,
-                                  icon: const SvgIcon(AppIcons.arrowBackRounded, size: 18, color: kSub),
+                                  icon: const SvgIcon(
+                                    AppIcons.arrowBackRounded,
+                                    size: 18,
+                                    color: kSub,
+                                  ),
                                   label: const Text(
                                     'Not a rider? Order food instead',
-                                    style: TextStyle(fontSize: 13.5, color: kSub, fontWeight: FontWeight.w700),
+                                    style: TextStyle(
+                                      fontSize: 13.5,
+                                      color: kSub,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                               ],

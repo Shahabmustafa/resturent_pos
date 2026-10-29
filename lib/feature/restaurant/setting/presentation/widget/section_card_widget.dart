@@ -12,7 +12,15 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textGrey, letterSpacing: 0.5)),
+      Text(
+        title,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textGrey,
+          letterSpacing: 0.5,
+        ),
+      ),
       const SizedBox(height: 10),
       Container(
         width: double.infinity,
@@ -22,7 +30,10 @@ class SectionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.border),
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
       ),
       const SizedBox(height: 18),
     ],
@@ -41,9 +52,19 @@ class PageHeader extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textDark)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textDark,
+          ),
+        ),
         const SizedBox(height: 3),
-        Text(subtitle, style: const TextStyle(fontSize: 13, color: AppColors.textGrey)),
+        Text(
+          subtitle,
+          style: const TextStyle(fontSize: 13, color: AppColors.textGrey),
+        ),
       ],
     ),
   );

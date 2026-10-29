@@ -33,8 +33,10 @@ class AppTabBar extends StatelessWidget {
     this.index = 0,
     this.onChanged,
     this.expand = true,
-  }) : assert(controller != null || onChanged != null,
-            'Provide either a controller or onChanged');
+  }) : assert(
+         controller != null || onChanged != null,
+         'Provide either a controller or onChanged',
+       );
 
   static const _track = Color(0xFFEEF0F6);
 
@@ -88,7 +90,10 @@ class AppTabBar extends StatelessWidget {
     if (expand) return track;
     return Align(
       alignment: Alignment.centerLeft,
-      child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: track),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: track,
+      ),
     );
   }
 }
@@ -133,7 +138,13 @@ class _AppTab extends StatelessWidget {
           color: selected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(9),
           boxShadow: selected
-              ? const [BoxShadow(color: Color(0x1A101828), blurRadius: 6, offset: Offset(0, 2))]
+              ? const [
+                  BoxShadow(
+                    color: Color(0x1A101828),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ]
               : const [],
         ),
         child: Material(
@@ -145,7 +156,10 @@ class _AppTab extends StatelessWidget {
             splashColor: AppColors.primary.withValues(alpha: 0.08),
             highlightColor: Colors.transparent,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: shrinkLabel ? 10 : 16, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: shrinkLabel ? 10 : 16,
+                vertical: 10,
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -1,54 +1,60 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../model/user_model.dart';
 
-/// Supabase Auth accounts for users can only be created server-side,
-/// so create/update/delete go through an Edge Function.
+/// Edge Function the admin panel still uses to create a branch's first Supabase Auth admin.
 const String kManageBranchUserFn = 'manage-branch-user';
 
+/// Staff accounts live in the `app_users` table. Password hashes never leave
+/// the database, so every read and write goes through an RPC.
 class BranchUserDatasource {
   final SupabaseClient _supabase;
   BranchUserDatasource(this._supabase);
 
   Future<List<BranchUserModel>> fetchUsers(String branchId) async {
-    final res = await _supabase
-        .from('branch_users')
-        .select()
-        .eq('branch_id', branchId)
-        .order('created_at');
-    return (res as List).map((e) => BranchUserModel.fromJson(e)).toList();
+    final res = await _rpc('app_list_users', {});
+    return (res as List)
+        .map(
+          (e) => BranchUserModel.fromJson(Map<String, dynamic>.from(e as Map)),
+        )
+        .toList();
   }
 
-  Future<BranchUserModel> addUser(BranchUserModel user, String branchId) async {
-    final res = await _invoke(user.toCreateBody(branchId));
-    return BranchUserModel.fromJson(res);
+  Future<BranchUserModel> addUser(BranchUserModel user, String branchId) =>
+      _save(user, branchId, null);
+
+  Future<BranchUserModel> updateUser(BranchUserModel user) =>
+      _save(user, user.branchId, user.id);
+
+  Future<void> toggleStatus(String userId, BranchUserStatus status) => _rpc(
+    'app_set_user_status',
+    {'p_id': userId, 'p_status': status.toJson()},
+  );
+
+  Future<void> deleteUser(String userId) =>
+      _rpc('app_delete_user', {'p_id': userId});
+
+  /// An empty password keeps the existing one when updating.
+  Future<BranchUserModel> _save(
+    BranchUserModel user,
+    String branchId,
+    String? id,
+  ) async {
+    final res = await _rpc('app_save_user', {
+      'p_id': id,
+      'p_name': user.name,
+      'p_username': user.username,
+      'p_password': user.password,
+      'p_role': user.role.toJson(),
+      'p_status': user.status.toJson(),
+    });
+    return BranchUserModel.fromJson(Map<String, dynamic>.from(res as Map));
   }
 
-  Future<BranchUserModel> updateUser(BranchUserModel user) async {
-    final res = await _invoke(user.toUpdateBody());
-    return BranchUserModel.fromJson(res);
-  }
-
-  Future<void> toggleStatus(String userId, BranchUserStatus status) async {
-    await _supabase
-        .from('branch_users')
-        .update({'status': status.toJson()})
-        .eq('id', userId);
-  }
-
-  Future<void> deleteUser(String userId) async {
-    await _invoke({'action': 'delete', 'user_id': userId});
-  }
-
-  Future<Map<String, dynamic>> _invoke(Map<String, dynamic> body) async {
+  Future<dynamic> _rpc(String fn, Map<String, dynamic> params) async {
     try {
-      final res = await _supabase.functions.invoke(kManageBranchUserFn, body: body);
-      return Map<String, dynamic>.from(res.data as Map);
-    } on FunctionException catch (e) {
-      final details = e.details;
-      final message = details is Map && details['error'] != null
-          ? details['error'].toString()
-          : 'Request failed (${e.status})';
-      throw Exception(message);
+      return await _supabase.rpc(fn, params: params);
+    } on PostgrestException catch (e) {
+      throw Exception(e.message);
     }
   }
 }

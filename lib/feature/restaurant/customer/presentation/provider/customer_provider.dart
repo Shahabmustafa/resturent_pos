@@ -6,7 +6,7 @@ import '../../data/datasource/customer_datasource.dart';
 import '../../data/model/customer_model.dart';
 
 final customerDatasourceProvider = Provider<CustomerDatasource>(
-      (_) => CustomerDatasource(Supabase.instance.client),
+  (_) => CustomerDatasource(Supabase.instance.client),
 );
 
 class CustomerState {
@@ -26,8 +26,8 @@ class CustomerState {
     String? errorMessage,
     bool clearError = false,
   }) => CustomerState(
-    customers:    customers    ?? this.customers,
-    isLoading:    isLoading    ?? this.isLoading,
+    customers: customers ?? this.customers,
+    isLoading: isLoading ?? this.isLoading,
     errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
   );
 }
@@ -46,7 +46,10 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
       final customers = await _ds.fetchCustomers(_branchId);
       state = state.copyWith(customers: customers, isLoading: false);
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
+      );
     }
   }
 
@@ -63,7 +66,9 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
     try {
       final updated = await _ds.updateCustomer(customer);
       state = state.copyWith(
-        customers: state.customers.map((c) => c.id == updated.id ? updated : c).toList(),
+        customers: state.customers
+            .map((c) => c.id == updated.id ? updated : c)
+            .toList(),
       );
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
@@ -75,7 +80,9 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
   Future<void> deleteCustomer(String customerId) async {
     try {
       await _ds.deleteCustomer(customerId);
-      state = state.copyWith(customers: state.customers.where((c) => c.id != customerId).toList());
+      state = state.copyWith(
+        customers: state.customers.where((c) => c.id != customerId).toList(),
+      );
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
     }
@@ -84,8 +91,12 @@ class CustomerNotifier extends StateNotifier<CustomerState> {
 
 // autoDispose: the list reloads each time the Customers page opens, so order
 // counts and totals (updated by the database) are current.
-final customerProvider = StateNotifierProvider.autoDispose<CustomerNotifier, CustomerState>((ref) {
-  final ds       = ref.watch(customerDatasourceProvider);
-  final branchId = ref.watch(branchAuthProvider).branch!.branchId; // ✅ FIXED
-  return CustomerNotifier(ds, branchId);
-});
+final customerProvider =
+    StateNotifierProvider.autoDispose<CustomerNotifier, CustomerState>((ref) {
+      final ds = ref.watch(customerDatasourceProvider);
+      final branchId = ref
+          .watch(branchAuthProvider)
+          .branch!
+          .branchId; // ✅ FIXED
+      return CustomerNotifier(ds, branchId);
+    });

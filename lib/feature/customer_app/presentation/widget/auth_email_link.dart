@@ -80,7 +80,11 @@ class _AuthEmailLinkState extends State<AuthEmailLink> {
         showCustomerAuthDialog(context);
         return;
       }
-      await showDialog<void>(context: context, barrierDismissible: false, builder: (_) => const _NewPasswordDialog());
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const _NewPasswordDialog(),
+      );
     } else {
       // The email is confirmed by the time the link opens the site, even when
       // the sign-in itself didn't carry over (e.g. a different browser).
@@ -109,9 +113,9 @@ class _AuthEmailLinkState extends State<AuthEmailLink> {
     }
   }
 
-  void _snack(String message) => ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(SnackBar(duration: const Duration(seconds: 6), content: Text(message)));
+  void _snack(String message) => ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(duration: const Duration(seconds: 6), content: Text(message)),
+  );
 
   @override
   Widget build(BuildContext context) => widget.child;
@@ -151,9 +155,9 @@ class _NewPasswordDialogState extends State<_NewPasswordDialog> {
       await CustomerAuth.changePassword(_password.text);
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Password updated — you\'re logged in.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password updated — you\'re logged in.')),
+      );
     } catch (e) {
       setState(() => _error = '$e'.replaceFirst('Exception: ', ''));
     } finally {
@@ -172,13 +176,16 @@ class _NewPasswordDialogState extends State<_NewPasswordDialog> {
     );
     final eye = IconButton(
       onPressed: () => setState(() => _show = !_show),
-      icon: SvgIcon(_show ? AppIcons.visibilityOffRounded : AppIcons.visibilityRounded, size: 20, color: CColors.muted),
+      icon: SvgIcon(
+        _show ? AppIcons.visibilityOffRounded : AppIcons.visibilityRounded,
+        size: 20,
+        color: CColors.muted,
+      ),
     );
 
     return Dialog(
       backgroundColor: CColors.paper,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
         child: SingleChildScrollView(
@@ -188,9 +195,19 @@ class _NewPasswordDialogState extends State<_NewPasswordDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Center(child: IconBadge(AppIcons.lockOutlineRounded, size: 56, background: CColors.cream)),
+                const Center(
+                  child: IconBadge(
+                    AppIcons.lockOutlineRounded,
+                    size: 56,
+                    background: CColors.cream,
+                  ),
+                ),
                 const SizedBox(height: 14),
-                Text('Choose a new password', textAlign: TextAlign.center, style: CText.display(24)),
+                Text(
+                  'Choose a new password',
+                  textAlign: TextAlign.center,
+                  style: CText.display(24),
+                ),
                 const SizedBox(height: 6),
                 Text(
                   'Enter a new password for your account.',
@@ -202,8 +219,12 @@ class _NewPasswordDialogState extends State<_NewPasswordDialog> {
                   controller: _password,
                   obscureText: !_show,
                   autofillHints: const [AutofillHints.newPassword],
-                  validator: (v) => (v ?? '').length < 6 ? 'At least 6 characters' : null,
-                  decoration: InputDecoration(hintText: '••••••', suffixIcon: eye),
+                  validator: (v) =>
+                      (v ?? '').length < 6 ? 'At least 6 characters' : null,
+                  decoration: InputDecoration(
+                    hintText: '••••••',
+                    suffixIcon: eye,
+                  ),
                 ),
                 label('Confirm new password'),
                 TextFormField(
@@ -211,13 +232,17 @@ class _NewPasswordDialogState extends State<_NewPasswordDialog> {
                   obscureText: !_show,
                   autofillHints: const [AutofillHints.newPassword],
                   onFieldSubmitted: (_) => _save(),
-                  validator: (v) => v != _password.text ? 'Passwords don\'t match' : null,
+                  validator: (v) =>
+                      v != _password.text ? 'Passwords don\'t match' : null,
                   decoration: const InputDecoration(hintText: '••••••'),
                 ),
                 if (_error != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 14),
-                    child: Text(_error!, style: CText.body(13, color: CColors.rust, height: 1.45)),
+                    child: Text(
+                      _error!,
+                      style: CText.body(13, color: CColors.rust, height: 1.45),
+                    ),
                   ),
                 const SizedBox(height: 22),
                 PillButton(

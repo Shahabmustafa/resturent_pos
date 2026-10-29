@@ -4,7 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/datasource/branch_auth_datasource.dart';
 import '../../data/model/branch_auth_model.dart';
 
-
 final branchAuthDatasourceProvider = Provider<BranchAuthDatasource>((ref) {
   return BranchAuthDatasource(Supabase.instance.client);
 });
@@ -55,14 +54,16 @@ class BranchAuthNotifier extends StateNotifier<BranchAuthState> {
   }
 
   Future<void> login({
-    required String email,
+    required String username,
     required String password,
+    bool stay = false,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final branch = await _datasource.login(
-        email: email,
+        username: username,
         password: password,
+        stay: stay,
       );
       state = state.copyWith(branch: branch, isLoading: false);
     } catch (e) {
@@ -73,6 +74,8 @@ class BranchAuthNotifier extends StateNotifier<BranchAuthState> {
     }
   }
 
+  void clearError() => state = state.copyWith(clearError: true);
+
   Future<void> logout() async {
     await _datasource.logout();
     state = state.copyWith(clearBranch: true, clearError: true);
@@ -80,7 +83,7 @@ class BranchAuthNotifier extends StateNotifier<BranchAuthState> {
 }
 
 final branchAuthProvider =
-StateNotifierProvider<BranchAuthNotifier, BranchAuthState>((ref) {
-  final datasource = ref.watch(branchAuthDatasourceProvider);
-  return BranchAuthNotifier(datasource);
-});
+    StateNotifierProvider<BranchAuthNotifier, BranchAuthState>((ref) {
+      final datasource = ref.watch(branchAuthDatasourceProvider);
+      return BranchAuthNotifier(datasource);
+    });

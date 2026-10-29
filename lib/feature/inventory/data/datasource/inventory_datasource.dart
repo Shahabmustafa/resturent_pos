@@ -10,11 +10,7 @@ class InventoryRemoteDatasource {
   // ── STOCK ─────────────────────────────────────────────────────────────────
 
   Future<List<StockItem>> fetchStock(String branchId) async {
-    final res = await _db
-        .from('stock_items')
-        .select()
-        .eq('branch_id', branchId)
-        .order('name');
+    final res = await _db.from('stock_items').select().order('name');
     return (res as List).map((e) => StockItem.fromJson(e)).toList();
   }
 
@@ -32,18 +28,13 @@ class InventoryRemoteDatasource {
         .from('stock_items')
         .update(item.toJson())
         .eq('id', item.id)
-        .eq('branch_id', item.branchId)
         .select()
         .single();
     return StockItem.fromJson(res);
   }
 
   Future<void> deleteStock(int id, String branchId) async {
-    await _db
-        .from('stock_items')
-        .delete()
-        .eq('id', id)
-        .eq('branch_id', branchId);
+    await _db.from('stock_items').delete().eq('id', id);
   }
 
   Future<StockItem> restockItem(int id, String branchId, double addQty) async {
@@ -52,14 +43,12 @@ class InventoryRemoteDatasource {
         .from('stock_items')
         .select('qty')
         .eq('id', id)
-        .eq('branch_id', branchId)
         .single();
     final newQty = (current['qty'] as num).toDouble() + addQty;
     final res = await _db
         .from('stock_items')
         .update({'qty': newQty, 'updated_at': DateTime.now().toIso8601String()})
         .eq('id', id)
-        .eq('branch_id', branchId)
         .select()
         .single();
     return StockItem.fromJson(res);
@@ -68,11 +57,7 @@ class InventoryRemoteDatasource {
   // ── SUPPLIERS ─────────────────────────────────────────────────────────────
 
   Future<List<Supplier>> fetchSuppliers(String branchId) async {
-    final res = await _db
-        .from('suppliers')
-        .select()
-        .eq('branch_id', branchId)
-        .order('name');
+    final res = await _db.from('suppliers').select().order('name');
     return (res as List).map((e) => Supplier.fromJson(e)).toList();
   }
 
@@ -86,11 +71,7 @@ class InventoryRemoteDatasource {
   }
 
   Future<void> deleteSupplier(int id, String branchId) async {
-    await _db
-        .from('suppliers')
-        .delete()
-        .eq('id', id)
-        .eq('branch_id', branchId);
+    await _db.from('suppliers').delete().eq('id', id);
   }
 
   // ── SUPPLIER TRANSACTIONS ─────────────────────────────────────────────────
@@ -100,7 +81,6 @@ class InventoryRemoteDatasource {
         .from('supplier_transactions')
         .select()
         .eq('supplier_id', supplierId)
-        .eq('branch_id', branchId)
         .order('created_at', ascending: false);
     return (res as List).map((e) => SupTx.fromJson(e)).toList();
   }
@@ -120,11 +100,7 @@ class InventoryRemoteDatasource {
         .eq('id', tx.supplierId)
         .single();
     final newVal = (current[col] as num).toDouble() + tx.amount;
-    await _db
-        .from('suppliers')
-        .update({col: newVal})
-        .eq('id', tx.supplierId)
-        .eq('branch_id', tx.branchId);
+    await _db.from('suppliers').update({col: newVal}).eq('id', tx.supplierId);
 
     return SupTx.fromJson(res);
   }

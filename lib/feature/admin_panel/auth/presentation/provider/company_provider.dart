@@ -45,7 +45,8 @@ class CompanyAuthState {
 class CompanyAuthNotifier extends StateNotifier<CompanyAuthState> {
   final CompanyAuthDatasource _datasource;
 
-  CompanyAuthNotifier(this._datasource) : super(const CompanyAuthState(restoring: true)) {
+  CompanyAuthNotifier(this._datasource)
+    : super(const CompanyAuthState(restoring: true)) {
     _loadSavedCompany();
   }
 
@@ -53,22 +54,20 @@ class CompanyAuthNotifier extends StateNotifier<CompanyAuthState> {
     state = state.copyWith(isLoading: true);
     try {
       final company = await _datasource.getSavedCompany();
-      state = state.copyWith(company: company, isLoading: false, restoring: false);
+      state = state.copyWith(
+        company: company,
+        isLoading: false,
+        restoring: false,
+      );
     } catch (_) {
       state = state.copyWith(isLoading: false, restoring: false);
     }
   }
 
-  Future<void> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> login({required String email, required String password}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      final company = await _datasource.login(
-        email: email,
-        password: password,
-      );
+      final company = await _datasource.login(email: email, password: password);
       state = state.copyWith(company: company, isLoading: false);
     } catch (e) {
       state = state.copyWith(
@@ -84,7 +83,8 @@ class CompanyAuthNotifier extends StateNotifier<CompanyAuthState> {
   }
 }
 
-final companyAuthProvider = StateNotifierProvider<CompanyAuthNotifier, CompanyAuthState>((ref) {
-  final datasource = ref.watch(companyAuthDatasourceProvider);
-  return CompanyAuthNotifier(datasource);
-});
+final companyAuthProvider =
+    StateNotifierProvider<CompanyAuthNotifier, CompanyAuthState>((ref) {
+      final datasource = ref.watch(companyAuthDatasourceProvider);
+      return CompanyAuthNotifier(datasource);
+    });

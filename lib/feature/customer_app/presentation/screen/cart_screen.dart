@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_icons.dart';
 import '../../../../core/widget/svg_icon.dart';
 import '../../data/model/dish_model.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show FunctionException, PostgrestException, User;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show FunctionException, PostgrestException, User;
 import '../../data/customer_datasource.dart';
 import '../provider/cart_provider.dart';
 import '../provider/customer_providers.dart';
@@ -61,7 +62,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
   // Light grey page so the white checkout cards stand out.
   @override
-  Widget build(BuildContext context) => ColoredBox(color: CColors.pageGrey, child: _page(context));
+  Widget build(BuildContext context) =>
+      ColoredBox(color: CColors.pageGrey, child: _page(context));
 
   Widget _page(BuildContext context) {
     final lines = ref.watch(cartProvider);
@@ -78,7 +80,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
     if (lines.isEmpty) return const _EmptyCart();
 
-    String? required(String? v) => (v == null || v.trim().isEmpty) ? 'Required' : null;
+    String? required(String? v) =>
+        (v == null || v.trim().isEmpty) ? 'Required' : null;
     Widget label(String t) => Padding(
       padding: const EdgeInsets.only(bottom: 8, top: 14),
       child: Text(
@@ -98,12 +101,19 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Text('Your Order', style: CText.display(30))),
+                      Expanded(
+                        child: Text('Your Order', style: CText.display(30)),
+                      ),
                       TextButton(
-                        onPressed: () => ref.read(cartProvider.notifier).clear(),
+                        onPressed: () =>
+                            ref.read(cartProvider.notifier).clear(),
                         child: Text(
                           'Clear',
-                          style: CText.body(14, color: CColors.rust, weight: FontWeight.w600),
+                          style: CText.body(
+                            14,
+                            color: CColors.rust,
+                            weight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -112,11 +122,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   for (final line in lines) _CartLineTile(line: line),
                   const SizedBox(height: 10),
                   if (table != null)
-                    _TableDetails(table: table, formKey: _formKey, name: _name, notes: _notes)
+                    _TableDetails(
+                      table: table,
+                      formKey: _formKey,
+                      name: _name,
+                      notes: _notes,
+                    )
                   else ...[
                     Text(
                       'How would you like it?',
-                      style: CText.body(14, color: CColors.ink, weight: FontWeight.w600),
+                      style: CText.body(
+                        14,
+                        color: CColors.ink,
+                        weight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Row(
@@ -127,7 +146,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             label: 'Delivery',
                             hint: 'To your door',
                             selected: _fulfilment == _Fulfilment.delivery,
-                            onTap: () => setState(() => _fulfilment = _Fulfilment.delivery),
+                            onTap: () => setState(
+                              () => _fulfilment = _Fulfilment.delivery,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -137,7 +158,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                             label: 'Takeaway',
                             hint: 'Collect it yourself',
                             selected: _fulfilment == _Fulfilment.collection,
-                            onTap: () => setState(() => _fulfilment = _Fulfilment.collection),
+                            onTap: () => setState(
+                              () => _fulfilment = _Fulfilment.collection,
+                            ),
                           ),
                         ),
                       ],
@@ -162,12 +185,19 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                               const Divider(color: CColors.line, height: 28),
                               Text('Your details', style: CText.display(19)),
                               label('Name'),
-                              TextFormField(controller: _name, validator: required),
+                              TextFormField(
+                                controller: _name,
+                                validator: required,
+                              ),
                               label('Phone'),
                               TextFormField(
                                 controller: _phone,
                                 keyboardType: TextInputType.phone,
-                                validator: (v) => (v ?? '').replaceAll(RegExp(r'\D'), '').length < 10
+                                validator: (v) =>
+                                    (v ?? '')
+                                            .replaceAll(RegExp(r'\D'), '')
+                                            .length <
+                                        10
                                     ? 'Enter a valid phone number'
                                     : null,
                               ),
@@ -178,14 +208,22 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   validator: required,
                                   minLines: 2,
                                   maxLines: 3,
-                                  decoration: const InputDecoration(hintText: 'House, street, area'),
+                                  decoration: const InputDecoration(
+                                    hintText: 'House, street, area',
+                                  ),
                                 ),
                                 label('Postcode'),
                                 TextFormField(
                                   controller: _postcode,
-                                  textCapitalization: TextCapitalization.characters,
-                                  decoration: const InputDecoration(hintText: 'e.g. GU21 6AB'),
-                                  validator: (v) => _ukPostcode.hasMatch((v ?? '').trim().toUpperCase())
+                                  textCapitalization:
+                                      TextCapitalization.characters,
+                                  decoration: const InputDecoration(
+                                    hintText: 'e.g. GU21 6AB',
+                                  ),
+                                  validator: (v) =>
+                                      _ukPostcode.hasMatch(
+                                        (v ?? '').trim().toUpperCase(),
+                                      )
                                       ? null
                                       : 'Enter the full postcode, e.g. GU21 6AB',
                                 ),
@@ -193,7 +231,9 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                               label('Notes (optional)'),
                               TextFormField(
                                 controller: _notes,
-                                decoration: const InputDecoration(hintText: 'e.g. extra spicy, no onions'),
+                                decoration: const InputDecoration(
+                                  hintText: 'e.g. extra spicy, no onions',
+                                ),
                               ),
                               if (kIsWeb) ...[
                                 label('Payment'),
@@ -205,19 +245,24 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                         label: 'Online Payment',
                                         hint: 'Card, Apple Pay, Google Pay',
                                         selected: _payBy == _PayBy.card,
-                                        onTap: () => setState(() => _payBy = _PayBy.card),
+                                        onTap: () => setState(
+                                          () => _payBy = _PayBy.card,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: _FulfilmentOption(
                                         icon: AppIcons.paymentsRounded,
-                                        label: _fulfilment == _Fulfilment.delivery
+                                        label:
+                                            _fulfilment == _Fulfilment.delivery
                                             ? 'Cash on Delivery'
                                             : 'Cash at Pickup',
                                         hint: 'Pay when you get your food',
                                         selected: _payBy == _PayBy.cash,
-                                        onTap: () => setState(() => _payBy = _PayBy.cash),
+                                        onTap: () => setState(
+                                          () => _payBy = _PayBy.cash,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -226,12 +271,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
-                                    const SvgIcon(AppIcons.paymentsRounded, size: 18, color: CColors.olive),
+                                    const SvgIcon(
+                                      AppIcons.paymentsRounded,
+                                      size: 18,
+                                      color: CColors.olive,
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         'Payment: cash on delivery / at pickup',
-                                        style: CText.body(13, color: CColors.olive, weight: FontWeight.w600),
+                                        style: CText.body(
+                                          13,
+                                          color: CColors.olive,
+                                          weight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -253,7 +306,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
               table: table,
               payByCard: _payBy == _PayBy.card,
               placing: _placing,
-              onCheckout: () => table != null ? _checkoutTable(table) : _checkout(user),
+              onCheckout: () =>
+                  table != null ? _checkoutTable(table) : _checkout(user),
             ),
           ],
         ),
@@ -274,25 +328,36 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       name: _name.text.trim(),
       phone: _phone.text.trim(),
       // The postcode goes on the end of the address the restaurant sees.
-      address: delivery ? '${_address.text.trim()}, ${_postcode.text.trim().toUpperCase()}' : '',
+      address: delivery
+          ? '${_address.text.trim()}, ${_postcode.text.trim().toUpperCase()}'
+          : '',
       notes: _notes.text,
     );
-    final lines = [for (final l in ref.read(cartProvider)) (dish: l.dish, option: l.option, qty: l.qty)];
+    final lines = [
+      for (final l in ref.read(cartProvider))
+        (dish: l.dish, option: l.option, qty: l.qty),
+    ];
     if (_payBy == _PayBy.card) return _payByCard(details, lines);
 
     setState(() => _placing = true);
     try {
-      final orderNumber = await ref.read(customerDatasourceProvider).placeOrder(details: details, lines: lines);
+      final orderNumber = await ref
+          .read(customerDatasourceProvider)
+          .placeOrder(details: details, lines: lines);
       if (!mounted) return;
       _notes.clear();
       final viewOrders = await _showPlaced(orderNumber, delivery);
       ref.read(cartProvider.notifier).clear();
-      ref.read(customerTabProvider.notifier).state = viewOrders ? CustomerTab.orders : CustomerTab.home;
+      ref.read(customerTabProvider.notifier).state = viewOrders
+          ? CustomerTab.orders
+          : CustomerTab.home;
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Couldn\'t place your order. Please try again. ($e)')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Couldn\'t place your order. Please try again. ($e)'),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _placing = false);
     }
@@ -300,24 +365,33 @@ class _CartScreenState extends ConsumerState<CartScreen> {
 
   /// Sends the browser to Stripe Checkout. Stripe brings the customer back to
   /// this page with `?checkout=success|cancelled` (see CardCheckoutReturn).
-  Future<void> _payByCard(CheckoutDetails details, List<({Dish dish, DishOption option, int qty})> lines) async {
+  Future<void> _payByCard(
+    CheckoutDetails details,
+    List<({Dish dish, DishOption option, int qty})> lines,
+  ) async {
     setState(() => _placing = true);
     try {
       final checkout = await ref
           .read(customerDatasourceProvider)
-          .startCardCheckout(details: details, lines: lines, returnUrl: Uri.base);
+          .startCardCheckout(
+            details: details,
+            lines: lines,
+            returnUrl: Uri.base,
+          );
       // Same tab, so coming back reloads the site; _placing stays on until then.
       final opened = await launchUrl(checkout.url, webOnlyWindowName: '_self');
       if (!opened) throw 'Couldn\'t open the payment page.';
     } catch (e) {
       if (!mounted) return;
       final message = switch (e) {
-        FunctionException(:final details) when details is Map && details['error'] != null => '${details['error']}',
+        FunctionException(:final details)
+            when details is Map && details['error'] != null =>
+          '${details['error']}',
         _ => 'Please try again.',
       };
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Couldn\'t start the online payment. $message')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Couldn\'t start the online payment. $message')),
+      );
       setState(() => _placing = false);
     }
   }
@@ -332,7 +406,10 @@ class _CartScreenState extends ConsumerState<CartScreen> {
             token: tableQrToken!,
             name: _name.text.trim(),
             notes: _notes.text,
-            lines: [for (final l in ref.read(cartProvider)) (dish: l.dish, option: l.option, qty: l.qty)],
+            lines: [
+              for (final l in ref.read(cartProvider))
+                (dish: l.dish, option: l.option, qty: l.qty),
+            ],
           );
       if (!mounted) return;
       _notes.clear();
@@ -342,28 +419,48 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     } catch (e) {
       if (!mounted) return;
       final message = e is PostgrestException ? e.message : 'Please try again.';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Couldn\'t send your order. $message')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Couldn\'t send your order. $message')),
+      );
     } finally {
       if (mounted) setState(() => _placing = false);
     }
   }
 
-  Future<void> _showSentToTable(String orderNumber, String table) => showDialog<void>(
+  Future<void> _showSentToTable(
+    String orderNumber,
+    String table,
+  ) => showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: CColors.paper,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      icon: const IconBadge(AppIcons.checkCircleRounded, size: 64, background: CColors.cream, color: CColors.olive),
-      title: Text('Order sent!', style: CText.display(24), textAlign: TextAlign.center),
+      icon: const IconBadge(
+        AppIcons.checkCircleRounded,
+        size: 64,
+        background: CColors.cream,
+        color: CColors.olive,
+      ),
+      title: Text(
+        'Order sent!',
+        style: CText.display(24),
+        textAlign: TextAlign.center,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(color: CColors.cream, borderRadius: BorderRadius.circular(30)),
+            decoration: BoxDecoration(
+              color: CColors.cream,
+              borderRadius: BorderRadius.circular(30),
+            ),
             child: Text(
               'Order $orderNumber · Table $table',
-              style: CText.body(15, color: CColors.ink, weight: FontWeight.w700),
+              style: CText.body(
+                15,
+                color: CColors.ink,
+                weight: FontWeight.w700,
+              ),
             ),
           ),
           const SizedBox(height: 14),
@@ -392,18 +489,33 @@ class _CartScreenState extends ConsumerState<CartScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: CColors.paper,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        icon: const IconBadge(AppIcons.checkCircleRounded, size: 64, background: CColors.cream, color: CColors.olive),
-        title: Text('Order placed!', style: CText.display(24), textAlign: TextAlign.center),
+        icon: const IconBadge(
+          AppIcons.checkCircleRounded,
+          size: 64,
+          background: CColors.cream,
+          color: CColors.olive,
+        ),
+        title: Text(
+          'Order placed!',
+          style: CText.display(24),
+          textAlign: TextAlign.center,
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(color: CColors.cream, borderRadius: BorderRadius.circular(30)),
+              decoration: BoxDecoration(
+                color: CColors.cream,
+                borderRadius: BorderRadius.circular(30),
+              ),
               child: Text(
                 'Order $orderNumber',
-                style: CText.body(15, color: CColors.ink, weight: FontWeight.w700),
+                style: CText.body(
+                  15,
+                  color: CColors.ink,
+                  weight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(height: 14),
@@ -444,7 +556,12 @@ class _TableDetails extends StatelessWidget {
   final TextEditingController name;
   final TextEditingController notes;
 
-  const _TableDetails({required this.table, required this.formKey, required this.name, required this.notes});
+  const _TableDetails({
+    required this.table,
+    required this.formKey,
+    required this.name,
+    required this.notes,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -469,14 +586,21 @@ class _TableDetails extends StatelessWidget {
           children: [
             Row(
               children: [
-                const IconBadge(AppIcons.tableRestaurantRounded, size: 44, background: CColors.cream),
+                const IconBadge(
+                  AppIcons.tableRestaurantRounded,
+                  size: 44,
+                  background: CColors.cream,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Dine-in · Table $table', style: CText.display(19)),
-                      Text('Your order goes straight to the kitchen.', style: CText.body(12.5, color: CColors.muted)),
+                      Text(
+                        'Your order goes straight to the kitchen.',
+                        style: CText.body(12.5, color: CColors.muted),
+                      ),
                     ],
                   ),
                 ),
@@ -487,17 +611,27 @@ class _TableDetails extends StatelessWidget {
             label('Notes (optional)'),
             TextFormField(
               controller: notes,
-              decoration: const InputDecoration(hintText: 'e.g. extra spicy, no onions'),
+              decoration: const InputDecoration(
+                hintText: 'e.g. extra spicy, no onions',
+              ),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                const SvgIcon(AppIcons.paymentsRounded, size: 18, color: CColors.olive),
+                const SvgIcon(
+                  AppIcons.paymentsRounded,
+                  size: 18,
+                  color: CColors.olive,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Payment: at the counter when you\'re done',
-                    style: CText.body(13, color: CColors.olive, weight: FontWeight.w600),
+                    style: CText.body(
+                      13,
+                      color: CColors.olive,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -516,16 +650,27 @@ class _LoginPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(color: CColors.ink, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: CColors.ink,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         children: [
-          const IconBadge(AppIcons.lockOutlineRounded, size: 44, background: CColors.inkElev, color: CColors.goldLight),
+          const IconBadge(
+            AppIcons.lockOutlineRounded,
+            size: 44,
+            background: CColors.inkElev,
+            color: CColors.goldLight,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Login to place your order', style: CText.display(17, color: Colors.white)),
+                Text(
+                  'Login to place your order',
+                  style: CText.display(17, color: Colors.white),
+                ),
                 const SizedBox(height: 3),
                 Text(
                   'New here? Registering takes just a minute.',
@@ -556,7 +701,11 @@ class _AccountRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const IconBadge(AppIcons.personRounded, size: 40, background: CColors.cream),
+        const IconBadge(
+          AppIcons.personRounded,
+          size: 40,
+          background: CColors.cream,
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -564,9 +713,16 @@ class _AccountRow extends StatelessWidget {
             children: [
               Text(
                 user.displayName,
-                style: CText.body(14.5, color: CColors.ink, weight: FontWeight.w600),
+                style: CText.body(
+                  14.5,
+                  color: CColors.ink,
+                  weight: FontWeight.w600,
+                ),
               ),
-              Text(user.email ?? '', style: CText.body(12.5, color: CColors.muted)),
+              Text(
+                user.email ?? '',
+                style: CText.body(12.5, color: CColors.muted),
+              ),
             ],
           ),
         ),
@@ -574,7 +730,11 @@ class _AccountRow extends StatelessWidget {
           onPressed: CustomerAuth.signOut,
           child: Text(
             'Logout',
-            style: CText.body(13.5, color: CColors.rust, weight: FontWeight.w600),
+            style: CText.body(
+              13.5,
+              color: CColors.rust,
+              weight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -601,7 +761,11 @@ class _CartLineTile extends ConsumerWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
-            child: SizedBox(width: 72, height: 72, child: FoodImage(line.dish.image)),
+            child: SizedBox(
+              width: 72,
+              height: 72,
+              child: FoodImage(line.dish.image),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -612,22 +776,36 @@ class _CartLineTile extends ConsumerWidget {
                   line.dish.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: CText.body(14, color: CColors.ink, weight: FontWeight.w600, height: 1.3),
+                  style: CText.body(
+                    14,
+                    color: CColors.ink,
+                    weight: FontWeight.w600,
+                    height: 1.3,
+                  ),
                 ),
-                if (line.dish.hasOptions) Text(line.option.label, style: CText.body(12.5, color: CColors.muted)),
+                if (line.dish.hasOptions)
+                  Text(
+                    line.option.label,
+                    style: CText.body(12.5, color: CColors.muted),
+                  ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: Text(
                         formatPrice(line.total),
-                        style: CText.body(14.5, color: CColors.rust, weight: FontWeight.w700),
+                        style: CText.body(
+                          14.5,
+                          color: CColors.rust,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     QtyStepper(
                       qty: line.qty,
                       compact: true,
-                      onChanged: (v) => ref.read(cartProvider.notifier).setQty(line.key, v),
+                      onChanged: (v) =>
+                          ref.read(cartProvider.notifier).setQty(line.key, v),
                     ),
                   ],
                 ),
@@ -670,7 +848,11 @@ class _FulfilmentOption extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SvgIcon(icon, size: 22, color: selected ? CColors.goldLight : CColors.rust),
+            SvgIcon(
+              icon,
+              size: 22,
+              color: selected ? CColors.goldLight : CColors.rust,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -678,9 +860,19 @@ class _FulfilmentOption extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: CText.body(14, color: selected ? Colors.white : CColors.ink, weight: FontWeight.w600),
+                    style: CText.body(
+                      14,
+                      color: selected ? Colors.white : CColors.ink,
+                      weight: FontWeight.w600,
+                    ),
                   ),
-                  Text(hint, style: CText.body(11.5, color: selected ? CColors.mutedLight : CColors.muted)),
+                  Text(
+                    hint,
+                    style: CText.body(
+                      11.5,
+                      color: selected ? CColors.mutedLight : CColors.muted,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -747,7 +939,10 @@ class _CheckoutBar extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Total', style: CText.body(14.5, color: CColors.muted)),
+                child: Text(
+                  'Total',
+                  style: CText.body(14.5, color: CColors.muted),
+                ),
               ),
               Text(formatPrice(total), style: CText.display(22)),
             ],
@@ -755,15 +950,21 @@ class _CheckoutBar extends StatelessWidget {
           const SizedBox(height: 14),
           PillButton(
             label: placing
-                ? (payByCard && table == null ? 'Opening secure payment…' : 'Placing order…')
+                ? (payByCard && table == null
+                      ? 'Opening secure payment…'
+                      : 'Placing order…')
                 : table != null
                 ? 'Send Order to Kitchen'
                 : !signedIn
                 ? 'Login to Order'
-                : (payByCard ? 'Pay ${formatPrice(total)} Online' : 'Place Order'),
+                : (payByCard
+                      ? 'Pay ${formatPrice(total)} Online'
+                      : 'Place Order'),
             icon: placing
                 ? null
-                : (signedIn || table != null ? AppIcons.arrowForwardRounded : AppIcons.lockOutlineRounded),
+                : (signedIn || table != null
+                      ? AppIcons.arrowForwardRounded
+                      : AppIcons.lockOutlineRounded),
             expand: true,
             onPressed: placing ? null : onCheckout,
           ),
@@ -784,7 +985,11 @@ class _EmptyCart extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const IconBadge(AppIcons.shoppingBagOutlined, size: 88, color: CColors.gold),
+            const IconBadge(
+              AppIcons.shoppingBagOutlined,
+              size: 88,
+              color: CColors.gold,
+            ),
             const SizedBox(height: 22),
             Text('Your cart is empty', style: CText.display(26)),
             const SizedBox(height: 8),
@@ -797,7 +1002,8 @@ class _EmptyCart extends ConsumerWidget {
             PillButton(
               label: 'Browse Menu',
               icon: AppIcons.arrowForwardRounded,
-              onPressed: () => ref.read(customerTabProvider.notifier).state = CustomerTab.menu,
+              onPressed: () => ref.read(customerTabProvider.notifier).state =
+                  CustomerTab.menu,
             ),
           ],
         ),

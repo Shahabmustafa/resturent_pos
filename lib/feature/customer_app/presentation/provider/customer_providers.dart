@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/customer_datasource.dart';
 
-final customerDatasourceProvider = Provider<CustomerDatasource>((_) => CustomerDatasource(Supabase.instance.client));
+final customerDatasourceProvider = Provider<CustomerDatasource>(
+  (_) => CustomerDatasource(Supabase.instance.client),
+);
 
 /// Live menu from the POS. `ref.invalidate(customerMenuProvider)` to reload.
-final customerMenuProvider = FutureProvider<CustomerMenu>((ref) => ref.watch(customerDatasourceProvider).fetchMenu());
+final customerMenuProvider = FutureProvider<CustomerMenu>(
+  (ref) => ref.watch(customerDatasourceProvider).fetchMenu(),
+);
 
 /// Token from a table's QR code (website opened at `?table=<token>`), or null.
 final tableQrToken = kIsWeb ? Uri.base.queryParameters['table'] : null;
@@ -42,7 +46,9 @@ final publicFeedbackProvider = FutureProvider<FeedbackSummary>(
 );
 
 /// Delivery charge as set in the POS (Settings → Company Info → Delivery).
-final deliveryFeeProvider = FutureProvider<double>((ref) => ref.watch(customerDatasourceProvider).fetchDeliveryFee());
+final deliveryFeeProvider = FutureProvider<double>(
+  (ref) => ref.watch(customerDatasourceProvider).fetchDeliveryFee(),
+);
 
 /// Opening hours as set in the POS (Settings → Company → Working hours).
 final openingHoursProvider = FutureProvider<OpeningHoursInfo>(
@@ -93,10 +99,16 @@ class CustomerAuth {
       final res = await _auth.signUp(
         email: email.trim(),
         password: password,
-        data: {'full_name': name.trim(), 'phone': phone.trim(), 'account_type': 'customer'},
+        data: {
+          'full_name': name.trim(),
+          'phone': phone.trim(),
+          'account_type': 'customer',
+        },
         emailRedirectTo: _emailLink('confirm'),
       );
-      return res.session != null ? SignUpResult.signedIn : SignUpResult.confirmEmail;
+      return res.session != null
+          ? SignUpResult.signedIn
+          : SignUpResult.confirmEmail;
     } on AuthException catch (e) {
       throw _friendly(e);
     }
@@ -107,17 +119,30 @@ class CustomerAuth {
   /// Emails a link that opens the website with a "choose a new password" dialog.
   static Future<void> sendPasswordReset(String email) async {
     try {
-      await _auth.resetPasswordForEmail(email.trim(), redirectTo: _emailLink('reset'));
+      await _auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: _emailLink('reset'),
+      );
     } on AuthException catch (e) {
       throw _friendly(e);
     }
   }
 
   /// Saves the profile fields (also used to pre-fill checkout).
-  static Future<void> updateProfile({required String name, required String phone, required String address}) async {
+  static Future<void> updateProfile({
+    required String name,
+    required String phone,
+    required String address,
+  }) async {
     try {
       await _auth.updateUser(
-        UserAttributes(data: {'full_name': name.trim(), 'phone': phone.trim(), 'address': address.trim()}),
+        UserAttributes(
+          data: {
+            'full_name': name.trim(),
+            'phone': phone.trim(),
+            'address': address.trim(),
+          },
+        ),
       );
     } on AuthException catch (e) {
       throw _friendly(e);
@@ -136,16 +161,24 @@ class CustomerAuth {
       _ => 'jpg',
     };
     // A new name each time, so browsers don't keep showing a cached old photo.
-    final path = '${user.id}/avatar-${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final path =
+        '${user.id}/avatar-${DateTime.now().millisecondsSinceEpoch}.$ext';
     try {
-      await storage.uploadBinary(path, bytes, fileOptions: FileOptions(contentType: mimeType));
+      await storage.uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: mimeType),
+      );
       final url = storage.getPublicUrl(path);
       final oldPath = _avatarPath(user.avatarUrl);
       await _auth.updateUser(UserAttributes(data: {'avatar_url': url}));
-      if (oldPath != null) await storage.remove([oldPath]).catchError((_) => <FileObject>[]);
+      if (oldPath != null)
+        await storage.remove([oldPath]).catchError((_) => <FileObject>[]);
       return url;
     } on StorageException catch (e) {
-      throw e.message.toLowerCase().contains('size') ? 'Photo is too large — please use one under 2 MB.' : e.message;
+      throw e.message.toLowerCase().contains('size')
+          ? 'Photo is too large — please use one under 2 MB.'
+          : e.message;
     } on AuthException catch (e) {
       throw _friendly(e);
     }
@@ -162,7 +195,10 @@ class CustomerAuth {
       throw _friendly(e);
     }
     if (oldPath != null) {
-      await Supabase.instance.client.storage.from('avatars').remove([oldPath]).catchError((_) => <FileObject>[]);
+      await Supabase.instance.client.storage
+          .from('avatars')
+          .remove([oldPath])
+          .catchError((_) => <FileObject>[]);
     }
   }
 
@@ -187,8 +223,10 @@ class CustomerAuth {
     if (m.contains('already registered') || m.contains('already exists')) {
       return 'An account with this email already exists — please log in.';
     }
-    if (m.contains('email not confirmed')) return 'Please confirm your email first (check your inbox).';
-    if (m.contains('should be different')) return 'The new password must be different from your current one.';
+    if (m.contains('email not confirmed'))
+      return 'Please confirm your email first (check your inbox).';
+    if (m.contains('should be different'))
+      return 'The new password must be different from your current one.';
     if (m.contains('rate limit') || m.contains('security purposes')) {
       return 'Too many emails sent — please wait a minute and try again.';
     }
@@ -197,7 +235,8 @@ class CustomerAuth {
 }
 
 extension CustomerUserX on User {
-  String get displayName => (userMetadata?['full_name'] as String?)?.trim().isNotEmpty == true
+  String get displayName =>
+      (userMetadata?['full_name'] as String?)?.trim().isNotEmpty == true
       ? userMetadata!['full_name'] as String
       : (email ?? '').split('@').first;
 

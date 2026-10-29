@@ -17,7 +17,8 @@ class FoodImage extends StatelessWidget {
     if (source.isEmpty) return const _Placeholder();
     Widget frame(BuildContext _, Widget child, int? frame, bool sync) =>
         sync || frame != null ? child : const _Placeholder();
-    Widget error(BuildContext _, Object _, StackTrace? _) => const _Placeholder();
+    Widget error(BuildContext _, Object _, StackTrace? _) =>
+        const _Placeholder();
 
     return source.startsWith('http')
         ? Image.network(
@@ -47,7 +48,11 @@ class _Placeholder extends StatelessWidget {
     return Container(
       color: CColors.cream2,
       alignment: Alignment.center,
-      child: const SvgIcon(AppIcons.restaurantRounded, size: 28, color: CColors.mutedLight),
+      child: const SvgIcon(
+        AppIcons.restaurantRounded,
+        size: 28,
+        color: CColors.mutedLight,
+      ),
     );
   }
 }
@@ -113,11 +118,23 @@ class PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (Color? bg, Gradient? gradient, Color fg, Color? border, List<BoxShadow>? shadow) = switch (style) {
+    final (
+      Color? bg,
+      Gradient? gradient,
+      Color fg,
+      Color? border,
+      List<BoxShadow>? shadow,
+    ) = switch (style) {
       PillStyle.rust => (CColors.rust, null, Colors.white, null, CShadows.rust),
       PillStyle.gold => (null, CColors.goldGradient, CColors.ink, null, null),
       PillStyle.outlineDark => (null, null, CColors.ink, CColors.ink, null),
-      PillStyle.outlineLight => (null, null, Colors.white, Colors.white70, null),
+      PillStyle.outlineLight => (
+        null,
+        null,
+        Colors.white,
+        Colors.white70,
+        null,
+      ),
     };
 
     final content = Row(
@@ -128,10 +145,17 @@ class PillButton extends StatelessWidget {
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
-            style: CText.body(small ? 13.5 : 14.5, color: fg, weight: FontWeight.w600),
+            style: CText.body(
+              small ? 13.5 : 14.5,
+              color: fg,
+              weight: FontWeight.w600,
+            ),
           ),
         ),
-        if (icon != null) ...[const SizedBox(width: 9), SvgIcon(icon, size: 16, color: fg)],
+        if (icon != null) ...[
+          const SizedBox(width: 9),
+          SvgIcon(icon, size: 16, color: fg),
+        ],
       ],
     );
 
@@ -151,7 +175,10 @@ class PillButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(50),
             onTap: onPressed,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: small ? 22 : 30, vertical: small ? 11 : 15),
+              padding: EdgeInsets.symmetric(
+                horizontal: small ? 22 : 30,
+                vertical: small ? 11 : 15,
+              ),
               child: content,
             ),
           ),
@@ -189,9 +216,18 @@ class SectionHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 22, height: 1.5, color: light ? CColors.goldLight : CColors.rust),
+              Container(
+                width: 22,
+                height: 1.5,
+                color: light ? CColors.goldLight : CColors.rust,
+              ),
               const SizedBox(width: 10),
-              Text(eyebrow!.toUpperCase(), style: CText.eyebrow(color: light ? CColors.goldLight : CColors.rust)),
+              Text(
+                eyebrow!.toUpperCase(),
+                style: CText.eyebrow(
+                  color: light ? CColors.goldLight : CColors.rust,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -206,7 +242,11 @@ class SectionHeader extends StatelessWidget {
           Text(
             subtitle!,
             textAlign: textAlign,
-            style: CText.body(15, color: light ? CColors.mutedLight : CColors.muted, height: 1.6),
+            style: CText.body(
+              15,
+              color: light ? CColors.mutedLight : CColors.muted,
+              height: 1.6,
+            ),
           ),
         ],
       ],
@@ -221,14 +261,24 @@ class IconBadge extends StatelessWidget {
   final Color background;
   final Color color;
 
-  const IconBadge(this.icon, {super.key, this.size = 38, this.background = CColors.paper, this.color = CColors.rust});
+  const IconBadge(
+    this.icon, {
+    super.key,
+    this.size = 38,
+    this.background = CColors.paper,
+    this.color = CColors.rust,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: background, shape: BoxShape.circle, boxShadow: CShadows.soft),
+      decoration: BoxDecoration(
+        color: background,
+        shape: BoxShape.circle,
+        boxShadow: CShadows.soft,
+      ),
       alignment: Alignment.center,
       child: SvgIcon(icon, size: size * 0.44, color: color),
     );
@@ -242,13 +292,23 @@ class MenuStatus extends StatelessWidget {
   final VoidCallback? onRetry;
   final String emptyText;
 
-  const MenuStatus.loading({super.key}) : loading = true, error = null, onRetry = null, emptyText = '';
-
-  const MenuStatus.error({super.key, required String this.error, required VoidCallback this.onRetry})
-    : loading = false,
+  const MenuStatus.loading({super.key})
+    : loading = true,
+      error = null,
+      onRetry = null,
       emptyText = '';
 
-  const MenuStatus.empty(this.emptyText, {super.key}) : loading = false, error = null, onRetry = null;
+  const MenuStatus.error({
+    super.key,
+    required String this.error,
+    required VoidCallback this.onRetry,
+  }) : loading = false,
+       emptyText = '';
+
+  const MenuStatus.empty(this.emptyText, {super.key})
+    : loading = false,
+      error = null,
+      onRetry = null;
 
   @override
   Widget build(BuildContext context) {
@@ -259,25 +319,37 @@ class MenuStatus extends StatelessWidget {
             ? const SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: CColors.rust),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: CColors.rust,
+                ),
               )
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgIcon(
-                    error != null ? AppIcons.warningRounded : AppIcons.restaurantRounded,
+                    error != null
+                        ? AppIcons.warningRounded
+                        : AppIcons.restaurantRounded,
                     size: 38,
                     color: CColors.mutedLight,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    error != null ? 'Couldn\'t load the menu. Check your internet connection.' : emptyText,
+                    error != null
+                        ? 'Couldn\'t load the menu. Check your internet connection.'
+                        : emptyText,
                     textAlign: TextAlign.center,
                     style: CText.body(14.5, color: CColors.muted),
                   ),
                   if (onRetry != null) ...[
                     const SizedBox(height: 16),
-                    PillButton(label: 'Try again', small: true, style: PillStyle.outlineDark, onPressed: onRetry),
+                    PillButton(
+                      label: 'Try again',
+                      small: true,
+                      style: PillStyle.outlineDark,
+                      onPressed: onRetry,
+                    ),
                   ],
                 ],
               ),

@@ -28,7 +28,13 @@ class KPICard extends StatelessWidget {
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE8EAF0)),
-        boxShadow: [BoxShadow(color: Color(0x0D000030), blurRadius: 10, offset: Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0D000030),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,11 +71,20 @@ class KPICard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(value,
-                  style: const TextStyle(
-                      color: Color(0xFF1A1D3A), fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Color(0xFF1A1D3A),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(title, style: const TextStyle(color: Color(0xFF9396B0), fontSize: 12)),
+              Text(
+                title,
+                style: const TextStyle(color: Color(0xFF9396B0), fontSize: 12),
+              ),
             ],
           ),
         ],

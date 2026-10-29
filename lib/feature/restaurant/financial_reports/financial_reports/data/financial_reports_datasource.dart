@@ -12,7 +12,7 @@ class FinancialReportsDatasource {
     required DateTime end,
   }) async {
     final startIso = start.toUtc().toIso8601String();
-    final endIso   = end.toUtc().toIso8601String();
+    final endIso = end.toUtc().toIso8601String();
 
     // FIX: use payment_status, not status
     // In the orders table:
@@ -22,19 +22,27 @@ class FinancialReportsDatasource {
     final ordersRes = await _client
         .from('orders')
         .select('id, total, payment_method, payment_status, status, created_at')
-        .eq('branch_id', branchId)
-        .neq('status', 'cancelled')          // cancelled orders ignore
+        .neq('status', 'cancelled') // cancelled orders ignore
         .gte('created_at', startIso)
         .lte('created_at', endIso);
 
-    final orders      = List<Map<String, dynamic>>.from(ordersRes as List);
+    final orders = List<Map<String, dynamic>>.from(ordersRes as List);
     // FIX: capital-P 'Paid' — the POS stores 'Paid'/'Unpaid'/'Partial'
-    final paidOrders  = orders.where((o) => o['payment_status'] == 'Paid').toList();
-    final unpaidOrders = orders.where((o) =>
-    o['payment_status'] == 'Unpaid' || o['payment_status'] == 'Partial').toList();
+    final paidOrders = orders
+        .where((o) => o['payment_status'] == 'Paid')
+        .toList();
+    final unpaidOrders = orders
+        .where(
+          (o) =>
+              o['payment_status'] == 'Unpaid' ||
+              o['payment_status'] == 'Partial',
+        )
+        .toList();
 
     final totalRevenue = paidOrders.fold<double>(
-        0, (s, o) => s + ((o['total'] as num?)?.toDouble() ?? 0));
+      0,
+      (s, o) => s + ((o['total'] as num?)?.toDouble() ?? 0),
+    );
 
     // Payment method breakdown — Paid orders only
     final cashRev = paidOrders
@@ -57,9 +65,13 @@ class FinancialReportsDatasource {
             .select('qty, unit_cost')
             .inFilter('order_id', orderIds);
         final items = List<Map<String, dynamic>>.from(itemsRes as List);
-        totalCost = items.fold<double>(0, (s, i) =>
-        s + ((i['qty'] as num?)?.toDouble() ?? 0) *
-            ((i['unit_cost'] as num?)?.toDouble() ?? 0));
+        totalCost = items.fold<double>(
+          0,
+          (s, i) =>
+              s +
+              ((i['qty'] as num?)?.toDouble() ?? 0) *
+                  ((i['unit_cost'] as num?)?.toDouble() ?? 0),
+        );
       } catch (_) {}
     }
 
@@ -69,31 +81,34 @@ class FinancialReportsDatasource {
       final expRes = await _client
           .from('supplier_transactions')
           .select('amount')
-          .eq('branch_id', branchId)
-          .eq('is_payment', true)            // payment entries only
+          .eq('is_payment', true) // payment entries only
           .gte('created_at', startIso)
           .lte('created_at', endIso);
       final expenses = List<Map<String, dynamic>>.from(expRes as List);
       totalExpenses = expenses.fold<double>(
-          0, (s, e) => s + ((e['amount'] as num?)?.toDouble() ?? 0));
+        0,
+        (s, e) => s + ((e['amount'] as num?)?.toDouble() ?? 0),
+      );
     } catch (_) {}
 
     final grossProfit = totalRevenue - totalCost;
-    final netProfit   = grossProfit - totalExpenses;
+    final netProfit = grossProfit - totalExpenses;
 
     return FinancialSummary(
-      totalRevenue:      totalRevenue,
-      totalCost:         totalCost,
-      grossProfit:       grossProfit,
-      totalExpenses:     totalExpenses,
-      netProfit:         netProfit,
-      totalOrders:       orders.length,
-      paidOrders:        paidOrders.length,
-      unpaidOrders:      unpaidOrders.length,
-      cashRevenue:       cashRev,
-      cardRevenue:       cardRev,
-      onlineRevenue:     onlineRev,
-      averageOrderValue: paidOrders.isEmpty ? 0 : totalRevenue / paidOrders.length,
+      totalRevenue: totalRevenue,
+      totalCost: totalCost,
+      grossProfit: grossProfit,
+      totalExpenses: totalExpenses,
+      netProfit: netProfit,
+      totalOrders: orders.length,
+      paidOrders: paidOrders.length,
+      unpaidOrders: unpaidOrders.length,
+      cashRevenue: cashRev,
+      cardRevenue: cardRev,
+      onlineRevenue: onlineRev,
+      averageOrderValue: paidOrders.isEmpty
+          ? 0
+          : totalRevenue / paidOrders.length,
     );
   }
 
@@ -104,14 +119,13 @@ class FinancialReportsDatasource {
     required DateTime end,
   }) async {
     final startIso = start.toUtc().toIso8601String();
-    final endIso   = end.toUtc().toIso8601String();
+    final endIso = end.toUtc().toIso8601String();
 
     // FIX: orders where payment_status == 'Paid'
     final ordersRes = await _client
         .from('orders')
         .select('id')
-        .eq('branch_id', branchId)
-        .eq('payment_status', 'Paid')       // FIX: 'Paid' capital P
+        .eq('payment_status', 'Paid') // FIX: 'Paid' capital P
         .gte('created_at', startIso)
         .lte('created_at', endIso);
 
@@ -134,23 +148,27 @@ class FinancialReportsDatasource {
 
       if (!grouped.containsKey(key)) {
         grouped[key] = {
-          'item_id':       key,
-          'item_name':     item['item_name'] ?? 'Unknown',
+          'item_id': key,
+          'item_name': item['item_name'] ?? 'Unknown',
           'category_name': '—',
           'quantity_sold': 0,
-          'revenue':       0.0,
-          'cost':          0.0,
-          'profit':        0.0,
+          'revenue': 0.0,
+          'cost': 0.0,
+          'profit': 0.0,
         };
       }
-      final qty   = (item['qty']        as num?)?.toInt()    ?? 0;
+      final qty = (item['qty'] as num?)?.toInt() ?? 0;
       final price = (item['unit_price'] as num?)?.toDouble() ?? 0;
-      final cost  = (item['unit_cost']  as num?)?.toDouble() ?? 0;
+      final cost = (item['unit_cost'] as num?)?.toDouble() ?? 0;
 
-      grouped[key]!['quantity_sold'] = (grouped[key]!['quantity_sold'] as int) + qty;
-      grouped[key]!['revenue']       = (grouped[key]!['revenue'] as double) + (qty * price);
-      grouped[key]!['cost']          = (grouped[key]!['cost']    as double) + (qty * cost);
-      grouped[key]!['profit']        = (grouped[key]!['revenue'] as double) - (grouped[key]!['cost'] as double);
+      grouped[key]!['quantity_sold'] =
+          (grouped[key]!['quantity_sold'] as int) + qty;
+      grouped[key]!['revenue'] =
+          (grouped[key]!['revenue'] as double) + (qty * price);
+      grouped[key]!['cost'] = (grouped[key]!['cost'] as double) + (qty * cost);
+      grouped[key]!['profit'] =
+          (grouped[key]!['revenue'] as double) -
+          (grouped[key]!['cost'] as double);
     }
 
     // Category names fetch — FIX: join syntax
@@ -196,8 +214,7 @@ class FinancialReportsDatasource {
     final res = await _client
         .from('orders')
         .select('created_at, total')
-        .eq('branch_id', branchId)
-        .eq('payment_status', 'Paid')       // FIX
+        .eq('payment_status', 'Paid') // FIX
         .neq('status', 'cancelled')
         .gte('created_at', start.toUtc().toIso8601String())
         .lte('created_at', end.toUtc().toIso8601String())
@@ -208,11 +225,13 @@ class FinancialReportsDatasource {
 
     for (final o in orders) {
       final date = DateTime.parse(o['created_at'].toString()).toLocal();
-      final key  = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final key =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       if (!daily.containsKey(key)) {
         daily[key] = {'date': key, 'revenue': 0.0, 'orders': 0};
       }
-      daily[key]!['revenue'] = (daily[key]!['revenue'] as double) +
+      daily[key]!['revenue'] =
+          (daily[key]!['revenue'] as double) +
           ((o['total'] as num?)?.toDouble() ?? 0);
       daily[key]!['orders'] = (daily[key]!['orders'] as int) + 1;
     }
@@ -232,7 +251,6 @@ class FinancialReportsDatasource {
       final res = await _client
           .from('supplier_transactions')
           .select('amount, supplier_id, suppliers(name)')
-          .eq('branch_id', branchId)
           .eq('is_payment', true)
           .gte('created_at', start.toUtc().toIso8601String())
           .lte('created_at', end.toUtc().toIso8601String());
@@ -253,7 +271,8 @@ class FinancialReportsDatasource {
         if (!grouped.containsKey(category)) {
           grouped[category] = {'category': category, 'amount': 0.0, 'count': 0};
         }
-        grouped[category]!['amount'] = (grouped[category]!['amount'] as double) +
+        grouped[category]!['amount'] =
+            (grouped[category]!['amount'] as double) +
             ((t['amount'] as num?)?.toDouble() ?? 0);
         grouped[category]!['count'] = (grouped[category]!['count'] as int) + 1;
       }

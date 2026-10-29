@@ -28,7 +28,6 @@ class TableBodySkeleton extends StatelessWidget {
   }
 }
 
-
 class _TableCardSkeleton extends StatelessWidget {
   final int rows;
   const _TableCardSkeleton({required this.rows});
@@ -43,78 +42,102 @@ class _TableCardSkeleton extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: kBorder),
-        boxShadow: const [BoxShadow(color: Color(0x0A000020), blurRadius: 12, offset: Offset(0, 4))],
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000020),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // Toolbar
-        Container(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
-          decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: kBorder))),
-          child: const Shimmer(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                ShimmerBox(width: 64, height: 16),
-                Spacer(),
-                ShimmerBox(width: 220, height: 36, radius: 8),
-              ]),
-              SizedBox(height: 12),
-              Row(children: [
-                ShimmerBox(width: 44, height: 30),
-                SizedBox(width: 6),
-                ShimmerBox(width: 86, height: 30),
-                SizedBox(width: 6),
-                ShimmerBox(width: 80, height: 30),
-                SizedBox(width: 6),
-                ShimmerBox(width: 80, height: 30),
-                SizedBox(width: 18),
-                ShimmerBox(width: 92, height: 32, radius: 7),
-              ]),
-            ]),
-          ),
-        ),
-
-        // Column header
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8F9FC),
-            border: Border(bottom: BorderSide(color: kBorder)),
-          ),
-          child: Shimmer(
-            child: Row(children: [
-              for (final f in _flex)
-                Expanded(
-                  flex: f,
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: ShimmerBox(width: 44, height: 11),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Toolbar
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: kBorder)),
+            ),
+            child: const Shimmer(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      ShimmerBox(width: 64, height: 16),
+                      Spacer(),
+                      ShimmerBox(width: 220, height: 36, radius: 8),
+                    ],
                   ),
-                ),
-            ]),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      ShimmerBox(width: 44, height: 30),
+                      SizedBox(width: 6),
+                      ShimmerBox(width: 86, height: 30),
+                      SizedBox(width: 6),
+                      ShimmerBox(width: 80, height: 30),
+                      SizedBox(width: 6),
+                      ShimmerBox(width: 80, height: 30),
+                      SizedBox(width: 18),
+                      ShimmerBox(width: 92, height: 32, radius: 7),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
 
-        // Rows
-        for (var i = 0; i < rows; i++)
+          // Column header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8F9FC),
+              border: Border(bottom: BorderSide(color: kBorder)),
+            ),
+            child: Shimmer(
+              child: Row(
+                children: [
+                  for (final f in _flex)
+                    Expanded(
+                      flex: f,
+                      child: const Align(
+                        alignment: Alignment.centerLeft,
+                        child: ShimmerBox(width: 44, height: 11),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // Rows
+          for (var i = 0; i < rows; i++)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+              decoration: BoxDecoration(
+                border: i == rows - 1
+                    ? null
+                    : const Border(
+                        bottom: BorderSide(color: Color(0xFFF0F2F8)),
+                      ),
+              ),
+              child: const Shimmer(child: _RowSkeleton()),
+            ),
+
+          // Footer
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
-            decoration: BoxDecoration(
-              border: i == rows - 1 ? null : const Border(bottom: BorderSide(color: Color(0xFFF0F2F8))),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8F9FC),
+              border: Border(top: BorderSide(color: kBorder)),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
             ),
-            child: const Shimmer(child: _RowSkeleton()),
+            child: const Shimmer(child: ShimmerBox(width: 150, height: 12)),
           ),
-
-        // Footer
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8F9FC),
-            border: Border(top: BorderSide(color: kBorder)),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-          ),
-          child: const Shimmer(child: ShimmerBox(width: 150, height: 12)),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -124,34 +147,52 @@ class _RowSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(children: [
-      // #
-      Expanded(flex: 1, child: Align(alignment: Alignment.centerLeft, child: ShimmerBox(width: 26, height: 26))),
-      // Table No.
-      Expanded(
-        flex: 2,
-        child: Row(children: [
-          ShimmerBox(width: 26, height: 26, radius: 7),
-          SizedBox(width: 8),
-          ShimmerBox(width: 44, height: 13),
-        ]),
-      ),
-      // Floor, Section, Capacity
-      Expanded(flex: 2, child: _IconText(textWidth: 60)),
-      Expanded(flex: 2, child: _IconText(textWidth: 56)),
-      Expanded(flex: 2, child: _IconText(textWidth: 52)),
-      // Status badge
-      Expanded(flex: 2, child: Align(alignment: Alignment.centerLeft, child: ShimmerBox(width: 92, height: 26))),
-      // Actions
-      Expanded(
-        flex: 2,
-        child: Row(children: [
-          ShimmerBox(width: 28, height: 28, radius: 8),
-          SizedBox(width: 6),
-          ShimmerBox(width: 28, height: 28, radius: 8),
-        ]),
-      ),
-    ]);
+    return const Row(
+      children: [
+        // #
+        Expanded(
+          flex: 1,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ShimmerBox(width: 26, height: 26),
+          ),
+        ),
+        // Table No.
+        Expanded(
+          flex: 2,
+          child: Row(
+            children: [
+              ShimmerBox(width: 26, height: 26, radius: 7),
+              SizedBox(width: 8),
+              ShimmerBox(width: 44, height: 13),
+            ],
+          ),
+        ),
+        // Floor, Section, Capacity
+        Expanded(flex: 2, child: _IconText(textWidth: 60)),
+        Expanded(flex: 2, child: _IconText(textWidth: 56)),
+        Expanded(flex: 2, child: _IconText(textWidth: 52)),
+        // Status badge
+        Expanded(
+          flex: 2,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ShimmerBox(width: 92, height: 26),
+          ),
+        ),
+        // Actions
+        Expanded(
+          flex: 2,
+          child: Row(
+            children: [
+              ShimmerBox(width: 28, height: 28, radius: 8),
+              SizedBox(width: 6),
+              ShimmerBox(width: 28, height: 28, radius: 8),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -160,9 +201,11 @@ class _IconText extends StatelessWidget {
   const _IconText({required this.textWidth});
 
   @override
-  Widget build(BuildContext context) => Row(children: [
-        const ShimmerBox(width: 13, height: 13, circle: true),
-        const SizedBox(width: 5),
-        ShimmerBox(width: textWidth, height: 13),
-      ]);
+  Widget build(BuildContext context) => Row(
+    children: [
+      const ShimmerBox(width: 13, height: 13, circle: true),
+      const SizedBox(width: 5),
+      ShimmerBox(width: textWidth, height: 13),
+    ],
+  );
 }

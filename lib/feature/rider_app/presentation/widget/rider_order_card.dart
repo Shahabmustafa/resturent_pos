@@ -11,7 +11,9 @@ import 'package:resturent_application/core/constants/currency.dart';
 Future<void> openExternal(BuildContext context, Uri uri) async {
   final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
   if (!ok && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No app found to open this')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('No app found to open this')));
   }
 }
 
@@ -36,7 +38,9 @@ class RiderOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final onTheWay = order.status == DeliveryOrderStatus.onTheWay;
-    final (badge, badgeColor) = onTheWay ? ('On the way', kPurple) : ('To pick up', kBlue);
+    final (badge, badgeColor) = onTheWay
+        ? ('On the way', kPurple)
+        : ('To pick up', kBlue);
 
     return GestureDetector(
       onTap: onTap,
@@ -46,7 +50,13 @@ class RiderOrderCard extends StatelessWidget {
           color: kCard,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: kBorder),
-          boxShadow: const [BoxShadow(color: Color(0x0D000020), blurRadius: 16, offset: Offset(0, 6))],
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D000020),
+              blurRadius: 16,
+              offset: Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,12 +68,18 @@ class RiderOrderCard extends StatelessWidget {
                 children: [
                   Text(
                     order.orderNum,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: kText),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: kText,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      DateFormat('h:mm a').format((order.assignedAt ?? order.createdAt).toLocal()),
+                      DateFormat(
+                        'h:mm a',
+                      ).format((order.assignedAt ?? order.createdAt).toLocal()),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12, color: kMuted),
@@ -71,19 +87,30 @@ class RiderOrderCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: badgeColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       badge,
-                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: badgeColor),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        color: badgeColor,
+                      ),
                     ),
                   ),
                   if (onTap != null) ...[
                     const SizedBox(width: 4),
-                    const SvgIcon(AppIcons.chevronRightRounded, size: 20, color: kMuted),
+                    const SvgIcon(
+                      AppIcons.chevronRightRounded,
+                      size: 20,
+                      color: kMuted,
+                    ),
                   ],
                 ],
               ),
@@ -117,10 +144,16 @@ class RiderOrderCard extends StatelessWidget {
                 children: [
                   _Line(AppIcons.personRounded, order.customerName, bold: true),
                   const SizedBox(height: 10),
-                  _Line(AppIcons.locationOnOutlined, order.address.isEmpty ? 'No address given' : order.address),
+                  _Line(
+                    AppIcons.locationOnOutlined,
+                    order.address.isEmpty ? 'No address given' : order.address,
+                  ),
                   if (order.items.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    _Line(AppIcons.shoppingBagOutlined, _itemsSummary(order.items)),
+                    _Line(
+                      AppIcons.shoppingBagOutlined,
+                      _itemsSummary(order.items),
+                    ),
                   ],
                   if (order.notes.isNotEmpty) ...[
                     const SizedBox(height: 10),
@@ -134,10 +167,21 @@ class RiderOrderCard extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SvgIcon(AppIcons.infoOutlineRounded, size: 16, color: kYellow),
+                          const SvgIcon(
+                            AppIcons.infoOutlineRounded,
+                            size: 16,
+                            color: kYellow,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(order.notes, style: const TextStyle(fontSize: 13, color: kText, height: 1.4)),
+                            child: Text(
+                              order.notes,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: kText,
+                                height: 1.4,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -160,7 +204,10 @@ class RiderOrderCard extends StatelessWidget {
                       color: kGreen,
                       onTap: order.phone.isEmpty
                           ? null
-                          : () => openExternal(context, Uri(scheme: 'tel', path: order.phone)),
+                          : () => openExternal(
+                              context,
+                              Uri(scheme: 'tel', path: order.phone),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -173,7 +220,10 @@ class RiderOrderCard extends StatelessWidget {
                           ? null
                           : () => openExternal(
                               context,
-                              Uri.https('www.google.com', '/maps/search/', {'api': '1', 'query': order.address}),
+                              Uri.https('www.google.com', '/maps/search/', {
+                                'api': '1',
+                                'query': order.address,
+                              }),
                             ),
                     ),
                   ),
@@ -187,18 +237,27 @@ class RiderOrderCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               decoration: const BoxDecoration(
                 color: kLight,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
                     children: [
-                      const Text('Collect', style: TextStyle(fontSize: 13, color: kSub)),
+                      const Text(
+                        'Collect',
+                        style: TextStyle(fontSize: 13, color: kSub),
+                      ),
                       const Spacer(),
                       Text(
                         formatMoney(order.amount),
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: kText),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: kText,
+                        ),
                       ),
                     ],
                   ),
@@ -206,29 +265,42 @@ class RiderOrderCard extends StatelessWidget {
                   SizedBox(
                     height: 54,
                     child: ElevatedButton.icon(
-                      onPressed: busy ? null : (onTheWay ? onDelivered : onStartTrip),
+                      onPressed: busy
+                          ? null
+                          : (onTheWay ? onDelivered : onStartTrip),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: onTheWay ? kGreen : kPrimary,
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: (onTheWay ? kGreen : kPrimary).withValues(alpha: 0.5),
+                        disabledBackgroundColor: (onTheWay ? kGreen : kPrimary)
+                            .withValues(alpha: 0.5),
                         disabledForegroundColor: Colors.white,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       icon: busy
                           ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
                             )
                           : SvgIcon(
-                              onTheWay ? AppIcons.checkCircleRounded : AppIcons.directionsBikeRounded,
+                              onTheWay
+                                  ? AppIcons.checkCircleRounded
+                                  : AppIcons.directionsBikeRounded,
                               size: 22,
                               color: Colors.white,
                             ),
                       label: Text(
                         onTheWay ? 'Mark Delivered' : 'Picked Up — Start Trip',
-                        style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
+                        style: const TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),
@@ -277,7 +349,12 @@ class _QuickButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback? onTap;
-  const _QuickButton({required this.icon, required this.label, required this.color, this.onTap});
+  const _QuickButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) => Material(
@@ -295,7 +372,11 @@ class _QuickButton extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: onTap == null ? kMuted : color),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: onTap == null ? kMuted : color,
+              ),
             ),
           ],
         ),
@@ -330,9 +411,18 @@ class RiderHistoryTile extends StatelessWidget {
             Container(
               width: 42,
               height: 42,
-              decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
               alignment: Alignment.center,
-              child: SvgIcon(delivered ? AppIcons.checkCircleRounded : AppIcons.cancelOutlined, size: 22, color: color),
+              child: SvgIcon(
+                delivered
+                    ? AppIcons.checkCircleRounded
+                    : AppIcons.cancelOutlined,
+                size: 22,
+                color: color,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -343,7 +433,11 @@ class RiderHistoryTile extends StatelessWidget {
                     '${order.orderNum} • ${order.customerName}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: kText),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: kText,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -355,7 +449,11 @@ class RiderHistoryTile extends StatelessWidget {
             ),
             Text(
               formatMoney(order.amount),
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: delivered ? kText : kMuted),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: delivered ? kText : kMuted,
+              ),
             ),
           ],
         ),
@@ -366,7 +464,11 @@ class RiderHistoryTile extends StatelessWidget {
 
 /// "4 items · Chicken Karahi × 1 +3 more" — the full list is on the detail screen.
 String _itemsSummary(String items) {
-  final parts = items.split(RegExp(r'[,\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  final parts = items
+      .split(RegExp(r'[,\n]'))
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
   if (parts.length <= 1) return items.trim();
   return '${parts.length} items · ${parts.first} +${parts.length - 1} more';
 }

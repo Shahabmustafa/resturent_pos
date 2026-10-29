@@ -88,27 +88,39 @@ class _ChooserScreenState extends State<_ChooserScreen> {
                       style: CText.body(15, color: CColors.muted),
                     ),
                     const SizedBox(height: 4),
-                    Text('Pak Afghan & Woking Shawarma', textAlign: TextAlign.center, style: CText.display(28)),
+                    Text(
+                      'Pak Afghan & Woking Shawarma',
+                      textAlign: TextAlign.center,
+                      style: CText.display(28),
+                    ),
                     const SizedBox(height: 10),
                     Text(
                       'How are you using the app?',
                       textAlign: TextAlign.center,
-                      style: CText.body(15.5, color: CColors.inkSoft, weight: FontWeight.w600),
+                      style: CText.body(
+                        15.5,
+                        color: CColors.inkSoft,
+                        weight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 30),
                     _Choice(
                       icon: AppIcons.restaurantRounded,
                       title: "I'm a customer",
-                      body: 'Browse the menu, order food and track your orders.',
+                      body:
+                          'Browse the menu, order food and track your orders.',
                       dark: true,
                       busy: _busy == AppMode.customer,
-                      onTap: _busy == null ? () => _pick(AppMode.customer) : null,
+                      onTap: _busy == null
+                          ? () => _pick(AppMode.customer)
+                          : null,
                     ),
                     const SizedBox(height: 14),
                     _Choice(
                       icon: AppIcons.deliveryDiningRounded,
                       title: "I'm a delivery rider",
-                      body: 'See the deliveries assigned to you and update them.',
+                      body:
+                          'See the deliveries assigned to you and update them.',
                       busy: _busy == AppMode.rider,
                       onTap: _busy == null ? () => _pick(AppMode.rider) : null,
                     ),
@@ -172,7 +184,11 @@ class _Choice extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: SvgIcon(icon, size: 28, color: dark ? CColors.ink : CColors.rust),
+                child: SvgIcon(
+                  icon,
+                  size: 28,
+                  color: dark ? CColors.ink : CColors.rust,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -181,7 +197,14 @@ class _Choice extends StatelessWidget {
                   children: [
                     Text(title, style: CText.display(19, color: fg)),
                     const SizedBox(height: 4),
-                    Text(body, style: CText.body(13, color: dark ? CColors.goldPale : CColors.muted, height: 1.45)),
+                    Text(
+                      body,
+                      style: CText.body(
+                        13,
+                        color: dark ? CColors.goldPale : CColors.muted,
+                        height: 1.45,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -190,9 +213,16 @@ class _Choice extends StatelessWidget {
                   ? SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: dark ? CColors.goldLight : CColors.rust),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: dark ? CColors.goldLight : CColors.rust,
+                      ),
                     )
-                  : SvgIcon(AppIcons.arrowForwardRounded, size: 22, color: dark ? CColors.goldLight : CColors.rust),
+                  : SvgIcon(
+                      AppIcons.arrowForwardRounded,
+                      size: 22,
+                      color: dark ? CColors.goldLight : CColors.rust,
+                    ),
             ],
           ),
         ),

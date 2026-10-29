@@ -7,12 +7,24 @@ import '../../data/model/branches_model.dart';
 
 // ─── All user roles supported ─────────────────────────────────────────────────
 const List<Map<String, dynamic>> kBranchRoles = [
-  {'value': 'admin',   'label': 'Admin',   'icon': AppIcons.adminPanelSettingsOutlined},
-  {'value': 'manager', 'label': 'Manager', 'icon': AppIcons.manageAccountsOutlined},
-  {'value': 'cashier', 'label': 'Cashier', 'icon': AppIcons.pointOfSaleOutlined},
-  {'value': 'chef',    'label': 'Chef',    'icon': AppIcons.restaurantOutlined},
-  {'value': 'rider',   'label': 'Rider',   'icon': AppIcons.deliveryDiningOutlined},
-  {'value': 'waiter',  'label': 'Waiter',  'icon': AppIcons.roomServiceOutlined},
+  {
+    'value': 'admin',
+    'label': 'Admin',
+    'icon': AppIcons.adminPanelSettingsOutlined,
+  },
+  {
+    'value': 'manager',
+    'label': 'Manager',
+    'icon': AppIcons.manageAccountsOutlined,
+  },
+  {
+    'value': 'cashier',
+    'label': 'Cashier',
+    'icon': AppIcons.pointOfSaleOutlined,
+  },
+  {'value': 'chef', 'label': 'Chef', 'icon': AppIcons.restaurantOutlined},
+  {'value': 'rider', 'label': 'Rider', 'icon': AppIcons.deliveryDiningOutlined},
+  {'value': 'waiter', 'label': 'Waiter', 'icon': AppIcons.roomServiceOutlined},
 ];
 
 // ─── Form Result ──────────────────────────────────────────────────────────────
@@ -62,9 +74,18 @@ class _BranchFormDialogState extends State<BranchFormDialog>
   bool _obscurePass = true;
 
   // Branch
-  late final TextEditingController _name, _city, _address, _phone, _ntn, _tables;
+  late final TextEditingController _name,
+      _city,
+      _address,
+      _phone,
+      _ntn,
+      _tables;
   // Admin user
-  late final TextEditingController _aName, _aUsername, _aEmail, _aPhone, _aPassword;
+  late final TextEditingController _aName,
+      _aUsername,
+      _aEmail,
+      _aPhone,
+      _aPassword;
   String _aRole = 'admin';
 
   bool get _isEditing => widget.editing != null;
@@ -77,48 +98,63 @@ class _BranchFormDialogState extends State<BranchFormDialog>
     final b = widget.editing;
     final admin = b?.adminUser;
 
-    _color = b?.color ??
+    _color =
+        b?.color ??
         AppColors.branchColors.firstWhere(
-              (c) => !widget.usedColors.contains(c),
+          (c) => !widget.usedColors.contains(c),
           orElse: () => AppColors.branchColors.first,
         );
 
-    _name    = TextEditingController(text: b?.name ?? '');
-    _city    = TextEditingController(text: b?.city ?? '');
+    _name = TextEditingController(text: b?.name ?? '');
+    _city = TextEditingController(text: b?.city ?? '');
     _address = TextEditingController(text: b?.address ?? '');
-    _phone   = TextEditingController(text: b?.phone ?? '');
-    _ntn     = TextEditingController(text: b?.ntn ?? '');
-    _tables  = TextEditingController(text: b != null ? '${b.tables}' : '');
+    _phone = TextEditingController(text: b?.phone ?? '');
+    _ntn = TextEditingController(text: b?.ntn ?? '');
+    _tables = TextEditingController(text: b != null ? '${b.tables}' : '');
 
-    _aName     = TextEditingController(text: admin?.name ?? '');
+    _aName = TextEditingController(text: admin?.name ?? '');
     _aUsername = TextEditingController(text: admin?.username ?? '');
-    _aEmail    = TextEditingController(text: admin?.email ?? '');
-    _aPhone    = TextEditingController(text: admin?.phone ?? '');
+    _aEmail = TextEditingController(text: admin?.email ?? '');
+    _aPhone = TextEditingController(text: admin?.phone ?? '');
     _aPassword = TextEditingController();
-    _aRole     = admin?.role ?? 'admin';
+    _aRole = admin?.role ?? 'admin';
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     for (final c in [
-      _name, _city, _address, _phone, _ntn, _tables,
-      _aName, _aUsername, _aEmail, _aPhone, _aPassword,
-    ]) c.dispose();
+      _name,
+      _city,
+      _address,
+      _phone,
+      _ntn,
+      _tables,
+      _aName,
+      _aUsername,
+      _aEmail,
+      _aPhone,
+      _aPassword,
+    ])
+      c.dispose();
     super.dispose();
   }
 
   bool get _valid {
-    final branchOk = _name.text.trim().isNotEmpty &&
+    final branchOk =
+        _name.text.trim().isNotEmpty &&
         _city.text.trim().isNotEmpty &&
         _address.text.trim().isNotEmpty;
     final email = _aEmail.text.trim();
     final pass = _aPassword.text.trim();
-    final adminOk = _aName.text.trim().isNotEmpty &&
+    final adminOk =
+        _aName.text.trim().isNotEmpty &&
         _aUsername.text.trim().isNotEmpty &&
         RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email);
     // Supabase Auth: password must be at least 6 characters
-    final passOk = _isEditing ? (pass.isEmpty || pass.length >= 6) : pass.length >= 6;
+    final passOk = _isEditing
+        ? (pass.isEmpty || pass.length >= 6)
+        : pass.length >= 6;
     return branchOk && adminOk && passOk;
   }
 
@@ -141,21 +177,24 @@ class _BranchFormDialogState extends State<BranchFormDialog>
       adminUser: widget.editing?.adminUser,
     );
 
-    widget.onSave(BranchFormResult(
-      branch: branch,
-      adminName: _aName.text.trim(),
-      adminUsername: _aUsername.text.trim(),
-      adminEmail: _aEmail.text.trim().toLowerCase(),
-      adminPhone: _aPhone.text.trim(),
-      adminRole: _aRole,
-      newPassword: _aPassword.text.trim().isEmpty ? null : _aPassword.text.trim(),
-    ));
+    widget.onSave(
+      BranchFormResult(
+        branch: branch,
+        adminName: _aName.text.trim(),
+        adminUsername: _aUsername.text.trim(),
+        adminEmail: _aEmail.text.trim().toLowerCase(),
+        adminPhone: _aPhone.text.trim(),
+        adminRole: _aRole,
+        newPassword: _aPassword.text.trim().isEmpty
+            ? null
+            : _aPassword.text.trim(),
+      ),
+    );
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) => Dialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     child: SizedBox(
       width: 560,
       child: Column(
@@ -170,7 +209,9 @@ class _BranchFormDialogState extends State<BranchFormDialog>
           // Tabs
           Container(
             decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
+              border: Border(
+                bottom: BorderSide(color: AppColors.border, width: 0.5),
+              ),
             ),
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: AppTabBar(
@@ -222,7 +263,10 @@ class _BranchFormDialogState extends State<BranchFormDialog>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.border, width: 0.5))),
+              border: Border(
+                top: BorderSide(color: AppColors.border, width: 0.5),
+              ),
+            ),
             child: Row(
               children: [
                 // Dot indicators
@@ -250,29 +294,51 @@ class _BranchFormDialogState extends State<BranchFormDialog>
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.border),
                     foregroundColor: AppColors.grey,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: const Text('Cancel',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 ListenableBuilder(
-                  listenable: Listenable.merge(
-                      [_name, _city, _address, _aName, _aUsername, _aEmail, _aPassword]),
+                  listenable: Listenable.merge([
+                    _name,
+                    _city,
+                    _address,
+                    _aName,
+                    _aUsername,
+                    _aEmail,
+                    _aPassword,
+                  ]),
                   builder: (_, __) => ElevatedButton(
                     onPressed: _valid ? _save : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 9,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       elevation: 0,
                       disabledBackgroundColor: AppColors.greyLt,
                     ),
                     child: Text(
                       _isEditing ? 'Save Changes' : 'Add Branch',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -287,8 +353,12 @@ class _BranchFormDialogState extends State<BranchFormDialog>
 
 // ─── Tab 1: Branch Info ───────────────────────────────────────────────────────
 class _BranchInfoTab extends StatelessWidget {
-  final TextEditingController nameCtrl, cityCtrl, addressCtrl, phoneCtrl,
-      ntnCtrl, tablesCtrl;
+  final TextEditingController nameCtrl,
+      cityCtrl,
+      addressCtrl,
+      phoneCtrl,
+      ntnCtrl,
+      tablesCtrl;
   final Color color;
   final List<Color> usedColors;
   final ValueChanged<Color> onColorChanged;
@@ -331,7 +401,11 @@ class _BranchInfoTab extends StatelessWidget {
                   ),
                 ),
                 child: selected
-                    ? const SvgIcon(AppIcons.check, size: 13, color: Colors.white)
+                    ? const SvgIcon(
+                        AppIcons.check,
+                        size: 13,
+                        color: Colors.white,
+                      )
                     : null,
               ),
             );
@@ -340,34 +414,51 @@ class _BranchInfoTab extends StatelessWidget {
         const SizedBox(height: 18),
         const _SectionLabel('BRANCH DETAILS'),
         const SizedBox(height: 10),
-        Row(children: [
-          Expanded(
+        Row(
+          children: [
+            Expanded(
               child: _Field(
-                  label: 'Branch Name *',
-                  controller: nameCtrl,
-                  hint: 'e.g. DHA Branch')),
-          const SizedBox(width: 12),
-          Expanded(
+                label: 'Branch Name *',
+                controller: nameCtrl,
+                hint: 'e.g. DHA Branch',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
               child: _Field(
-                  label: 'City *', controller: cityCtrl, hint: 'e.g. Lahore')),
-        ]),
+                label: 'City *',
+                controller: cityCtrl,
+                hint: 'e.g. Lahore',
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 10),
         _Field(
-            label: 'Address *',
-            controller: addressCtrl,
-            hint: 'Full address'),
+          label: 'Address *',
+          controller: addressCtrl,
+          hint: 'Full address',
+        ),
         const SizedBox(height: 10),
-        Row(children: [
-          Expanded(
+        Row(
+          children: [
+            Expanded(
               child: _Field(
-                  label: 'Phone',
-                  controller: phoneCtrl,
-                  hint: '042-XXXXXXX')),
-          const SizedBox(width: 12),
-          Expanded(
+                label: 'Phone',
+                controller: phoneCtrl,
+                hint: '042-XXXXXXX',
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
               child: _Field(
-                  label: 'NTN', controller: ntnCtrl, hint: 'XXXXXXX-X')),
-        ]),
+                label: 'NTN',
+                controller: ntnCtrl,
+                hint: 'XXXXXXX-X',
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 10),
         _Field(
           label: 'Total Tables',
@@ -384,7 +475,11 @@ class _BranchInfoTab extends StatelessWidget {
 // ─── Tab 2: Admin Access ──────────────────────────────────────────────────────
 class _AdminAccessTab extends StatelessWidget {
   final bool isEditing;
-  final TextEditingController nameCtrl, usernameCtrl, emailCtrl, phoneCtrl, passwordCtrl;
+  final TextEditingController nameCtrl,
+      usernameCtrl,
+      emailCtrl,
+      phoneCtrl,
+      passwordCtrl;
   final String role;
   final bool obscurePass;
   final ValueChanged<String> onRoleChanged;
@@ -418,42 +513,52 @@ class _AdminAccessTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.primary.withOpacity(0.2)),
           ),
-          child: Row(children: [
-            const SvgIcon(AppIcons.adminPanelSettingsOutlined,
-                color: AppColors.primary, size: 14),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                isEditing
-                    ? 'The admin user will be updated. Leave the password empty to keep it unchanged.'
-                    : 'The admin logs in to the POS with this email and password.',
-                style: const TextStyle(
-                    fontSize: 11, color: AppColors.primary, height: 1.4),
+          child: Row(
+            children: [
+              const SvgIcon(
+                AppIcons.adminPanelSettingsOutlined,
+                color: AppColors.primary,
+                size: 14,
               ),
-            ),
-          ]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isEditing
+                      ? 'The admin user will be updated. Leave the password empty to keep it unchanged.'
+                      : 'The admin logs in to the POS with this email and password.',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.primary,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 14),
-        Row(children: [
-          Expanded(
-            child: _Field(
-              label: 'Admin Name *',
-              controller: nameCtrl,
-              hint: 'Full name',
-              prefixIcon: AppIcons.personOutlineRounded,
+        Row(
+          children: [
+            Expanded(
+              child: _Field(
+                label: 'Admin Name *',
+                controller: nameCtrl,
+                hint: 'Full name',
+                prefixIcon: AppIcons.personOutlineRounded,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _Field(
-              label: 'Phone',
-              controller: phoneCtrl,
-              hint: '0300-0000000',
-              keyboardType: TextInputType.phone,
-              prefixIcon: AppIcons.phoneOutlined,
+            const SizedBox(width: 12),
+            Expanded(
+              child: _Field(
+                label: 'Phone',
+                controller: phoneCtrl,
+                hint: '0300-0000000',
+                keyboardType: TextInputType.phone,
+                prefixIcon: AppIcons.phoneOutlined,
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         const SizedBox(height: 10),
         _Field(
           label: 'Username *',
@@ -484,33 +589,35 @@ class _AdminAccessTab extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 7),
+                  horizontal: 12,
+                  vertical: 7,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.bg,
+                  color: isSelected ? AppColors.primary : AppColors.bg,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.border,
+                    color: isSelected ? AppColors.primary : AppColors.border,
                   ),
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  SvgIcon(r['icon'] as AppIcon,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgIcon(
+                      r['icon'] as AppIcon,
                       size: 13,
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.grey),
-                  const SizedBox(width: 5),
-                  Text(r['label'] as String,
+                      color: isSelected ? Colors.white : AppColors.grey,
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      r['label'] as String,
                       style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isSelected
-                              ? Colors.white
-                              : AppColors.grey)),
-                ]),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : AppColors.grey,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }).toList(),
@@ -518,13 +625,9 @@ class _AdminAccessTab extends StatelessWidget {
         const SizedBox(height: 12),
 
         _Field(
-          label: isEditing
-              ? 'New Password (optional)'
-              : 'Password *',
+          label: isEditing ? 'New Password (optional)' : 'Password *',
           controller: passwordCtrl,
-          hint: isEditing
-              ? 'Leave empty to keep current'
-              : 'Min 6 characters',
+          hint: isEditing ? 'Leave empty to keep current' : 'Min 6 characters',
           isPassword: true,
           obscure: obscurePass,
           prefixIcon: AppIcons.lockOutlineRounded,
@@ -546,23 +649,37 @@ class _DialogHeader extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5))),
-    child: Row(children: [
-      Text(title,
+      border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
+    ),
+    child: Row(
+      children: [
+        Text(
+          title,
           style: const TextStyle(
-              fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.dark)),
-      const Spacer(),
-      GestureDetector(
-        onTap: onClose,
-        child: Container(
-          width: 26,
-          height: 26,
-          decoration: BoxDecoration(
-              color: AppColors.bg, borderRadius: BorderRadius.circular(6)),
-          child: const SvgIcon(AppIcons.close, size: 14, color: AppColors.grey),
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: AppColors.dark,
+          ),
         ),
-      ),
-    ]),
+        const Spacer(),
+        GestureDetector(
+          onTap: onClose,
+          child: Container(
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              color: AppColors.bg,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const SvgIcon(
+              AppIcons.close,
+              size: 14,
+              color: AppColors.grey,
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
 
@@ -571,12 +688,15 @@ class _SectionLabel extends StatelessWidget {
   const _SectionLabel(this.text);
 
   @override
-  Widget build(BuildContext context) => Text(text,
-      style: const TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-          color: AppColors.grey,
-          letterSpacing: 0.8));
+  Widget build(BuildContext context) => Text(
+    text,
+    style: const TextStyle(
+      fontSize: 9,
+      fontWeight: FontWeight.w600,
+      color: AppColors.grey,
+      letterSpacing: 0.8,
+    ),
+  );
 }
 
 class _Field extends StatelessWidget {
@@ -602,9 +722,14 @@ class _Field extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label,
-          style: const TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.grey)),
+      Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: AppColors.grey,
+        ),
+      ),
       const SizedBox(height: 5),
       TextField(
         controller: controller,
@@ -619,26 +744,32 @@ class _Field extends StatelessWidget {
               : null,
           suffixIcon: isPassword
               ? IconButton(
-            icon: SvgIcon(
-                obscure
-                    ? AppIcons.visibilityOffOutlined
-                    : AppIcons.visibilityOutlined,
-                size: 15,
-                color: AppColors.grey),
-            onPressed: onToggleObscure,
-          )
+                  icon: SvgIcon(
+                    obscure
+                        ? AppIcons.visibilityOffOutlined
+                        : AppIcons.visibilityOutlined,
+                    size: 15,
+                    color: AppColors.grey,
+                  ),
+                  onPressed: onToggleObscure,
+                )
               : null,
-          contentPadding:
-          const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 14,
+          ),
           border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.border)),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
           enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.border)),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
           focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.primary)),
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppColors.primary),
+          ),
           filled: true,
           fillColor: AppColors.white,
           isDense: true,

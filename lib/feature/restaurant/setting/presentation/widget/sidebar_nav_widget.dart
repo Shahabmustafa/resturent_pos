@@ -47,15 +47,32 @@ class Sidebar extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
-                  child: const SvgIcon(AppIcons.restaurant, color: Colors.white, size: 22),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const SvgIcon(
+                    AppIcons.restaurant,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(kAppName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
-                    Text('POS System v2.1', style: TextStyle(color: AppColors.primary, fontSize: 11)),
+                    Text(
+                      kAppName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      'POS System v2.1',
+                      style: TextStyle(color: AppColors.primary, fontSize: 11),
+                    ),
                   ],
                 ),
               ],
@@ -67,7 +84,10 @@ class Sidebar extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                _InfoRow(icon: AppIcons.locationOnOutlined, text: 'Blue Area, Islamabad'),
+                _InfoRow(
+                  icon: AppIcons.locationOnOutlined,
+                  text: 'Blue Area, Islamabad',
+                ),
                 SizedBox(height: 4),
                 _InfoRow(icon: AppIcons.phoneOutlined, text: '+92 51 234 5678'),
                 SizedBox(height: 4),
@@ -90,33 +110,60 @@ class Sidebar extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     margin: const EdgeInsets.only(bottom: 2),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
-                      color: active ? AppColors.primaryLight.withOpacity(0.12) : Colors.transparent,
+                      color: active
+                          ? AppColors.primaryLight.withOpacity(0.12)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        SvgIcon(item.icon, size: 18, color: active ? AppColors.primary : AppColors.sidebarText),
+                        SvgIcon(
+                          item.icon,
+                          size: 18,
+                          color: active
+                              ? AppColors.primary
+                              : AppColors.sidebarText,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             item.label,
                             style: TextStyle(
                               fontSize: 13,
-                              color: active ? AppColors.primary : AppColors.sidebarText,
-                              fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+                              color: active
+                                  ? AppColors.primary
+                                  : AppColors.sidebarText,
+                              fontWeight: active
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
                             ),
                           ),
                         ),
                         if (item.badge != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: item.badgeDanger ? AppColors.danger : AppColors.primary,
+                              color: item.badgeDanger
+                                  ? AppColors.danger
+                                  : AppColors.primary,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Text(item.badge!, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700)),
+                            child: Text(
+                              item.badge!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -134,19 +181,43 @@ class Sidebar extends StatelessWidget {
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: AppColors.primary,
-                  child: const Text('A', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                  child: const Text(
+                    'A',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Admin', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-                      Text('Super Admin', style: TextStyle(color: AppColors.sidebarText, fontSize: 11)),
+                      Text(
+                        'Admin',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Super Admin',
+                        style: TextStyle(
+                          color: AppColors.sidebarText,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SvgIcon(AppIcons.logout, size: 18, color: AppColors.sidebarText),
+                const SvgIcon(
+                  AppIcons.logout,
+                  size: 18,
+                  color: AppColors.sidebarText,
+                ),
               ],
             ),
           ),
@@ -167,7 +238,10 @@ class _InfoRow extends StatelessWidget {
     children: [
       SvgIcon(icon, size: 12, color: AppColors.sidebarText),
       const SizedBox(width: 5),
-      Text(text, style: const TextStyle(color: AppColors.sidebarText, fontSize: 11)),
+      Text(
+        text,
+        style: const TextStyle(color: AppColors.sidebarText, fontSize: 11),
+      ),
     ],
   );
 }

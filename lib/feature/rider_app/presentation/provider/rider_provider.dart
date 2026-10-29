@@ -8,7 +8,8 @@ import '../../data/rider_datasource.dart';
 import '../../rider_app.dart';
 
 bool isActiveDelivery(DeliveryOrder o) =>
-    o.status == DeliveryOrderStatus.assigned || o.status == DeliveryOrderStatus.onTheWay;
+    o.status == DeliveryOrderStatus.assigned ||
+    o.status == DeliveryOrderStatus.onTheWay;
 
 class RiderState {
   final Rider? me;
@@ -16,7 +17,8 @@ class RiderState {
   final String? error;
   final bool togglingOnline;
   final Set<String> working; // delivery ids with an action in flight
-  final int newAssignments; // goes up each time the restaurant assigns a new delivery
+  final int
+  newAssignments; // goes up each time the restaurant assigns a new delivery
 
   const RiderState({
     this.me,
@@ -27,10 +29,13 @@ class RiderState {
     this.newAssignments = 0,
   });
 
-  List<DeliveryOrder> get active => (orders ?? const []).where(isActiveDelivery).toList();
-  List<DeliveryOrder> get history => (orders ?? const []).where((o) => !isActiveDelivery(o)).toList();
+  List<DeliveryOrder> get active =>
+      (orders ?? const []).where(isActiveDelivery).toList();
+  List<DeliveryOrder> get history =>
+      (orders ?? const []).where((o) => !isActiveDelivery(o)).toList();
 
-  DeliveryOrder? order(String id) => orders?.where((o) => o.id == id).firstOrNull;
+  DeliveryOrder? order(String id) =>
+      orders?.where((o) => o.id == id).firstOrNull;
 
   RiderState copyWith({
     Rider? me,
@@ -75,11 +80,18 @@ class RiderNotifier extends StateNotifier<RiderState> {
           .listen(
             _onOrders,
             onError: (_) {
-              if (mounted) state = state.copyWith(error: 'Live updates paused. Pull down to refresh.');
+              if (mounted)
+                state = state.copyWith(
+                  error: 'Live updates paused. Pull down to refresh.',
+                );
             },
           );
     } catch (_) {
-      if (mounted) state = state.copyWith(error: 'Could not load your account. Check your internet and try again.');
+      if (mounted)
+        state = state.copyWith(
+          error:
+              'Could not load your account. Check your internet and try again.',
+        );
     }
   }
 
@@ -90,9 +102,14 @@ class RiderNotifier extends StateNotifier<RiderState> {
         if (isActiveDelivery(o)) o.id,
     };
     // Only count as "new" after the first load.
-    final fresh = state.orders != null && active.difference(_seenActive).isNotEmpty;
+    final fresh =
+        state.orders != null && active.difference(_seenActive).isNotEmpty;
     _seenActive = active;
-    state = state.copyWith(orders: orders, clearError: true, newAssignments: fresh ? state.newAssignments + 1 : null);
+    state = state.copyWith(
+      orders: orders,
+      clearError: true,
+      newAssignments: fresh ? state.newAssignments + 1 : null,
+    );
     _refreshMe(); // assigning/finishing changes the rider's status and totals
   }
 
@@ -115,7 +132,9 @@ class RiderNotifier extends StateNotifier<RiderState> {
     try {
       final status = await _ds.setOnline(online);
       await _refreshMe();
-      return status == 'busy' && !online ? 'Finish your current delivery before going offline.' : null;
+      return status == 'busy' && !online
+          ? 'Finish your current delivery before going offline.'
+          : null;
     } catch (_) {
       return 'Could not change status. Try again.';
     } finally {
@@ -124,8 +143,10 @@ class RiderNotifier extends StateNotifier<RiderState> {
   }
 
   /// Both actions return null on success or an error message.
-  Future<String?> startTrip(String deliveryId) => _run(deliveryId, () => _ds.startTrip(deliveryId));
-  Future<String?> markDelivered(String deliveryId) => _run(deliveryId, () => _ds.markDelivered(deliveryId));
+  Future<String?> startTrip(String deliveryId) =>
+      _run(deliveryId, () => _ds.startTrip(deliveryId));
+  Future<String?> markDelivered(String deliveryId) =>
+      _run(deliveryId, () => _ds.markDelivered(deliveryId));
 
   Future<String?> _run(String id, Future<void> Function() action) async {
     state = state.copyWith(working: {...state.working, id});
@@ -137,7 +158,8 @@ class RiderNotifier extends StateNotifier<RiderState> {
     } catch (_) {
       return 'Something went wrong. Check your internet and try again.';
     } finally {
-      if (mounted) state = state.copyWith(working: {...state.working}..remove(id));
+      if (mounted)
+        state = state.copyWith(working: {...state.working}..remove(id));
     }
   }
 
@@ -148,18 +170,24 @@ class RiderNotifier extends StateNotifier<RiderState> {
   }
 }
 
-final riderProvider = StateNotifierProvider.autoDispose<RiderNotifier, RiderState>(
-  (ref) => RiderNotifier(ref.read(riderDsProvider)),
-);
+final riderProvider =
+    StateNotifierProvider.autoDispose<RiderNotifier, RiderState>(
+      (ref) => RiderNotifier(ref.read(riderDsProvider)),
+    );
 
 /// Finished deliveries from the last [days] days (1 = today) for the Earnings tab.
 /// Re-fetches whenever the rider's delivery count changes.
-final riderEarningsProvider = FutureProvider.autoDispose.family<List<DeliveryOrder>, int>((ref, days) async {
-  // Select plain values: the Rider object is replaced on every refresh.
-  final riderId = ref.watch(riderProvider.select((s) => s.me?.id));
-  ref.watch(riderProvider.select((s) => s.me?.totalDeliveries));
-  if (riderId == null) return const [];
-  final now = DateTime.now();
-  final since = DateTime(now.year, now.month, now.day).subtract(Duration(days: days - 1));
-  return ref.read(riderDsProvider).fetchDelivered(riderId, since);
-});
+final riderEarningsProvider = FutureProvider.autoDispose
+    .family<List<DeliveryOrder>, int>((ref, days) async {
+      // Select plain values: the Rider object is replaced on every refresh.
+      final riderId = ref.watch(riderProvider.select((s) => s.me?.id));
+      ref.watch(riderProvider.select((s) => s.me?.totalDeliveries));
+      if (riderId == null) return const [];
+      final now = DateTime.now();
+      final since = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: days - 1));
+      return ref.read(riderDsProvider).fetchDelivered(riderId, since);
+    });

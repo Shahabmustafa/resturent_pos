@@ -41,10 +41,9 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
       return;
     }
 
-    await ref.read(companyAuthProvider.notifier).login(
-      email: email,
-      password: password,
-    );
+    await ref
+        .read(companyAuthProvider.notifier)
+        .login(email: email, password: password);
   }
 
   @override
@@ -53,13 +52,16 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
 
     ref.listen<CompanyAuthState>(companyAuthProvider, (prev, next) {
       // AdminPanelApp swaps to the dashboard once a company is signed in.
-      if (next.errorMessage != null && next.errorMessage != prev?.errorMessage) {
+      if (next.errorMessage != null &&
+          next.errorMessage != prev?.errorMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
             backgroundColor: AppColors.danger,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -72,115 +74,125 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
       body: Row(
         children: [
           // ── Left Panel (Branding), hidden on phones ────────────────
-          if (wide) Expanded(
-            flex: 5,
-            child: Container(
-              color: AppColors.sidebar,
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: CustomPaint(painter: _DotPatternPainter()),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(48),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Logo
-                        Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const SvgIcon(
-                                AppIcons.storefrontRounded,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              kAppName,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const Spacer(),
-
-                        Text(
-                          'Manage your restaurant\nchain with ease.',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.95),
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            height: 1.3,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        Text(
-                          'Multi-branch POS system — manage all branches\nfrom a single platform.',
-                          style: TextStyle(
-                            color: AppColors.sidebarText,
-                            fontSize: 14,
-                            height: 1.6,
-                          ),
-                        ),
-
-                        const SizedBox(height: 40),
-
-                        ...[
-                          (AppIcons.storeOutlined, 'Multi-branch Management'),
-                          (AppIcons.receiptLongOutlined, 'Real-time Reporting'),
-                          (AppIcons.peopleOutlineRounded, 'Staff & Role Management'),
-                        ].map(
-                              (item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 28,
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: SvgIcon(item.$1,
-                                      color: AppColors.primary, size: 15),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  item.$2,
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 48),
-                      ],
+          if (wide)
+            Expanded(
+              flex: 5,
+              child: Container(
+                color: AppColors.sidebar,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomPaint(painter: _DotPatternPainter()),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(48),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Logo
+                          Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const SvgIcon(
+                                  AppIcons.storefrontRounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                kAppName,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const Spacer(),
+
+                          Text(
+                            'Manage your restaurant\nchain with ease.',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.95),
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              height: 1.3,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          Text(
+                            'Multi-branch POS system — manage all branches\nfrom a single platform.',
+                            style: TextStyle(
+                              color: AppColors.sidebarText,
+                              fontSize: 14,
+                              height: 1.6,
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          ...[
+                            (AppIcons.storeOutlined, 'Multi-branch Management'),
+                            (
+                              AppIcons.receiptLongOutlined,
+                              'Real-time Reporting',
+                            ),
+                            (
+                              AppIcons.peopleOutlineRounded,
+                              'Staff & Role Management',
+                            ),
+                          ].map(
+                            (item) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: SvgIcon(
+                                      item.$1,
+                                      color: AppColors.primary,
+                                      size: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    item.$2,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
           // ── Right Panel (Login Form) ────────────────────────────────
           Expanded(
@@ -191,148 +203,164 @@ class _CompanyLoginScreenState extends ConsumerState<CompanyLoginScreen> {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 380),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 32),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Company Login',
-                          style: TextStyle(
-                            color: AppColors.textDark,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Sign in with your company credentials',
-                          style: TextStyle(
-                            color: AppColors.textGrey,
-                            fontSize: 13.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 36),
-
-                        const _FieldLabel(label: 'Email'),
-                        const SizedBox(height: 6),
-                        _LoginField(
-                          controller: _emailController,
-                          hint: 'you@example.com',
-                          icon: AppIcons.alternateEmailRounded,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        const _FieldLabel(label: 'Password'),
-                        const SizedBox(height: 6),
-                        _LoginField(
-                          controller: _passwordController,
-                          hint: '••••••••',
-                          icon: AppIcons.lockOutlineRounded,
-                          isPassword: true,
-                          obscure: _obscurePassword,
-                          onToggleObscure: () => setState(
-                                  () => _obscurePassword = !_obscurePassword),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 46,
-                          child: ElevatedButton(
-                            onPressed: authState.isLoading ? null : _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor:
-                              AppColors.primary.withOpacity(0.5),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: authState.isLoading
-                                ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                                : const Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
+                    constraints: const BoxConstraints(maxWidth: 380),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 32,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Company Login',
+                            style: TextStyle(
+                              color: AppColors.textDark,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Sign in with your company credentials',
+                            style: TextStyle(
+                              color: AppColors.textGrey,
+                              fontSize: 13.5,
+                            ),
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 36),
 
-                        Row(
-                          children: [
-                            const Expanded(
-                                child: Divider(color: AppColors.border, height: 1)),
-                            Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                'SaaS Platform',
-                                style: const TextStyle(
-                                  color: AppColors.textGrey,
-                                  fontSize: 11,
+                          const _FieldLabel(label: 'Email'),
+                          const SizedBox(height: 6),
+                          _LoginField(
+                            controller: _emailController,
+                            hint: 'you@example.com',
+                            icon: AppIcons.alternateEmailRounded,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          const _FieldLabel(label: 'Password'),
+                          const SizedBox(height: 6),
+                          _LoginField(
+                            controller: _passwordController,
+                            hint: '••••••••',
+                            icon: AppIcons.lockOutlineRounded,
+                            isPassword: true,
+                            obscure: _obscurePassword,
+                            onToggleObscure: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          SizedBox(
+                            width: double.infinity,
+                            height: 46,
+                            child: ElevatedButton(
+                              onPressed: authState.isLoading ? null : _login,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: AppColors.primary
+                                    .withOpacity(0.5),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
+                              child: authState.isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
-                            const Expanded(
-                                child: Divider(color: AppColors.border, height: 1)),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                                color: AppColors.primary.withOpacity(0.2)),
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                          const SizedBox(height: 24),
+
+                          Row(
                             children: [
-                              const SvgIcon(AppIcons.infoOutlineRounded,
-                                  color: AppColors.primary, size: 16),
-                              const SizedBox(width: 10),
                               const Expanded(
+                                child: Divider(
+                                  color: AppColors.border,
+                                  height: 1,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 child: Text(
-                                  'Your email and password will be provided by your administrator.',
-                                  style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 12.5,
-                                    height: 1.5,
+                                  'SaaS Platform',
+                                  style: const TextStyle(
+                                    color: AppColors.textGrey,
+                                    fontSize: 11,
                                   ),
+                                ),
+                              ),
+                              const Expanded(
+                                child: Divider(
+                                  color: AppColors.border,
+                                  height: 1,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+
+                          const SizedBox(height: 24),
+
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SvgIcon(
+                                  AppIcons.infoOutlineRounded,
+                                  color: AppColors.primary,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 10),
+                                const Expanded(
+                                  child: Text(
+                                    'Your email and password will be provided by your administrator.',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 12.5,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 ),
               ),
             ),
@@ -392,20 +420,22 @@ class _LoginField extends StatelessWidget {
         prefixIcon: SvgIcon(icon, color: AppColors.textGrey, size: 18),
         suffixIcon: isPassword
             ? IconButton(
-          icon: SvgIcon(
-            obscure
-                ? AppIcons.visibilityOffOutlined
-                : AppIcons.visibilityOutlined,
-            color: AppColors.textGrey,
-            size: 18,
-          ),
-          onPressed: onToggleObscure,
-        )
+                icon: SvgIcon(
+                  obscure
+                      ? AppIcons.visibilityOffOutlined
+                      : AppIcons.visibilityOutlined,
+                  color: AppColors.textGrey,
+                  size: 18,
+                ),
+                onPressed: onToggleObscure,
+              )
             : null,
         filled: true,
         fillColor: AppColors.bg,
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.border),

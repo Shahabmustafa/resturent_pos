@@ -145,45 +145,53 @@ class _BranchesPageState extends State<BranchesPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Delete Branch',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        title: const Text(
+          'Delete Branch',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Delete "${b.name}"?',
-                style: const TextStyle(fontSize: 13)),
+            Text('Delete "${b.name}"?', style: const TextStyle(fontSize: 13)),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                  color: AppColors.dangerLt,
-                  borderRadius: BorderRadius.circular(8)),
-              child: const Row(children: [
-                SvgIcon(AppIcons.warningAmberRounded,
-                    color: AppColors.danger, size: 14),
-                SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'All of the branch\'s users and data will also be deleted.',
-                    style: TextStyle(fontSize: 11, color: AppColors.danger),
+                color: AppColors.dangerLt,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                children: [
+                  SvgIcon(
+                    AppIcons.warningAmberRounded,
+                    color: AppColors.danger,
+                    size: 14,
                   ),
-                ),
-              ]),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'All of the branch\'s users and data will also be deleted.',
+                      style: TextStyle(fontSize: 11, color: AppColors.danger),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.danger,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () async {
               Navigator.pop(context);
@@ -203,7 +211,8 @@ class _BranchesPageState extends State<BranchesPage> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Center(
-          child: CircularProgressIndicator(color: AppColors.primary));
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     final filtered = _filtered;
@@ -220,16 +229,20 @@ class _BranchesPageState extends State<BranchesPage> {
             ElevatedButton.icon(
               onPressed: () => _openModal(),
               icon: const SvgIcon(AppIcons.add, size: 15),
-              label: const Text('Add Branch',
-                  style:
-                  TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              label: const Text(
+                'Add Branch',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 elevation: 0,
               ),
             ),
@@ -243,35 +256,45 @@ class _BranchesPageState extends State<BranchesPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── KPI Row ────────────────────────────────────────────
-                Row(children: [
-                  Expanded(
+                Row(
+                  children: [
+                    Expanded(
                       child: KpiCard(
-                          label: 'Total Branches',
-                          value: '${_branches.length}',
-                          icon: AppIcons.storeOutlined,
-                          color: AppColors.primary)),
-                  const SizedBox(width: 12),
-                  Expanded(
+                        label: 'Total Branches',
+                        value: '${_branches.length}',
+                        icon: AppIcons.storeOutlined,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: KpiCard(
-                          label: 'Open',
-                          value: '$openCount',
-                          icon: AppIcons.checkCircleOutline,
-                          color: AppColors.success)),
-                  const SizedBox(width: 12),
-                  Expanded(
+                        label: 'Open',
+                        value: '$openCount',
+                        icon: AppIcons.checkCircleOutline,
+                        color: AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: KpiCard(
-                          label: 'Closed',
-                          value: '$closedCount',
-                          icon: AppIcons.cancelOutlined,
-                          color: AppColors.danger)),
-                  const SizedBox(width: 12),
-                  Expanded(
+                        label: 'Closed',
+                        value: '$closedCount',
+                        icon: AppIcons.cancelOutlined,
+                        color: AppColors.danger,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: KpiCard(
-                          label: 'Total Tables',
-                          value: '$totalTables',
-                          icon: AppIcons.tableRestaurantOutlined,
-                          color: const Color(0xFF8B5CF6))),
-                ]),
+                        label: 'Total Tables',
+                        value: '$totalTables',
+                        icon: AppIcons.tableRestaurantOutlined,
+                        color: const Color(0xFF8B5CF6),
+                      ),
+                    ),
+                  ],
+                ),
 
                 const SizedBox(height: 22),
 
@@ -283,172 +306,211 @@ class _BranchesPageState extends State<BranchesPage> {
                       // Toolbar
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                        child: Row(children: [
-                          const Text('All Branches',
+                        child: Row(
+                          children: [
+                            const Text(
+                              'All Branches',
                               style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.dark)),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text('${_branches.length}',
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary)),
-                          ),
-                          const Spacer(),
-                          SizedBox(
-                            width: 230,
-                            height: 34,
-                            child: TextField(
-                              onChanged: (v) =>
-                                  setState(() => _search = v),
-                              style: const TextStyle(
-                                  fontSize: 12, color: AppColors.dark),
-                              decoration: InputDecoration(
-                                hintText: 'Search name, city, phone...',
-                                hintStyle: const TextStyle(
-                                    fontSize: 12, color: AppColors.grey),
-                                prefixIcon: const SvgIcon(AppIcons.search,
-                                    size: 15, color: AppColors.grey),
-                                filled: true,
-                                fillColor: AppColors.bg,
-                                contentPadding:
-                                const EdgeInsets.symmetric(
-                                    vertical: 0, horizontal: 10),
-                                border: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                        color: AppColors.border)),
-                                enabledBorder: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                        color: AppColors.border)),
-                                focusedBorder: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8),
-                                    borderSide: const BorderSide(
-                                        color: AppColors.primary,
-                                        width: 1.5)),
-                                isDense: true,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.dark,
                               ),
                             ),
-                          ),
-                        ]),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryLight,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${_branches.length}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            SizedBox(
+                              width: 230,
+                              height: 34,
+                              child: TextField(
+                                onChanged: (v) => setState(() => _search = v),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.dark,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Search name, city, phone...',
+                                  hintStyle: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.grey,
+                                  ),
+                                  prefixIcon: const SvgIcon(
+                                    AppIcons.search,
+                                    size: 15,
+                                    color: AppColors.grey,
+                                  ),
+                                  filled: true,
+                                  fillColor: AppColors.bg,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 0,
+                                    horizontal: 10,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.primary,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
 
                       filtered.isEmpty
                           ? Padding(
-                        padding: const EdgeInsets.all(48),
-                        child: Center(
-                          child: Column(children: [
-                            SvgIcon(AppIcons.storeOutlined,
-                                size: 40, color: AppColors.greyLt),
-                            const SizedBox(height: 10),
-                            Text(
-                              _search.isEmpty
-                                  ? 'No branches yet'
-                                  : 'No results found',
-                              style: const TextStyle(
-                                  color: AppColors.grey,
-                                  fontSize: 13),
-                            ),
-                          ]),
-                        ),
-                      )
-                          : Column(
-                        children: [
-                          // ── Header ──────────────────────────
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
-                            decoration: const BoxDecoration(
-                              color: AppColors.bg,
-                              border: Border(
-                                top: BorderSide(
-                                    color: AppColors.border,
-                                    width: 0.5),
-                                bottom: BorderSide(
-                                    color: AppColors.border,
-                                    width: 0.5),
+                              padding: const EdgeInsets.all(48),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    SvgIcon(
+                                      AppIcons.storeOutlined,
+                                      size: 40,
+                                      color: AppColors.greyLt,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      _search.isEmpty
+                                          ? 'No branches yet'
+                                          : 'No results found',
+                                      style: const TextStyle(
+                                        color: AppColors.grey,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            child: Row(children: [
-                              _Th(
-                                  label: 'Branch',
-                                  col: 'name',
-                                  flex: 3,
-                                  sortCol: _sortCol,
-                                  asc: _sortAsc,
-                                  onSort: _setSort),
-                              _Th(
-                                  label: 'City',
-                                  col: 'city',
-                                  flex: 2,
-                                  sortCol: _sortCol,
-                                  asc: _sortAsc,
-                                  onSort: _setSort),
-                              _Th(
-                                  label: 'Phone',
-                                  col: 'phone',
-                                  flex: 2,
-                                  sortCol: _sortCol,
-                                  asc: _sortAsc,
-                                  onSort: _setSort),
-                              _Th(
-                                  label: 'Tables',
-                                  col: 'tables',
-                                  flex: 1,
-                                  sortCol: _sortCol,
-                                  asc: _sortAsc,
-                                  onSort: _setSort),
-                              _Th(
-                                  label: 'Status',
-                                  col: 'status',
-                                  flex: 1,
-                                  sortCol: _sortCol,
-                                  asc: _sortAsc,
-                                  onSort: _setSort),
-                              const SizedBox(width: 80),
-                            ]),
-                          ),
+                            )
+                          : Column(
+                              children: [
+                                // ── Header ──────────────────────────
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.bg,
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: AppColors.border,
+                                        width: 0.5,
+                                      ),
+                                      bottom: BorderSide(
+                                        color: AppColors.border,
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      _Th(
+                                        label: 'Branch',
+                                        col: 'name',
+                                        flex: 3,
+                                        sortCol: _sortCol,
+                                        asc: _sortAsc,
+                                        onSort: _setSort,
+                                      ),
+                                      _Th(
+                                        label: 'City',
+                                        col: 'city',
+                                        flex: 2,
+                                        sortCol: _sortCol,
+                                        asc: _sortAsc,
+                                        onSort: _setSort,
+                                      ),
+                                      _Th(
+                                        label: 'Phone',
+                                        col: 'phone',
+                                        flex: 2,
+                                        sortCol: _sortCol,
+                                        asc: _sortAsc,
+                                        onSort: _setSort,
+                                      ),
+                                      _Th(
+                                        label: 'Tables',
+                                        col: 'tables',
+                                        flex: 1,
+                                        sortCol: _sortCol,
+                                        asc: _sortAsc,
+                                        onSort: _setSort,
+                                      ),
+                                      _Th(
+                                        label: 'Status',
+                                        col: 'status',
+                                        flex: 1,
+                                        sortCol: _sortCol,
+                                        asc: _sortAsc,
+                                        onSort: _setSort,
+                                      ),
+                                      const SizedBox(width: 80),
+                                    ],
+                                  ),
+                                ),
 
-                          // ── Rows ────────────────────────────
-                          ...filtered.asMap().entries.map(
-                                (e) => _BranchRow(
-                              branch: e.value,
-                              isEven: e.key % 2 == 0,
-                              onEdit: () => _openModal(e.value),
-                              onDelete: () =>
-                                  _confirmDelete(e.value),
-                              onToggle: () async {
-                                await widget.datasource
-                                    .toggleBranchStatus(
-                                    e.value.id,
-                                    !e.value.isOpen);
-                                setState(() {
-                                  _branches = _branches
-                                      .map((b) => b.id ==
-                                      e.value.id
-                                      ? b.copyWith(
-                                      isOpen: !b.isOpen)
-                                      : b)
-                                      .toList();
-                                });
-                              },
+                                // ── Rows ────────────────────────────
+                                ...filtered.asMap().entries.map(
+                                  (e) => _BranchRow(
+                                    branch: e.value,
+                                    isEven: e.key % 2 == 0,
+                                    onEdit: () => _openModal(e.value),
+                                    onDelete: () => _confirmDelete(e.value),
+                                    onToggle: () async {
+                                      await widget.datasource
+                                          .toggleBranchStatus(
+                                            e.value.id,
+                                            !e.value.isOpen,
+                                          );
+                                      setState(() {
+                                        _branches = _branches
+                                            .map(
+                                              (b) => b.id == e.value.id
+                                                  ? b.copyWith(
+                                                      isOpen: !b.isOpen,
+                                                    )
+                                                  : b,
+                                            )
+                                            .toList();
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -484,22 +546,27 @@ class _Th extends StatelessWidget {
       flex: flex,
       child: GestureDetector(
         onTap: () => onSort(col),
-        child: Row(children: [
-          Text(label,
+        child: Row(
+          children: [
+            Text(
+              label,
               style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: active ? AppColors.primary : AppColors.grey,
-                  letterSpacing: 0.3)),
-          const SizedBox(width: 3),
-          SvgIcon(
-            active
-                ? (asc ? AppIcons.arrowUpward : AppIcons.arrowDownward)
-                : AppIcons.unfoldMore,
-            size: 12,
-            color: active ? AppColors.primary : AppColors.greyLt,
-          ),
-        ]),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: active ? AppColors.primary : AppColors.grey,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(width: 3),
+            SvgIcon(
+              active
+                  ? (asc ? AppIcons.arrowUpward : AppIcons.arrowDownward)
+                  : AppIcons.unfoldMore,
+              size: 12,
+              color: active ? AppColors.primary : AppColors.greyLt,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -535,8 +602,7 @@ class _BranchRowState extends State<_BranchRow> {
       onExit: (_) => setState(() => _hover = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 100),
-        padding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         decoration: BoxDecoration(
           color: _hover
               ? b.color.withOpacity(0.04)
@@ -544,79 +610,102 @@ class _BranchRowState extends State<_BranchRow> {
               ? AppColors.white
               : AppColors.bg.withOpacity(0.4),
           border: const Border(
-              bottom: BorderSide(color: AppColors.border, width: 0.5)),
+            bottom: BorderSide(color: AppColors.border, width: 0.5),
+          ),
         ),
         child: Row(
           children: [
             // ── Branch name + color dot ──────────────────────────────
             Expanded(
               flex: 3,
-              child: Row(children: [
-                Container(
+              child: Row(
+                children: [
+                  Container(
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                        color: b.color, shape: BoxShape.circle)),
-                const SizedBox(width: 8),
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
+                      color: b.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
                       color: b.color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(7)),
-                  child: SvgIcon(AppIcons.storeOutlined,
-                      color: b.color, size: 14),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: SvgIcon(
+                      AppIcons.storeOutlined,
+                      color: b.color,
+                      size: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(b.name,
-                            style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.dark),
-                            overflow: TextOverflow.ellipsis),
-                        Text(b.ntn.isEmpty ? '—' : b.ntn,
-                            style: const TextStyle(
-                                fontSize: 10, color: AppColors.grey)),
-                      ]),
-                ),
-              ]),
+                        Text(
+                          b.name,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.dark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          b.ntn.isEmpty ? '—' : b.ntn,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppColors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // ── City ────────────────────────────────────────────────
             Expanded(
               flex: 2,
-              child: Text(b.city,
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.dark)),
+              child: Text(
+                b.city,
+                style: const TextStyle(fontSize: 12, color: AppColors.dark),
+              ),
             ),
 
             // ── Phone ───────────────────────────────────────────────
             Expanded(
               flex: 2,
-              child: Text(b.phone.isEmpty ? '—' : b.phone,
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.dark)),
+              child: Text(
+                b.phone.isEmpty ? '—' : b.phone,
+                style: const TextStyle(fontSize: 12, color: AppColors.dark),
+              ),
             ),
 
             // ── Tables ──────────────────────────────────────────────
             Expanded(
               flex: 1,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                    color: AppColors.infoLt,
-                    borderRadius: BorderRadius.circular(6)),
-                child: Text('${b.tables}',
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.info),
-                    textAlign: TextAlign.center),
+                  color: AppColors.infoLt,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${b.tables}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.info,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
 
@@ -636,9 +725,7 @@ class _BranchRowState extends State<_BranchRow> {
                       icon: b.isOpen
                           ? AppIcons.toggleOnRounded
                           : AppIcons.toggleOffRounded,
-                      color: b.isOpen
-                          ? AppColors.success
-                          : AppColors.grey,
+                      color: b.isOpen ? AppColors.success : AppColors.grey,
                       tooltip: b.isOpen ? 'Mark Closed' : 'Mark Open',
                       onTap: widget.onToggle,
                     ),
@@ -691,8 +778,9 @@ class _IconBtn extends StatelessWidget {
         width: 24,
         height: 24,
         decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(6)),
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(6),
+        ),
         child: SvgIcon(icon, size: 13, color: color),
       ),
     ),

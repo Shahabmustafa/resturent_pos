@@ -91,20 +91,34 @@ class BranchReportDatasource {
 
   /// Figures for every branch over [from]..[to], fetched in parallel. A branch
   /// that fails comes back with [BranchReport.error] instead of failing all.
-  Future<List<BranchReport>> fetch(List<Branch> branches, DateTime from, DateTime to) {
+  Future<List<BranchReport>> fetch(
+    List<Branch> branches,
+    DateTime from,
+    DateTime to,
+  ) {
     final offset = DateTime.now().timeZoneOffset.inMinutes;
-    return Future.wait(branches.map((b) async {
-      try {
-        final res = await _db.rpc('dashboard_stats', params: {
-          'p_branch_id': b.id,
-          'p_from': from.toUtc().toIso8601String(),
-          'p_to': to.toUtc().toIso8601String(),
-          'p_utc_offset_min': offset,
-        });
-        return BranchReport.fromStats(b, Map<String, dynamic>.from(res as Map));
-      } catch (e) {
-        return BranchReport(branch: b, error: e.toString().replaceAll('Exception: ', ''));
-      }
-    }));
+    return Future.wait(
+      branches.map((b) async {
+        try {
+          final res = await _db.rpc(
+            'dashboard_stats',
+            params: {
+              'p_from': from.toUtc().toIso8601String(),
+              'p_to': to.toUtc().toIso8601String(),
+              'p_utc_offset_min': offset,
+            },
+          );
+          return BranchReport.fromStats(
+            b,
+            Map<String, dynamic>.from(res as Map),
+          );
+        } catch (e) {
+          return BranchReport(
+            branch: b,
+            error: e.toString().replaceAll('Exception: ', ''),
+          );
+        }
+      }),
+    );
   }
 }

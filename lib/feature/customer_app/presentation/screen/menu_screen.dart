@@ -35,7 +35,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
     // Null = "All": every category as its own section.
     final category = menu?.category(ref.watch(menuCategoryProvider));
-    final sections = menu == null ? const <_Section>[] : _sectionsFor(menu, category, q);
+    final sections = menu == null
+        ? const <_Section>[]
+        : _sectionsFor(menu, category, q);
 
     final width = MediaQuery.sizeOf(context).width;
     // Same content column as Home: side gutter, then centred at the max width.
@@ -65,7 +67,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       hintText: 'Search the menu…',
                       prefixIcon: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 14),
-                        child: SvgIcon(AppIcons.searchRounded, size: 20, color: CColors.muted),
+                        child: SvgIcon(
+                          AppIcons.searchRounded,
+                          size: 20,
+                          color: CColors.muted,
+                        ),
                       ),
                       prefixIconConstraints: const BoxConstraints(minWidth: 48),
                       suffixIcon: _query.isEmpty
@@ -75,7 +81,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                 _search.clear();
                                 _query = '';
                               }),
-                              icon: const SvgIcon(AppIcons.closeRounded, size: 18, color: CColors.muted),
+                              icon: const SvgIcon(
+                                AppIcons.closeRounded,
+                                size: 18,
+                                color: CColors.muted,
+                              ),
                             ),
                     ),
                   ),
@@ -88,13 +98,18 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           SliverFillRemaining(
             hasScrollBody: false,
             child: menuAsync.hasError
-                ? MenuStatus.error(error: '${menuAsync.error}', onRetry: () => ref.invalidate(customerMenuProvider))
+                ? MenuStatus.error(
+                    error: '${menuAsync.error}',
+                    onRetry: () => ref.invalidate(customerMenuProvider),
+                  )
                 : const MenuStatus.loading(),
           )
         else if (menu.dishes.isEmpty)
           const SliverFillRemaining(
             hasScrollBody: false,
-            child: MenuStatus.empty('The menu is empty right now — new items are coming soon.'),
+            child: MenuStatus.empty(
+              'The menu is empty right now — new items are coming soon.',
+            ),
           ),
         // Chips stay pinned while scrolling so switching category is always one tap.
         if (menu != null && menu.categories.isNotEmpty)
@@ -106,7 +121,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 categories: menu.categories,
                 showAll: true,
                 selected: category?.id,
-                onSelected: (id) => ref.read(menuCategoryProvider.notifier).state = id,
+                onSelected: (id) =>
+                    ref.read(menuCategoryProvider.notifier).state = id,
               ),
             ),
           ),
@@ -118,9 +134,16 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SvgIcon(AppIcons.searchRounded, size: 40, color: CColors.mutedLight),
+                    const SvgIcon(
+                      AppIcons.searchRounded,
+                      size: 40,
+                      color: CColors.mutedLight,
+                    ),
                     const SizedBox(height: 10),
-                    Text('No dishes match "$_query"', style: CText.body(15, color: CColors.muted)),
+                    Text(
+                      'No dishes match "$_query"',
+                      style: CText.body(15, color: CColors.muted),
+                    ),
                   ],
                 ),
               ),
@@ -162,12 +185,20 @@ class _ChipsHeader extends SliverPersistentHeaderDelegate {
   double get maxExtent => _height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return AnimatedContainer(
       duration: Duration.zero,
       decoration: BoxDecoration(
         color: CColors.cream,
-        border: Border(bottom: BorderSide(color: overlapsContent ? CColors.line : Colors.transparent)),
+        border: Border(
+          bottom: BorderSide(
+            color: overlapsContent ? CColors.line : Colors.transparent,
+          ),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(gutter, 14, gutter, 14),
       child: child,
@@ -175,7 +206,8 @@ class _ChipsHeader extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(_ChipsHeader old) => old.gutter != gutter || old.child != child;
+  bool shouldRebuild(_ChipsHeader old) =>
+      old.gutter != gutter || old.child != child;
 }
 
 /// A titled group of dishes on the menu page.
@@ -190,26 +222,39 @@ class _Section {
 String _countLabel(int n) => '$n ${n == 1 ? 'dish' : 'dishes'}';
 
 /// Search results, one chosen category, or every category (plus uncategorised dishes).
-List<_Section> _sectionsFor(CustomerMenu menu, MenuCategory? category, String query) {
+List<_Section> _sectionsFor(
+  CustomerMenu menu,
+  MenuCategory? category,
+  String query,
+) {
   if (query.isNotEmpty) {
-    final hits = menu.dishes.where((d) => d.name.toLowerCase().contains(query)).toList();
-    return hits.isEmpty ? const [] : [_Section('Search results', _countLabel(hits.length), hits)];
+    final hits = menu.dishes
+        .where((d) => d.name.toLowerCase().contains(query))
+        .toList();
+    return hits.isEmpty
+        ? const []
+        : [_Section('Search results', _countLabel(hits.length), hits)];
   }
   final cats = category == null ? menu.categories : [category];
   final sections = [
     for (final c in cats)
-      if (menu.byCategory(c.id).isNotEmpty) _Section(c.name, _tagline(c), menu.byCategory(c.id)),
+      if (menu.byCategory(c.id).isNotEmpty)
+        _Section(c.name, _tagline(c), menu.byCategory(c.id)),
   ];
   if (category == null) {
     final known = {for (final c in menu.categories) c.id};
-    final other = menu.dishes.where((d) => !known.contains(d.categoryId)).toList();
-    if (other.isNotEmpty) sections.add(_Section('More', _countLabel(other.length), other));
+    final other = menu.dishes
+        .where((d) => !known.contains(d.categoryId))
+        .toList();
+    if (other.isNotEmpty)
+      sections.add(_Section('More', _countLabel(other.length), other));
   }
   return sections;
 }
 
-String _tagline(MenuCategory c) =>
-    c.tagline.isEmpty ? _countLabel(c.dishCount) : '${c.tagline} · ${_countLabel(c.dishCount)}';
+String _tagline(MenuCategory c) => c.tagline.isEmpty
+    ? _countLabel(c.dishCount)
+    : '${c.tagline} · ${_countLabel(c.dishCount)}';
 
 class _SectionHeader extends StatelessWidget {
   final _Section section;

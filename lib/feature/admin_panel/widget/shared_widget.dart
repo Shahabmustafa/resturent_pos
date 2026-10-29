@@ -73,49 +73,64 @@ class AdminTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding:
-    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
     decoration: const BoxDecoration(
       color: AppColors.white,
-      border: Border(
-          bottom: BorderSide(color: AppColors.border, width: 0.5)),
+      border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
     ),
-    child: Row(children: [
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.dark)),
-          Text(subtitle,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontSize: 11, color: AppColors.grey)),
-        ]),
-      ),
-      ...actions,
-      if (actions.isNotEmpty) const SizedBox(width: 12),
-      if (MediaQuery.sizeOf(context).width >= 700) Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppColors.primaryLt,
-          borderRadius: BorderRadius.circular(7),
+                  color: AppColors.dark,
+                ),
+              ),
+              Text(
+                subtitle,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, color: AppColors.grey),
+              ),
+            ],
+          ),
         ),
-        child: Row(children: [
-          const SvgIcon(AppIcons.calendarTodayOutlined,
-              size: 12, color: AppColors.primary),
-          const SizedBox(width: 5),
-          Text(DateFormat('MMM d, yyyy').format(DateTime.now()),
-              style: const TextStyle(
-                  fontSize: 11,
+        ...actions,
+        if (actions.isNotEmpty) const SizedBox(width: 12),
+        if (MediaQuery.sizeOf(context).width >= 700)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLt,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Row(
+              children: [
+                const SvgIcon(
+                  AppIcons.calendarTodayOutlined,
+                  size: 12,
                   color: AppColors.primary,
-                  fontWeight: FontWeight.w500)),
-        ]),
-      ),
-    ]),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  DateFormat('MMM d, yyyy').format(DateTime.now()),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    ),
   );
 }
 
@@ -135,25 +150,33 @@ class KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppCard(
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SvgIcon(icon, size: 17, color: color),
         ),
-        child: SvgIcon(icon, size: 17, color: color),
-      ),
-      const SizedBox(height: 12),
-      Text(value,
+        const SizedBox(height: 12),
+        Text(
+          value,
           style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.dark)),
-      const SizedBox(height: 2),
-      Text(label,
-          style: const TextStyle(fontSize: 11, color: AppColors.grey)),
-    ]),
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.dark,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: AppColors.grey),
+        ),
+      ],
+    ),
   );
 }

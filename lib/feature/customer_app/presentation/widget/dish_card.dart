@@ -23,7 +23,11 @@ class DishCard extends ConsumerWidget {
           color: CColors.paper,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: hovered ? CColors.gold.withValues(alpha: .6) : CColors.line),
+            side: BorderSide(
+              color: hovered
+                  ? CColors.gold.withValues(alpha: .6)
+                  : CColors.line,
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -35,18 +39,28 @@ class DishCard extends ConsumerWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      TiltDepth(depth: 5, child: ZoomImage(dish.image, zoomed: hovered)),
+                      TiltDepth(
+                        depth: 5,
+                        child: ZoomImage(dish.image, zoomed: hovered),
+                      ),
                       if (dish.isSignature)
                         Positioned(
                           top: 10,
                           left: 10,
                           child: Container(
                             padding: const EdgeInsets.fromLTRB(7, 4, 9, 4),
-                            decoration: BoxDecoration(color: CColors.rust, borderRadius: BorderRadius.circular(30)),
+                            decoration: BoxDecoration(
+                              color: CColors.rust,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const SvgIcon(AppIcons.starRounded, size: 11, color: Colors.white),
+                                const SvgIcon(
+                                  AppIcons.starRounded,
+                                  size: 11,
+                                  color: Colors.white,
+                                ),
                                 const SizedBox(width: 3),
                                 Text(
                                   'SIGNATURE',
@@ -75,7 +89,12 @@ class DishCard extends ConsumerWidget {
                           dish.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: CText.body(13.5, color: CColors.ink, weight: FontWeight.w600, height: 1.3),
+                          style: CText.body(
+                            13.5,
+                            color: CColors.ink,
+                            weight: FontWeight.w600,
+                            height: 1.3,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -87,11 +106,22 @@ class DishCard extends ConsumerWidget {
                                 dish.description,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: CText.body(12, color: CColors.muted, height: 1.45),
+                                style: CText.body(
+                                  12,
+                                  color: CColors.muted,
+                                  height: 1.45,
+                                ),
                               )
                             : dish.hasOptions
                             ? _SizeTags(options: dish.options)
-                            : Text('Cooked fresh to order', style: CText.body(12, color: CColors.muted, height: 1.45)),
+                            : Text(
+                                'Cooked fresh to order',
+                                style: CText.body(
+                                  12,
+                                  color: CColors.muted,
+                                  height: 1.45,
+                                ),
+                              ),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -102,7 +132,9 @@ class DishCard extends ConsumerWidget {
                               if (dish.hasOptions) {
                                 showDishDialog(context, dish);
                               } else {
-                                ref.read(cartProvider.notifier).add(dish, dish.options.first);
+                                ref
+                                    .read(cartProvider.notifier)
+                                    .add(dish, dish.options.first);
                                 showAddedSnack(context, dish.name);
                               }
                             },
@@ -149,7 +181,9 @@ class _SizeTags extends StatelessWidget {
         var used = 0.0;
         var fit = 0;
         for (var i = 0; i < options.length; i++) {
-          final reserve = i == options.length - 1 ? 0.0 : _tagWidth('+${options.length - i - 1}', scaler);
+          final reserve = i == options.length - 1
+              ? 0.0
+              : _tagWidth('+${options.length - i - 1}', scaler);
           final w = _tagWidth(options[i].label, scaler);
           if (used + w + reserve > c.maxWidth) break;
           used += w;
@@ -166,7 +200,11 @@ class _SizeTags extends StatelessWidget {
           ),
           child: Text(
             text,
-            style: CText.body(11, color: CColors.olive, weight: FontWeight.w600),
+            style: CText.body(
+              11,
+              color: CColors.olive,
+              weight: FontWeight.w600,
+            ),
           ),
         );
         // A non-scrolling horizontal view clips the row, so a rounding difference
@@ -176,7 +214,10 @@ class _SizeTags extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: [for (final o in options.take(fit)) tag(o.label), if (extra > 0) tag('+$extra')],
+            children: [
+              for (final o in options.take(fit)) tag(o.label),
+              if (extra > 0) tag('+$extra'),
+            ],
           ),
         );
       },
@@ -238,7 +279,12 @@ class _AddButton extends StatelessWidget {
 void showAddedSnack(BuildContext context, String name) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(duration: const Duration(milliseconds: 1600), content: Text('$name added to cart')));
+    ..showSnackBar(
+      SnackBar(
+        duration: const Duration(milliseconds: 1600),
+        content: Text('$name added to cart'),
+      ),
+    );
 }
 
 Future<void> showDishDialog(BuildContext context, Dish dish) {
@@ -247,7 +293,6 @@ Future<void> showDishDialog(BuildContext context, Dish dish) {
     builder: (_) => Dialog(
       backgroundColor: CColors.paper,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
@@ -274,14 +319,20 @@ class _DishDialogState extends ConsumerState<_DishDialog> {
   Widget build(BuildContext context) {
     final dish = widget.dish;
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.85),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+      ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
-                SizedBox(height: 240, width: double.infinity, child: FoodImage(dish.image)),
+                SizedBox(
+                  height: 240,
+                  width: double.infinity,
+                  child: FoodImage(dish.image),
+                ),
                 Positioned(
                   top: 14,
                   right: 14,
@@ -293,7 +344,11 @@ class _DishDialogState extends ConsumerState<_DishDialog> {
                       onTap: () => Navigator.pop(context),
                       child: const Padding(
                         padding: EdgeInsets.all(8),
-                        child: SvgIcon(AppIcons.closeRounded, size: 20, color: CColors.ink),
+                        child: SvgIcon(
+                          AppIcons.closeRounded,
+                          size: 20,
+                          color: CColors.ink,
+                        ),
                       ),
                     ),
                   ),
@@ -307,30 +362,53 @@ class _DishDialogState extends ConsumerState<_DishDialog> {
                 children: [
                   Text(dish.name, style: CText.display(24)),
                   const SizedBox(height: 8),
-                  Text(dish.description, style: CText.body(14.5, color: CColors.muted, height: 1.6)),
+                  Text(
+                    dish.description,
+                    style: CText.body(14.5, color: CColors.muted, height: 1.6),
+                  ),
                   const SizedBox(height: 14),
-                  Wrap(spacing: 8, runSpacing: 8, children: const [_Tag('100% Halal'), _Tag('Cooked fresh to order')]),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: const [
+                      _Tag('100% Halal'),
+                      _Tag('Cooked fresh to order'),
+                    ],
+                  ),
                   if (dish.hasOptions) ...[
                     const SizedBox(height: 22),
                     Text(
                       'Choose size',
-                      style: CText.body(14, color: CColors.ink, weight: FontWeight.w600),
+                      style: CText.body(
+                        14,
+                        color: CColors.ink,
+                        weight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     for (final o in dish.options)
-                      _OptionTile(option: o, selected: o == _option, onTap: () => setState(() => _option = o)),
+                      _OptionTile(
+                        option: o,
+                        selected: o == _option,
+                        onTap: () => setState(() => _option = o),
+                      ),
                   ],
                   const SizedBox(height: 22),
                   Row(
                     children: [
-                      QtyStepper(qty: _qty, onChanged: (v) => setState(() => _qty = v.clamp(1, 99))),
+                      QtyStepper(
+                        qty: _qty,
+                        onChanged: (v) => setState(() => _qty = v.clamp(1, 99)),
+                      ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: PillButton(
                           label: 'Add  •  ${formatPrice(_option.price * _qty)}',
                           expand: true,
                           onPressed: () {
-                            ref.read(cartProvider.notifier).add(dish, _option, qty: _qty);
+                            ref
+                                .read(cartProvider.notifier)
+                                .add(dish, _option, qty: _qty);
                             Navigator.pop(context);
                             showAddedSnack(context, dish.name);
                           },
@@ -357,7 +435,10 @@ class _Tag extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: CColors.cream, borderRadius: BorderRadius.circular(30)),
+      decoration: BoxDecoration(
+        color: CColors.cream,
+        borderRadius: BorderRadius.circular(30),
+      ),
       child: Text(
         label,
         style: CText.body(12, color: CColors.olive, weight: FontWeight.w600),
@@ -371,7 +452,11 @@ class _OptionTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _OptionTile({required this.option, required this.selected, required this.onTap});
+  const _OptionTile({
+    required this.option,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -384,24 +469,38 @@ class _OptionTile extends StatelessWidget {
           duration: Duration.zero,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? CColors.goldPale.withValues(alpha: 0.45) : CColors.paper,
+            color: selected
+                ? CColors.goldPale.withValues(alpha: 0.45)
+                : CColors.paper,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: selected ? CColors.gold : CColors.line, width: selected ? 1.5 : 1),
+            border: Border.all(
+              color: selected ? CColors.gold : CColors.line,
+              width: selected ? 1.5 : 1,
+            ),
           ),
           child: Row(
             children: [
               SvgIcon(
-                selected ? AppIcons.checkCircleRounded : AppIcons.radioButtonUncheckedRounded,
+                selected
+                    ? AppIcons.checkCircleRounded
+                    : AppIcons.radioButtonUncheckedRounded,
                 size: 20,
                 color: selected ? CColors.rust : CColors.mutedLight,
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(option.label, style: CText.body(14.5, weight: FontWeight.w500)),
+                child: Text(
+                  option.label,
+                  style: CText.body(14.5, weight: FontWeight.w500),
+                ),
               ),
               Text(
                 formatPrice(option.price),
-                style: CText.body(14.5, color: CColors.ink, weight: FontWeight.w600),
+                style: CText.body(
+                  14.5,
+                  color: CColors.ink,
+                  weight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -416,7 +515,12 @@ class QtyStepper extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final bool compact;
 
-  const QtyStepper({super.key, required this.qty, required this.onChanged, this.compact = false});
+  const QtyStepper({
+    super.key,
+    required this.qty,
+    required this.onChanged,
+    this.compact = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -445,7 +549,11 @@ class QtyStepper extends StatelessWidget {
             child: Text(
               '$qty',
               textAlign: TextAlign.center,
-              style: CText.body(compact ? 13.5 : 15, color: CColors.ink, weight: FontWeight.w600),
+              style: CText.body(
+                compact ? 13.5 : 15,
+                color: CColors.ink,
+                weight: FontWeight.w600,
+              ),
             ),
           ),
           btn(AppIcons.addRounded, 1),

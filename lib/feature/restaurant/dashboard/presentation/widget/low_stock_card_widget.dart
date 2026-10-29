@@ -79,7 +79,7 @@ class LowStockCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ..._items.map(
-                (item) => Padding(
+            (item) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
                 children: [

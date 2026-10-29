@@ -21,7 +21,6 @@ Future<void> confirmSwitchToRider(BuildContext context) async {
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: CColors.paper,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text('Switch to Rider app?', style: CText.display(22)),
       content: Text(
         'You will be logged out of your customer account and the Rider app will open.',
@@ -32,7 +31,11 @@ Future<void> confirmSwitchToRider(BuildContext context) async {
           onPressed: () => Navigator.pop(ctx, false),
           child: Text(
             'Cancel',
-            style: CText.body(14, color: CColors.muted, weight: FontWeight.w600),
+            style: CText.body(
+              14,
+              color: CColors.muted,
+              weight: FontWeight.w600,
+            ),
           ),
         ),
         TextButton(
@@ -86,7 +89,9 @@ class ProfileScreen extends ConsumerWidget {
                     label: 'View My Orders',
                     small: true,
                     icon: AppIcons.arrowForwardRounded,
-                    onPressed: () => ref.read(customerTabProvider.notifier).state = CustomerTab.orders,
+                    onPressed: () =>
+                        ref.read(customerTabProvider.notifier).state =
+                            CustomerTab.orders,
                   ),
                   PillButton(
                     label: 'Log Out',
@@ -103,10 +108,18 @@ class ProfileScreen extends ConsumerWidget {
               Center(
                 child: TextButton.icon(
                   onPressed: () => confirmSwitchToRider(context),
-                  icon: const SvgIcon(AppIcons.deliveryDiningRounded, size: 18, color: CColors.muted),
+                  icon: const SvgIcon(
+                    AppIcons.deliveryDiningRounded,
+                    size: 18,
+                    color: CColors.muted,
+                  ),
                   label: Text(
                     'Delivery rider? Switch to the Rider app',
-                    style: CText.body(13.5, color: CColors.muted, weight: FontWeight.w600),
+                    style: CText.body(
+                      13.5,
+                      color: CColors.muted,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -122,7 +135,6 @@ class ProfileScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: CColors.paper,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Log out?', style: CText.display(22)),
         content: Text(
           'You can log back in any time to order and track your orders.',
@@ -133,14 +145,22 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Cancel',
-              style: CText.body(14, color: CColors.muted, weight: FontWeight.w600),
+              style: CText.body(
+                14,
+                color: CColors.muted,
+                weight: FontWeight.w600,
+              ),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               'Log Out',
-              style: CText.body(14, color: CColors.rust, weight: FontWeight.w700),
+              style: CText.body(
+                14,
+                color: CColors.rust,
+                weight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -234,7 +254,10 @@ class _AvatarEditorState extends State<_AvatarEditor> {
     ..showSnackBar(SnackBar(content: Text(text)));
 
   Future<void> _upload() async {
-    const images = XTypeGroup(label: 'images', extensions: ['jpg', 'jpeg', 'png', 'webp']);
+    const images = XTypeGroup(
+      label: 'images',
+      extensions: ['jpg', 'jpeg', 'png', 'webp'],
+    );
     final file = await openFile(acceptedTypeGroups: [images]);
     if (file == null) return;
     final bytes = await file.readAsBytes();
@@ -284,12 +307,18 @@ class _AvatarEditorState extends State<_AvatarEditor> {
           if (_busy)
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(color: Colors.black.withValues(alpha: .45), shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: .45),
+                  shape: BoxShape.circle,
+                ),
                 alignment: Alignment.center,
                 child: const SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -300,17 +329,25 @@ class _AvatarEditorState extends State<_AvatarEditor> {
               enabled: !_busy,
               tooltip: 'Change photo',
               color: CColors.paper,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               onSelected: (v) => v == 'upload' ? _upload() : _remove(),
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'upload',
-                  child: Text(hasPhoto ? 'Change photo' : 'Upload photo', style: CText.body(14)),
+                  child: Text(
+                    hasPhoto ? 'Change photo' : 'Upload photo',
+                    style: CText.body(14),
+                  ),
                 ),
                 if (hasPhoto)
                   PopupMenuItem(
                     value: 'remove',
-                    child: Text('Remove photo', style: CText.body(14, color: CColors.rust)),
+                    child: Text(
+                      'Remove photo',
+                      style: CText.body(14, color: CColors.rust),
+                    ),
                   ),
               ],
               child: Container(
@@ -320,7 +357,11 @@ class _AvatarEditorState extends State<_AvatarEditor> {
                   shape: BoxShape.circle,
                   border: Border.all(color: CColors.ink, width: 2),
                 ),
-                child: const SvgIcon(AppIcons.editRounded, size: 15, color: Colors.white),
+                child: const SvgIcon(
+                  AppIcons.editRounded,
+                  size: 15,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -365,7 +406,11 @@ class _Stats extends ConsumerWidget {
       children: [
         tile(AppIcons.receiptLongRounded, '${orders.length}', 'Orders'),
         const SizedBox(width: 10),
-        tile(AppIcons.accountBalanceWalletRounded, formatPrice(spent), 'Total spent'),
+        tile(
+          AppIcons.accountBalanceWalletRounded,
+          formatPrice(spent),
+          'Total spent',
+        ),
         const SizedBox(width: 10),
         tile(AppIcons.starRounded, '$reviews', 'Reviews'),
       ],
@@ -407,7 +452,11 @@ class _DetailsFormState extends State<_DetailsForm> {
       _saved = false;
     });
     try {
-      await CustomerAuth.updateProfile(name: _name.text, phone: _phone.text, address: _address.text);
+      await CustomerAuth.updateProfile(
+        name: _name.text,
+        phone: _phone.text,
+        address: _address.text,
+      );
       if (mounted) setState(() => _saved = true);
     } catch (e) {
       if (mounted) setState(() => _error = '$e');
@@ -428,7 +477,10 @@ class _DetailsFormState extends State<_DetailsForm> {
           children: [
             Text('Personal details', style: CText.display(19)),
             const SizedBox(height: 4),
-            Text('Used to fill in checkout for you.', style: CText.body(13, color: CColors.muted)),
+            Text(
+              'Used to fill in checkout for you.',
+              style: CText.body(13, color: CColors.muted),
+            ),
             const _Label('Full name'),
             TextFormField(
               controller: _name,
@@ -442,14 +494,18 @@ class _DetailsFormState extends State<_DetailsForm> {
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(hintText: '03xx xxxxxxx'),
               validator: (v) =>
-                  (v ?? '').replaceAll(RegExp(r'\D'), '').length < 10 ? 'Enter a valid phone number' : null,
+                  (v ?? '').replaceAll(RegExp(r'\D'), '').length < 10
+                  ? 'Enter a valid phone number'
+                  : null,
             ),
             const _Label('Default delivery address'),
             TextFormField(
               controller: _address,
               enabled: !_busy,
               maxLines: 2,
-              decoration: const InputDecoration(hintText: 'House, street, area'),
+              decoration: const InputDecoration(
+                hintText: 'House, street, area',
+              ),
             ),
             if (_error != null) _Notice(_error!, error: true),
             if (_saved) const _Notice('Your details have been saved.'),
@@ -516,7 +572,11 @@ class _PasswordFormState extends State<_PasswordForm> {
     final eye = IconButton(
       tooltip: _show ? 'Hide password' : 'Show password',
       onPressed: () => setState(() => _show = !_show),
-      icon: SvgIcon(_show ? AppIcons.visibilityOffRounded : AppIcons.visibilityRounded, size: 20, color: CColors.muted),
+      icon: SvgIcon(
+        _show ? AppIcons.visibilityOffRounded : AppIcons.visibilityRounded,
+        size: 20,
+        color: CColors.muted,
+      ),
     );
     return Container(
       padding: const EdgeInsets.all(20),
@@ -532,15 +592,20 @@ class _PasswordFormState extends State<_PasswordForm> {
               controller: _password,
               enabled: !_busy,
               obscureText: !_show,
-              decoration: InputDecoration(hintText: 'At least 6 characters', suffixIcon: eye),
-              validator: (v) => (v ?? '').length < 6 ? 'Use at least 6 characters' : null,
+              decoration: InputDecoration(
+                hintText: 'At least 6 characters',
+                suffixIcon: eye,
+              ),
+              validator: (v) =>
+                  (v ?? '').length < 6 ? 'Use at least 6 characters' : null,
             ),
             const _Label('Confirm new password'),
             TextFormField(
               controller: _confirm,
               enabled: !_busy,
               obscureText: !_show,
-              validator: (v) => v != _password.text ? 'Passwords do not match' : null,
+              validator: (v) =>
+                  v != _password.text ? 'Passwords do not match' : null,
             ),
             if (_error != null) _Notice(_error!, error: true),
             if (_saved) const _Notice('Your password has been changed.'),
@@ -570,9 +635,18 @@ class _SignedOut extends StatelessWidget {
     decoration: _card,
     child: Column(
       children: [
-        const IconBadge(AppIcons.personRounded, size: 64, background: CColors.cream, color: CColors.gold),
+        const IconBadge(
+          AppIcons.personRounded,
+          size: 64,
+          background: CColors.cream,
+          color: CColors.gold,
+        ),
         const SizedBox(height: 16),
-        Text('Log in to see your profile', textAlign: TextAlign.center, style: CText.display(22)),
+        Text(
+          'Log in to see your profile',
+          textAlign: TextAlign.center,
+          style: CText.display(22),
+        ),
         const SizedBox(height: 6),
         Text(
           'Manage your details, saved address and password.',
@@ -580,7 +654,11 @@ class _SignedOut extends StatelessWidget {
           style: CText.body(14, color: CColors.muted, height: 1.5),
         ),
         const SizedBox(height: 18),
-        PillButton(label: 'Login', small: true, onPressed: () => showCustomerAuthDialog(context)),
+        PillButton(
+          label: 'Login',
+          small: true,
+          onPressed: () => showCustomerAuthDialog(context),
+        ),
       ],
     ),
   );
@@ -620,10 +698,17 @@ class _Notice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SvgIcon(error ? AppIcons.warningRounded : AppIcons.checkCircleRounded, size: 18, color: color),
+          SvgIcon(
+            error ? AppIcons.warningRounded : AppIcons.checkCircleRounded,
+            size: 18,
+            color: color,
+          ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: CText.body(13, color: color, height: 1.45)),
+            child: Text(
+              text,
+              style: CText.body(13, color: color, height: 1.45),
+            ),
           ),
         ],
       ),

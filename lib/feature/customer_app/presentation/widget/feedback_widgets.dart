@@ -20,19 +20,25 @@ class StarRow extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       for (var i = 1; i <= 5; i++)
-        SvgIcon(AppIcons.starRounded, size: size, color: i <= rating ? CColors.gold : CColors.line),
+        SvgIcon(
+          AppIcons.starRounded,
+          size: size,
+          color: i <= rating ? CColors.gold : CColors.line,
+        ),
     ],
   );
 }
 
 /// Asks the customer to rate a completed order. Resolves to true once saved.
-Future<bool> showFeedbackDialog(BuildContext context, CustomerOrder order) async {
+Future<bool> showFeedbackDialog(
+  BuildContext context,
+  CustomerOrder order,
+) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (_) => Dialog(
       backgroundColor: CColors.paper,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
         child: _FeedbackForm(order: order),
@@ -73,12 +79,20 @@ class _FeedbackFormState extends ConsumerState<_FeedbackForm> {
     try {
       await ref
           .read(customerDatasourceProvider)
-          .submitFeedback(orderId: widget.order.id, rating: _rating, comment: _comment.text);
+          .submitFeedback(
+            orderId: widget.order.id,
+            rating: _rating,
+            comment: _comment.text,
+          );
       ref.invalidate(myOrdersProvider);
       ref.invalidate(publicFeedbackProvider);
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      setState(() => _error = e is PostgrestException ? e.message : 'Couldn\'t send your feedback. Please try again.');
+      setState(
+        () => _error = e is PostgrestException
+            ? e.message
+            : 'Couldn\'t send your feedback. Please try again.',
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -93,11 +107,17 @@ class _FeedbackFormState extends ConsumerState<_FeedbackForm> {
         children: [
           Row(
             children: [
-              Expanded(child: Text('How was your order?', style: CText.display(26))),
+              Expanded(
+                child: Text('How was your order?', style: CText.display(26)),
+              ),
               IconButton(
                 tooltip: 'Close',
                 onPressed: _busy ? null : () => Navigator.pop(context, false),
-                icon: const SvgIcon(AppIcons.closeRounded, size: 22, color: CColors.muted),
+                icon: const SvgIcon(
+                  AppIcons.closeRounded,
+                  size: 22,
+                  color: CColors.muted,
+                ),
               ),
             ],
           ),
@@ -138,14 +158,22 @@ class _FeedbackFormState extends ConsumerState<_FeedbackForm> {
           Center(
             child: Text(
               _rating == 0 ? 'Tap a star to rate' : _labels[_rating],
-              style: CText.body(13.5, color: _rating == 0 ? CColors.mutedLight : CColors.rust, weight: FontWeight.w600),
+              style: CText.body(
+                13.5,
+                color: _rating == 0 ? CColors.mutedLight : CColors.rust,
+                weight: FontWeight.w600,
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 8, top: 18),
             child: Text(
               'Tell us more (optional)',
-              style: CText.body(13.5, color: CColors.ink, weight: FontWeight.w600),
+              style: CText.body(
+                13.5,
+                color: CColors.ink,
+                weight: FontWeight.w600,
+              ),
             ),
           ),
           TextField(
@@ -153,12 +181,17 @@ class _FeedbackFormState extends ConsumerState<_FeedbackForm> {
             enabled: !_busy,
             maxLines: 4,
             maxLength: 500,
-            decoration: const InputDecoration(hintText: 'What did you like? What could be better?'),
+            decoration: const InputDecoration(
+              hintText: 'What did you like? What could be better?',
+            ),
           ),
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(_error!, style: CText.body(13, color: CColors.rust, height: 1.45)),
+              child: Text(
+                _error!,
+                style: CText.body(13, color: CColors.rust, height: 1.45),
+              ),
             ),
           const SizedBox(height: 16),
           PillButton(

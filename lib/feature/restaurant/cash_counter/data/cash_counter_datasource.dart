@@ -11,17 +11,18 @@ class CashCounterDatasource {
     final row = await _db
         .from('cash_counters')
         .select()
-        .eq('branch_id', branchId)
         .eq('status', 'open')
         .maybeSingle();
     return row == null ? null : CashCounter.fromJson(row);
   }
 
-  Future<List<CashCounter>> fetchHistory(String branchId, {int limit = 30}) async {
+  Future<List<CashCounter>> fetchHistory(
+    String branchId, {
+    int limit = 30,
+  }) async {
     final rows = await _db
         .from('cash_counters')
         .select()
-        .eq('branch_id', branchId)
         .eq('status', 'closed')
         .order('opened_at', ascending: false)
         .limit(limit);
@@ -38,25 +39,41 @@ class CashCounterDatasource {
   }
 
   Future<CounterSummary> fetchSummary(String counterId) async {
-    final res = await _db.rpc('cash_counter_summary', params: {'p_counter_id': counterId});
+    final res = await _db.rpc(
+      'cash_counter_summary',
+      params: {'p_counter_id': counterId},
+    );
     return CounterSummary.fromJson(Map<String, dynamic>.from(res as Map));
   }
 
   Future<void> open(String branchId, double openingCash) =>
-      _db.rpc('open_cash_counter', params: {'p_branch_id': branchId, 'p_opening_cash': openingCash});
+      _db.rpc('open_cash_counter', params: {'p_opening_cash': openingCash});
 
-  Future<void> addEntry(String counterId, {required bool isIn, required double amount, required String reason}) =>
-      _db.rpc('add_cash_counter_entry', params: {
-        'p_counter_id': counterId,
-        'p_kind': isIn ? 'in' : 'out',
-        'p_amount': amount,
-        'p_reason': reason,
-      });
+  Future<void> addEntry(
+    String counterId, {
+    required bool isIn,
+    required double amount,
+    required String reason,
+  }) => _db.rpc(
+    'add_cash_counter_entry',
+    params: {
+      'p_counter_id': counterId,
+      'p_kind': isIn ? 'in' : 'out',
+      'p_amount': amount,
+      'p_reason': reason,
+    },
+  );
 
-  Future<void> close(String counterId, {required double countedCash, required String notes}) =>
-      _db.rpc('close_cash_counter', params: {
-        'p_counter_id': counterId,
-        'p_counted_cash': countedCash,
-        'p_notes': notes,
-      });
+  Future<void> close(
+    String counterId, {
+    required double countedCash,
+    required String notes,
+  }) => _db.rpc(
+    'close_cash_counter',
+    params: {
+      'p_counter_id': counterId,
+      'p_counted_cash': countedCash,
+      'p_notes': notes,
+    },
+  );
 }

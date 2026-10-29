@@ -38,7 +38,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 20, 16, 10),
-                child: Text('Settings', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textGrey, letterSpacing: 0.5)),
+                child: Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textGrey,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
               ...List.generate(_tabs.length, (i) {
                 final t = _tabs[i];
@@ -46,17 +54,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 return GestureDetector(
                   onTap: () => setState(() => _tab = i),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 1,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 11,
+                    ),
                     decoration: BoxDecoration(
-                      color: active ? AppColors.primaryLight : Colors.transparent,
+                      color: active
+                          ? AppColors.primaryLight
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        SvgIcon(t.icon, size: 17, color: active ? AppColors.primary : AppColors.textGrey),
+                        SvgIcon(
+                          t.icon,
+                          size: 17,
+                          color: active
+                              ? AppColors.primary
+                              : AppColors.textGrey,
+                        ),
                         const SizedBox(width: 10),
-                        Text(t.label, style: TextStyle(fontSize: 13, color: active ? AppColors.primary : AppColors.textGrey, fontWeight: active ? FontWeight.w600 : FontWeight.normal)),
+                        Text(
+                          t.label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: active
+                                ? AppColors.primary
+                                : AppColors.textGrey,
+                            fontWeight: active
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
                       ],
                     ),
                   ),

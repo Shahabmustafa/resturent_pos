@@ -15,7 +15,8 @@ class RiderEarningsScreen extends ConsumerStatefulWidget {
   const RiderEarningsScreen({super.key});
 
   @override
-  ConsumerState<RiderEarningsScreen> createState() => _RiderEarningsScreenState();
+  ConsumerState<RiderEarningsScreen> createState() =>
+      _RiderEarningsScreenState();
 }
 
 class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
@@ -24,7 +25,9 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final charge = ref.watch(riderProvider.select((s) => s.me?.chargePerDelivery ?? 0));
+    final charge = ref.watch(
+      riderProvider.select((s) => s.me?.chargePerDelivery ?? 0),
+    );
     final async = ref.watch(riderEarningsProvider(_days));
 
     return RefreshIndicator(
@@ -32,14 +35,26 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
       onRefresh: () => ref.refresh(riderEarningsProvider(_days).future),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 16, 16, 24),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          MediaQuery.paddingOf(context).top + 16,
+          16,
+          24,
+        ),
         children: [
           const Text(
             'Earnings',
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: kText),
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: kText,
+            ),
           ),
           const SizedBox(height: 4),
-          const Text('What you delivered and what you earned', style: TextStyle(fontSize: 13.5, color: kSub)),
+          const Text(
+            'What you delivered and what you earned',
+            style: TextStyle(fontSize: 13.5, color: kSub),
+          ),
           const SizedBox(height: 18),
 
           // Period selector
@@ -84,7 +99,9 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
             loading: () => const [
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 60),
-                child: Center(child: CircularProgressIndicator(color: kPrimary)),
+                child: Center(
+                  child: CircularProgressIndicator(color: kPrimary),
+                ),
               ),
             ],
             error: (_, _) => [
@@ -131,16 +148,29 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('You earned', style: TextStyle(fontSize: 13.5, color: Colors.white.withValues(alpha: 0.8))),
+            Text(
+              'You earned',
+              style: TextStyle(
+                fontSize: 13.5,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+            ),
             const SizedBox(height: 4),
             Text(
               _rs(earned),
-              style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: Colors.white),
+              style: const TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               '${orders.length} ${orders.length == 1 ? 'delivery' : 'deliveries'} × ${_rs(charge)}',
-              style: TextStyle(fontSize: 12.5, color: Colors.white.withValues(alpha: 0.75)),
+              style: TextStyle(
+                fontSize: 12.5,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
             ),
           ],
         ),
@@ -148,9 +178,19 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
       const SizedBox(height: 12),
       Row(
         children: [
-          _MiniStat(icon: AppIcons.checkCircleRounded, color: kGreen, label: 'Delivered', value: '${orders.length}'),
+          _MiniStat(
+            icon: AppIcons.checkCircleRounded,
+            color: kGreen,
+            label: 'Delivered',
+            value: '${orders.length}',
+          ),
           const SizedBox(width: 12),
-          _MiniStat(icon: AppIcons.paymentsRounded, color: kBlue, label: 'Cash collected', value: _rs(cash)),
+          _MiniStat(
+            icon: AppIcons.paymentsRounded,
+            color: kBlue,
+            label: 'Cash collected',
+            value: _rs(cash),
+          ),
         ],
       ),
       const SizedBox(height: 22),
@@ -162,17 +202,27 @@ class _RiderEarningsScreenState extends ConsumerState<RiderEarningsScreen> {
             children: [
               SvgIcon(AppIcons.savingsRounded, size: 44, color: kMuted),
               SizedBox(height: 10),
-              Text('No deliveries in this period yet', style: TextStyle(fontSize: 14.5, color: kSub)),
+              Text(
+                'No deliveries in this period yet',
+                style: TextStyle(fontSize: 14.5, color: kSub),
+              ),
             ],
           ),
         )
       else ...[
         const Text(
           'Day by day',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: kText),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: kText,
+          ),
         ),
         const SizedBox(height: 10),
-        for (final day in days) ...[_DayRow(day: day, orders: byDay[day]!, charge: charge), const SizedBox(height: 10)],
+        for (final day in days) ...[
+          _DayRow(day: day, orders: byDay[day]!, charge: charge),
+          const SizedBox(height: 10),
+        ],
       ],
       const SizedBox(height: 6),
       Text(
@@ -188,7 +238,12 @@ class _MiniStat extends StatelessWidget {
   final AppIcon icon;
   final Color color;
   final String label, value;
-  const _MiniStat({required this.icon, required this.color, required this.label, required this.value});
+  const _MiniStat({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) => Expanded(
@@ -203,7 +258,10 @@ class _MiniStat extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: SvgIcon(icon, size: 18, color: color),
           ),
           const SizedBox(width: 10),
@@ -216,10 +274,17 @@ class _MiniStat extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     value,
-                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: kText),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: kText,
+                    ),
                   ),
                 ),
-                Text(label, style: const TextStyle(fontSize: 11.5, color: kMuted)),
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 11.5, color: kMuted),
+                ),
               ],
             ),
           ),
@@ -234,7 +299,11 @@ class _DayRow extends StatelessWidget {
   final DateTime day;
   final List<DeliveryOrder> orders;
   final double charge;
-  const _DayRow({required this.day, required this.orders, required this.charge});
+  const _DayRow({
+    required this.day,
+    required this.orders,
+    required this.charge,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +330,11 @@ class _DayRow extends StatelessWidget {
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           title: Text(
             label,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: kText),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: kText,
+            ),
           ),
           subtitle: Text(
             '${orders.length} ${orders.length == 1 ? 'delivery' : 'deliveries'} • Cash ${_rs(cash)}',
@@ -269,7 +342,11 @@ class _DayRow extends StatelessWidget {
           ),
           trailing: Text(
             _rs(orders.length * charge),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: kGreen),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: kGreen,
+            ),
           ),
           children: [
             for (final o in orders)
@@ -278,7 +355,9 @@ class _DayRow extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      DateFormat('h:mm a').format((o.deliveredAt ?? o.createdAt).toLocal()),
+                      DateFormat(
+                        'h:mm a',
+                      ).format((o.deliveredAt ?? o.createdAt).toLocal()),
                       style: const TextStyle(fontSize: 12.5, color: kMuted),
                     ),
                     const SizedBox(width: 12),
@@ -287,10 +366,17 @@ class _DayRow extends StatelessWidget {
                         '${o.orderNum} • ${o.customerName}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13.5, color: kText, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          color: kText,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    Text(_rs(o.amount), style: const TextStyle(fontSize: 13.5, color: kSub)),
+                    Text(
+                      _rs(o.amount),
+                      style: const TextStyle(fontSize: 13.5, color: kSub),
+                    ),
                   ],
                 ),
               ),

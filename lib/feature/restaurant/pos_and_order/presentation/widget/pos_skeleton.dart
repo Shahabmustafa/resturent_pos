@@ -40,21 +40,28 @@ class _ProductCardSkeleton extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(13),
         child: const Shimmer(
-          child: Column(children: [
-            Expanded(child: SizedBox.expand(child: ShimmerBox(radius: 0))),
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                ShimmerBox(width: 104, height: 12),
-                SizedBox(height: 8),
-                Row(children: [
-                  ShimmerBox(width: 58, height: 13),
-                  Spacer(),
-                  ShimmerBox(width: 22, height: 22, circle: true),
-                ]),
-              ]),
-            ),
-          ]),
+          child: Column(
+            children: [
+              Expanded(child: SizedBox.expand(child: ShimmerBox(radius: 0))),
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 8, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShimmerBox(width: 104, height: 12),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        ShimmerBox(width: 58, height: 13),
+                        Spacer(),
+                        ShimmerBox(width: 22, height: 22, circle: true),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,5 +1,4 @@
 class ReceiptSettings {
-  final String branchId;
   final String? logoUrl;
   final int fontIndex;
   final bool showLogo;
@@ -11,7 +10,6 @@ class ReceiptSettings {
   final String headerNote;
 
   const ReceiptSettings({
-    required this.branchId,
     this.logoUrl,
     this.fontIndex = 0,
     this.showLogo = true,
@@ -24,7 +22,6 @@ class ReceiptSettings {
   });
 
   factory ReceiptSettings.fromMap(Map<String, dynamic> m) => ReceiptSettings(
-    branchId: m['branch_id'] as String,
     fontIndex: (m['font_index'] as int?) ?? 0,
     logoUrl: m['logo_url'] as String?,
     showLogo: (m['show_logo'] as bool?) ?? true,
@@ -32,12 +29,12 @@ class ReceiptSettings {
     showCashierName: (m['show_cashier_name'] as bool?) ?? false,
     showFbrQr: (m['show_fbr_qr'] as bool?) ?? true,
     autoPrintKitchenToken: (m['auto_print_kitchen_token'] as bool?) ?? true,
-    footerText: (m['footer_text'] as String?) ?? 'Thank you for dining with us!',
+    footerText:
+        (m['footer_text'] as String?) ?? 'Thank you for dining with us!',
     headerNote: (m['header_note'] as String?) ?? 'Fresh • Halal • Hygienic',
   );
 
   Map<String, dynamic> toMap() => {
-    'branch_id': branchId,
     'font_index': fontIndex,
     'logo_url': logoUrl,
     'show_logo': showLogo,
@@ -60,17 +57,15 @@ class ReceiptSettings {
     bool? autoPrintKitchenToken,
     String? footerText,
     String? headerNote,
-  }) =>
-      ReceiptSettings(
-        branchId: branchId,
-        fontIndex: fontIndex ?? this.fontIndex,
-        logoUrl: logoUrl ?? this.logoUrl,
-        showLogo: showLogo ?? this.showLogo,
-        showTaxBreakdown: showTaxBreakdown ?? this.showTaxBreakdown,
-        showCashierName: showCashierName ?? this.showCashierName,
-        showFbrQr: showFbrQr ?? this.showFbrQr,
-        autoPrintKitchenToken: autoPrintKitchenToken ?? this.autoPrintKitchenToken,
-        footerText: footerText ?? this.footerText,
-        headerNote: headerNote ?? this.headerNote,
-      );
+  }) => ReceiptSettings(
+    fontIndex: fontIndex ?? this.fontIndex,
+    logoUrl: logoUrl ?? this.logoUrl,
+    showLogo: showLogo ?? this.showLogo,
+    showTaxBreakdown: showTaxBreakdown ?? this.showTaxBreakdown,
+    showCashierName: showCashierName ?? this.showCashierName,
+    showFbrQr: showFbrQr ?? this.showFbrQr,
+    autoPrintKitchenToken: autoPrintKitchenToken ?? this.autoPrintKitchenToken,
+    footerText: footerText ?? this.footerText,
+    headerNote: headerNote ?? this.headerNote,
+  );
 }

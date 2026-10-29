@@ -8,17 +8,30 @@ class DashboardDatasource {
   // ─── KPI: Today's Revenue, Orders, Customers, Avg Order ───
   Future<Map<String, dynamic>> fetchTodayKpis(String branchId) async {
     final today = DateTime.now();
-    final start = DateTime(today.year, today.month, today.day).toIso8601String();
-    final end = DateTime(today.year, today.month, today.day, 23, 59, 59).toIso8601String();
+    final start = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    ).toIso8601String();
+    final end = DateTime(
+      today.year,
+      today.month,
+      today.day,
+      23,
+      59,
+      59,
+    ).toIso8601String();
 
     final orders = await _db
         .from('orders')
         .select('total, customer_name, payment_status')
-        .eq('branch_id', branchId)
         .gte('created_at', start)
         .lte('created_at', end);
 
-    final totalRevenue = orders.fold<double>(0, (sum, o) => sum + (o['total'] ?? 0));
+    final totalRevenue = orders.fold<double>(
+      0,
+      (sum, o) => sum + (o['total'] ?? 0),
+    );
     final totalOrders = orders.length;
     final uniqueCustomers = orders
         .map((o) => o['customer_name'] ?? '')
@@ -41,22 +54,30 @@ class DashboardDatasource {
     final thisMonday = now.subtract(Duration(days: now.weekday - 1));
     final lastMonday = thisMonday.subtract(const Duration(days: 7));
 
-    final thisWeekStart = DateTime(thisMonday.year, thisMonday.month, thisMonday.day).toIso8601String();
-    final lastWeekStart = DateTime(lastMonday.year, lastMonday.month, lastMonday.day).toIso8601String();
-    final lastWeekEnd = DateTime(thisMonday.year, thisMonday.month, thisMonday.day)
-        .subtract(const Duration(seconds: 1))
-        .toIso8601String();
+    final thisWeekStart = DateTime(
+      thisMonday.year,
+      thisMonday.month,
+      thisMonday.day,
+    ).toIso8601String();
+    final lastWeekStart = DateTime(
+      lastMonday.year,
+      lastMonday.month,
+      lastMonday.day,
+    ).toIso8601String();
+    final lastWeekEnd = DateTime(
+      thisMonday.year,
+      thisMonday.month,
+      thisMonday.day,
+    ).subtract(const Duration(seconds: 1)).toIso8601String();
 
     final thisWeekOrders = await _db
         .from('orders')
         .select('total, created_at')
-        .eq('branch_id', branchId)
         .gte('created_at', thisWeekStart);
 
     final lastWeekOrders = await _db
         .from('orders')
         .select('total, created_at')
-        .eq('branch_id', branchId)
         .gte('created_at', lastWeekStart)
         .lte('created_at', lastWeekEnd);
 
@@ -78,12 +99,13 @@ class DashboardDatasource {
 
   // ─── Order Type Donut: Dine-in / Takeaway / Delivery ───
   Future<Map<String, int>> fetchOrderTypeCounts(String branchId) async {
-    final orders = await _db
-        .from('orders')
-        .select('order_type')
-        .eq('branch_id', branchId);
+    final orders = await _db.from('orders').select('order_type');
 
-    final Map<String, int> counts = {'Dine-in': 0, 'Takeaway': 0, 'Delivery': 0};
+    final Map<String, int> counts = {
+      'Dine-in': 0,
+      'Takeaway': 0,
+      'Delivery': 0,
+    };
     for (final o in orders) {
       final type = o['order_type'] ?? '';
       if (counts.containsKey(type)) counts[type] = counts[type]! + 1;
@@ -95,8 +117,9 @@ class DashboardDatasource {
   Future<List<Map<String, dynamic>>> fetchRecentOrders(String branchId) async {
     final data = await _db
         .from('orders')
-        .select('order_number, customer_name, order_type, total, payment_status, table_number, created_at')
-        .eq('branch_id', branchId)
+        .select(
+          'order_number, customer_name, order_type, total, payment_status, table_number, created_at',
+        )
         .order('created_at', ascending: false)
         .limit(5);
 
@@ -104,16 +127,19 @@ class DashboardDatasource {
   }
 
   // ─── Top Selling Items ───
-  Future<List<Map<String, dynamic>>> fetchTopSellingItems(String branchId) async {
+  Future<List<Map<String, dynamic>>> fetchTopSellingItems(
+    String branchId,
+  ) async {
     final data = await _db
         .from('order_items')
-        .select('item_name, total_price, qty')
-        .eq('branch_id', branchId);
+        .select('item_name, total_price, qty');
 
     final Map<String, Map<String, dynamic>> grouped = {};
     for (final item in data) {
       final name = item['item_name'] as String;
-      final cleanName = name.contains('(') ? name.substring(0, name.indexOf('(')).trim() : name;
+      final cleanName = name.contains('(')
+          ? name.substring(0, name.indexOf('(')).trim()
+          : name;
       if (!grouped.containsKey(cleanName)) {
         grouped[cleanName] = {'name': cleanName, 'revenue': 0.0, 'qty': 0};
       }
@@ -122,10 +148,14 @@ class DashboardDatasource {
     }
 
     final sorted = grouped.values.toList()
-      ..sort((a, b) => (b['revenue'] as double).compareTo(a['revenue'] as double));
+      ..sort(
+        (a, b) => (b['revenue'] as double).compareTo(a['revenue'] as double),
+      );
 
     final top5 = sorted.take(5).toList();
-    final maxRevenue = top5.isNotEmpty ? (top5.first['revenue'] as double) : 1.0;
+    final maxRevenue = top5.isNotEmpty
+        ? (top5.first['revenue'] as double)
+        : 1.0;
 
     for (final item in top5) {
       item['ratio'] = (item['revenue'] as double) / maxRevenue;
@@ -140,15 +170,14 @@ class DashboardDatasource {
     // so fetch everything and filter in Dart
     final all = await _db
         .from('stock_items')
-        .select('name, qty, min_qty, unit')
-        .eq('branch_id', branchId);
+        .select('name, qty, min_qty, unit');
 
     return all
         .where((item) {
-      final qty    = (item['qty']     as num?)?.toDouble() ?? 0.0;
-      final minQty = (item['min_qty'] as num?)?.toDouble() ?? 0.0;
-      return qty <= minQty;
-    })
+          final qty = (item['qty'] as num?)?.toDouble() ?? 0.0;
+          final minQty = (item['min_qty'] as num?)?.toDouble() ?? 0.0;
+          return qty <= minQty;
+        })
         .map((e) => Map<String, dynamic>.from(e))
         .toList();
   }
@@ -158,26 +187,33 @@ class DashboardDatasource {
     // Tables
     final tables = await _db
         .from('tables')
-        .select('status')
-        .eq('branch_id', branchId)
-        .eq('is_active', true);
+        .select('table_number')
+        .isFilter('deleted_at', null);
+
+    final openDineIn = await _db
+        .from('orders')
+        .select('table_number')
+        .eq('order_type', 'Dine-in')
+        .not('status', 'in', '(completed,cancelled,delivered)');
 
     final totalTables = tables.length;
-    final occupiedTables = tables.where((t) => t['status'] == 'reserved').length;
+    final occupiedTables = {
+      for (final o in openDineIn)
+        if ((o['table_number'] as String?)?.isNotEmpty ?? false)
+          o['table_number'],
+    }.length;
 
     // Kitchen (pending/preparing orders)
-    final kitchenOrders = await _db
-        .from('orders')
-        .select('id')
-        .eq('branch_id', branchId)
-        .inFilter('status', ['pending', 'preparing']);
+    final kitchenOrders = await _db.from('orders').select('id').inFilter(
+      'status',
+      ['pending', 'preparing'],
+    );
 
     // Active deliveries
-    final deliveries = await _db
-        .from('delivery_orders')
-        .select('id')
-        .eq('branch_id', branchId)
-        .inFilter('status', ['assigned', 'on_the_way']);
+    final deliveries = await _db.from('delivery_orders').select('id').inFilter(
+      'status',
+      ['assigned', 'on_the_way'],
+    );
 
     // Cash balance (branch_cash singleton row per branch)
     double cashBalance = 0;
@@ -185,7 +221,6 @@ class DashboardDatasource {
       final cash = await _db
           .from('branch_cash')
           .select('balance')
-          .eq('branch_id', branchId)
           .maybeSingle();
       cashBalance = (cash?['balance'] as num?)?.toDouble() ?? 0;
     } catch (_) {

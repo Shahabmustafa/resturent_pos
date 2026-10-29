@@ -24,25 +24,43 @@ void riderToast(BuildContext context, String msg, Color color) {
     );
 }
 
-Future<void> startTrip(BuildContext context, WidgetRef ref, DeliveryOrder o) async {
+Future<void> startTrip(
+  BuildContext context,
+  WidgetRef ref,
+  DeliveryOrder o,
+) async {
   final error = await ref.read(riderProvider.notifier).startTrip(o.id);
   if (!context.mounted) return;
   if (error == null) HapticFeedback.mediumImpact();
-  riderToast(context, error ?? 'Trip started — drive safe!', error == null ? kGreen : kRed);
+  riderToast(
+    context,
+    error ?? 'Trip started — drive safe!',
+    error == null ? kGreen : kRed,
+  );
 }
 
-Future<void> markDelivered(BuildContext context, WidgetRef ref, DeliveryOrder o) async {
+Future<void> markDelivered(
+  BuildContext context,
+  WidgetRef ref,
+  DeliveryOrder o,
+) async {
   final ok = await showModalBottomSheet<bool>(
     context: context,
     backgroundColor: kCard,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
     builder: (_) => DeliveredSheet(order: o),
   );
   if (ok != true || !context.mounted) return;
   final error = await ref.read(riderProvider.notifier).markDelivered(o.id);
   if (!context.mounted) return;
   if (error == null) HapticFeedback.mediumImpact();
-  riderToast(context, error ?? 'Delivered! Great job.', error == null ? kGreen : kRed);
+  riderToast(
+    context,
+    error ?? 'Delivered! Great job.',
+    error == null ? kGreen : kRed,
+  );
 }
 
 Future<void> confirmSignOut(BuildContext context, WidgetRef ref) async {
@@ -50,10 +68,18 @@ Future<void> confirmSignOut(BuildContext context, WidgetRef ref) async {
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: const Text('Sign out?'),
-      content: const Text('You will stop seeing new deliveries until you sign in again.'),
+      content: const Text(
+        'You will stop seeing new deliveries until you sign in again.',
+      ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
-        TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Sign out')),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: const Text('Sign out'),
+        ),
       ],
     ),
   );
@@ -78,16 +104,26 @@ class DeliveredSheet extends StatelessWidget {
               child: Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: kBorder, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: kBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               'Mark as delivered?',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: kText),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: kText,
+              ),
             ),
             const SizedBox(height: 6),
-            Text('${order.orderNum} • ${order.customerName}', style: const TextStyle(fontSize: 14, color: kSub)),
+            Text(
+              '${order.orderNum} • ${order.customerName}',
+              style: const TextStyle(fontSize: 14, color: kSub),
+            ),
             const SizedBox(height: 18),
             Container(
               padding: const EdgeInsets.all(16),
@@ -98,16 +134,27 @@ class DeliveredSheet extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const SvgIcon(AppIcons.paymentsRounded, size: 26, color: kGreen),
+                  const SvgIcon(
+                    AppIcons.paymentsRounded,
+                    size: 26,
+                    color: kGreen,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Collect from customer', style: TextStyle(fontSize: 12.5, color: kSub)),
+                        const Text(
+                          'Collect from customer',
+                          style: TextStyle(fontSize: 12.5, color: kSub),
+                        ),
                         Text(
                           formatMoney(order.amount),
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: kText),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: kText,
+                          ),
                         ),
                       ],
                     ),
@@ -124,9 +171,14 @@ class DeliveredSheet extends StatelessWidget {
                   backgroundColor: kGreen,
                   foregroundColor: Colors.white,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                child: const Text('Yes, delivered', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                child: const Text(
+                  'Yes, delivered',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
               ),
             ),
             const SizedBox(height: 8),

@@ -8,7 +8,6 @@ import '../../data/datasource/receipt_settings_datasource.dart';
 import '../../data/model/branch_setting_model.dart';
 import '../../data/model/receipt_settings_model.dart';
 
-
 // ── State ────────────────────────────────────────────────────────────────────
 
 class ReceiptSettingsState {
@@ -29,13 +28,12 @@ class ReceiptSettingsState {
     bool? loading,
     bool? saving,
     String? error,
-  }) =>
-      ReceiptSettingsState(
-        settings: settings ?? this.settings,
-        loading: loading ?? this.loading,
-        saving: saving ?? this.saving,
-        error: error,
-      );
+  }) => ReceiptSettingsState(
+    settings: settings ?? this.settings,
+    loading: loading ?? this.loading,
+    saving: saving ?? this.saving,
+    error: error,
+  );
 }
 
 // ── Notifier ─────────────────────────────────────────────────────────────────
@@ -45,7 +43,7 @@ class ReceiptSettingsNotifier extends StateNotifier<ReceiptSettingsState> {
   final String _branchId;
 
   ReceiptSettingsNotifier(this._ds, this._branchId)
-      : super(const ReceiptSettingsState()) {
+    : super(const ReceiptSettingsState()) {
     load();
   }
 
@@ -81,7 +79,7 @@ class ReceiptSettingsNotifier extends StateNotifier<ReceiptSettingsState> {
     if (s == null) return null;
     state = state.copyWith(saving: true, error: null);
     try {
-      final url = await _ds.uploadLogo(s.branchId, file);
+      final url = await _ds.uploadLogo(_branchId, file);
       final updated = s.copyWith(logoUrl: url);
       await _ds.upsert(updated);
       state = state.copyWith(settings: updated, saving: false);
@@ -97,21 +95,18 @@ class ReceiptSettingsNotifier extends StateNotifier<ReceiptSettingsState> {
 // ── Providers ─────────────────────────────────────────────────────────────────
 
 final _receiptDsProvider = Provider(
-      (ref) => ReceiptSettingsDataSource(Supabase.instance.client),
+  (ref) => ReceiptSettingsDataSource(Supabase.instance.client),
 );
 
 final _branchSettingsDsProvider = Provider(
-      (ref) => BranchSettingsDatasource(Supabase.instance.client),
+  (ref) => BranchSettingsDatasource(Supabase.instance.client),
 );
 
 final receiptSettingsProvider =
-StateNotifierProvider<ReceiptSettingsNotifier, ReceiptSettingsState>((ref) {
-  final branchId = ref.watch(branchAuthProvider).branch?.branchId ?? '';
-  return ReceiptSettingsNotifier(
-    ref.read(_receiptDsProvider),
-    branchId,
-  );
-});
+    StateNotifierProvider<ReceiptSettingsNotifier, ReceiptSettingsState>((ref) {
+      final branchId = ref.watch(branchAuthProvider).branch?.branchId ?? '';
+      return ReceiptSettingsNotifier(ref.read(_receiptDsProvider), branchId);
+    });
 
 // ── Branch info provider (restaurant_name, address, phone) ───────────────────
 

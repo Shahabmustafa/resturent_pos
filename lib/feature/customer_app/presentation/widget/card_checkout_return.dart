@@ -53,7 +53,9 @@ class _CardCheckoutReturnState extends ConsumerState<CardCheckoutReturn> {
         barrierDismissible: false,
         builder: (_) => _PaymentResultDialog(paymentId: paymentId),
       );
-      ref.read(customerTabProvider.notifier).state = viewOrders == true ? CustomerTab.orders : CustomerTab.home;
+      ref.read(customerTabProvider.notifier).state = viewOrders == true
+          ? CustomerTab.orders
+          : CustomerTab.home;
     } else {
       await _restoreCart(paymentId);
     }
@@ -68,11 +70,16 @@ class _CardCheckoutReturnState extends ConsumerState<CardCheckoutReturn> {
       if (payment == null || payment.isPaid) return;
       final cart = ref.read(cartProvider.notifier);
       for (final item in payment.items) {
-        final dish = menu.dishes.where((d) => d.id == item.menuItemId).firstOrNull;
+        final dish = menu.dishes
+            .where((d) => d.id == item.menuItemId)
+            .firstOrNull;
         if (dish == null) continue; // no longer on the menu
         final option = item.size.isEmpty
-            ? dish.options.where((o) => !o.isSize).firstOrNull ?? dish.options.first
-            : dish.options.where((o) => o.isSize && o.label == item.size).firstOrNull;
+            ? dish.options.where((o) => !o.isSize).firstOrNull ??
+                  dish.options.first
+            : dish.options
+                  .where((o) => o.isSize && o.label == item.size)
+                  .firstOrNull;
         if (option != null) cart.add(dish, option, qty: item.qty);
       }
     } catch (_) {
@@ -81,7 +88,11 @@ class _CardCheckoutReturnState extends ConsumerState<CardCheckoutReturn> {
     if (!mounted) return;
     ref.read(customerTabProvider.notifier).state = CustomerTab.cart;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Payment cancelled — you have not been charged. Your cart is still here.')),
+      const SnackBar(
+        content: Text(
+          'Payment cancelled — you have not been charged. Your cart is still here.',
+        ),
+      ),
     );
   }
 
@@ -97,12 +108,15 @@ class _PaymentResultDialog extends ConsumerStatefulWidget {
   const _PaymentResultDialog({required this.paymentId});
 
   @override
-  ConsumerState<_PaymentResultDialog> createState() => _PaymentResultDialogState();
+  ConsumerState<_PaymentResultDialog> createState() =>
+      _PaymentResultDialogState();
 }
 
 class _PaymentResultDialogState extends ConsumerState<_PaymentResultDialog> {
   // Created once, so rebuilds don't restart the status checks.
-  late final _payment = ref.read(customerDatasourceProvider).watchCardPayment(widget.paymentId);
+  late final _payment = ref
+      .read(customerDatasourceProvider)
+      .watchCardPayment(widget.paymentId);
 
   @override
   Widget build(BuildContext context) {
@@ -127,37 +141,65 @@ class _PaymentResultDialogState extends ConsumerState<_PaymentResultDialog> {
               : 'Payment received. Your food is being cooked fresh. We\'ll have it ready for pickup shortly.';
         } else if (failed) {
           title = 'Payment not completed';
-          message = 'We couldn\'t confirm this payment. If you were charged, please contact us and we\'ll sort it out.';
+          message =
+              'We couldn\'t confirm this payment. If you were charged, please contact us and we\'ll sort it out.';
         } else {
           title = 'Confirming payment…';
-          message = 'This only takes a few seconds. Please keep this page open.';
+          message =
+              'This only takes a few seconds. Please keep this page open.';
         }
 
         return AlertDialog(
           backgroundColor: CColors.paper,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           icon: paid
-              ? const IconBadge(AppIcons.checkCircleRounded, size: 64, background: CColors.cream, color: CColors.olive)
+              ? const IconBadge(
+                  AppIcons.checkCircleRounded,
+                  size: 64,
+                  background: CColors.cream,
+                  color: CColors.olive,
+                )
               : failed
-              ? const IconBadge(AppIcons.errorOutline, size: 64, background: CColors.cream, color: CColors.rust)
+              ? const IconBadge(
+                  AppIcons.errorOutline,
+                  size: 64,
+                  background: CColors.cream,
+                  color: CColors.rust,
+                )
               : const Center(
                   child: SizedBox(
                     width: 48,
                     height: 48,
-                    child: CircularProgressIndicator(color: CColors.rust, strokeWidth: 4),
+                    child: CircularProgressIndicator(
+                      color: CColors.rust,
+                      strokeWidth: 4,
+                    ),
                   ),
                 ),
-          title: Text(title, style: CText.display(24), textAlign: TextAlign.center),
+          title: Text(
+            title,
+            style: CText.display(24),
+            textAlign: TextAlign.center,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (paid) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(color: CColors.cream, borderRadius: BorderRadius.circular(30)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: CColors.cream,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                   child: Text(
                     'Order ${payment!.orderNumber ?? ''} · Paid online',
-                    style: CText.body(15, color: CColors.ink, weight: FontWeight.w700),
+                    style: CText.body(
+                      15,
+                      color: CColors.ink,
+                      weight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),

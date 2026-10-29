@@ -6,11 +6,7 @@ class BranchSettingsDatasource {
   const BranchSettingsDatasource(this._db);
 
   Future<BranchModel> fetch(String branchId) async {
-    final res = await _db
-        .from('branches')
-        .select()
-        .eq('id', branchId)
-        .single();
+    final res = await _db.from('branches').select().eq('id', branchId).single();
     return BranchModel.fromJson(res);
   }
 

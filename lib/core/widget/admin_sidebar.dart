@@ -32,68 +32,91 @@ class AdminSidebar extends StatelessWidget {
         // ── Logo ──────────────────────────────────────────────
         Container(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
-          child: Row(children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(9),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const SvgIcon(
+                  AppIcons.restaurantRounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
-              child: const SvgIcon(AppIcons.restaurantRounded,
-                  color: Colors.white, size: 18),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(companyName.isEmpty ? 'Admin Panel' : companyName,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      companyName.isEmpty ? 'Admin Panel' : companyName,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13)),
-                  const Text('Owner Portal',
-                      style: TextStyle(
-                          color: AppColors.primary, fontSize: 10)),
-                ],
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const Text(
+                      'Owner Portal',
+                      style: TextStyle(color: AppColors.primary, fontSize: 10),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
 
         // ── Branch pill ───────────────────────────────────────
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 12),
-          padding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-              color: AppColors.sidebarSec,
-              borderRadius: BorderRadius.circular(8)),
-          child: Row(children: [
-            const SvgIcon(AppIcons.storeOutlined,
-                size: 13, color: AppColors.sidebarTxt),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text('$branchCount Branches',
+            color: AppColors.sidebarSec,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              const SvgIcon(
+                AppIcons.storeOutlined,
+                size: 13,
+                color: AppColors.sidebarTxt,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '$branchCount Branches',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      color: AppColors.sidebarTxt, fontSize: 11)),
-            ),
-            Container(
+                    color: AppColors.sidebarTxt,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              Container(
                 width: 7,
                 height: 7,
                 decoration: const BoxDecoration(
-                    color: AppColors.success,
-                    shape: BoxShape.circle)),
-            const SizedBox(width: 4),
-            Text('$openCount Open',
+                  color: AppColors.success,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '$openCount Open',
                 style: const TextStyle(
-                    color: AppColors.success,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600)),
-          ]),
+                  color: AppColors.success,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
 
         const SizedBox(height: 16),
@@ -101,12 +124,15 @@ class AdminSidebar extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 18),
           child: Align(
             alignment: Alignment.centerLeft,
-            child: Text('MENU',
-                style: TextStyle(
-                    color: AppColors.sidebarTxt,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8)),
+            child: Text(
+              'MENU',
+              style: TextStyle(
+                color: AppColors.sidebarTxt,
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.8,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 6),
@@ -141,42 +167,58 @@ class AdminSidebar extends StatelessWidget {
           margin: const EdgeInsets.all(10),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-              color: AppColors.sidebarSec,
-              borderRadius: BorderRadius.circular(9)),
-          child: Row(children: [
-            CircleAvatar(
-              radius: 15,
-              backgroundColor: AppColors.primary.withOpacity(0.2),
-              child: Text(_initials(accountName.isEmpty ? companyName : accountName),
+            color: AppColors.sidebarSec,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 15,
+                backgroundColor: AppColors.primary.withOpacity(0.2),
+                child: Text(
+                  _initials(accountName.isEmpty ? companyName : accountName),
                   style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700)),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(accountName.isEmpty ? companyName : accountName,
+                    color: AppColors.primary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      accountName.isEmpty ? companyName : accountName,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600)),
-                  const Text('Owner',
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Text(
+                      'Owner',
                       style: TextStyle(
-                          color: AppColors.sidebarTxt, fontSize: 10)),
-                ],
+                        color: AppColors.sidebarTxt,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              tooltip: 'Log out',
-              onPressed: onLogout,
-              icon: const SvgIcon(AppIcons.logoutRounded,
-                  size: 16, color: AppColors.sidebarTxt),
-            ),
-          ]),
+              IconButton(
+                tooltip: 'Log out',
+                onPressed: onLogout,
+                icon: const SvgIcon(
+                  AppIcons.logoutRounded,
+                  size: 16,
+                  color: AppColors.sidebarTxt,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     ),
@@ -184,7 +226,11 @@ class AdminSidebar extends StatelessWidget {
 }
 
 String _initials(String name) {
-  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+  final parts = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((p) => p.isNotEmpty)
+      .toList();
   if (parts.isEmpty) return '?';
   if (parts.length == 1) return parts[0][0].toUpperCase();
   return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
@@ -211,33 +257,34 @@ class _NavItem extends StatelessWidget {
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
-      padding:
-      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: active
             ? AppColors.primary.withOpacity(0.15)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(9),
       ),
-      child: Row(children: [
-        SvgIcon(active ? iconFill : icon,
+      child: Row(
+        children: [
+          SvgIcon(
+            active ? iconFill : icon,
             size: 17,
-            color:
-            active ? AppColors.primary : AppColors.sidebarTxt),
-        const SizedBox(width: 9),
-        Expanded(
-          child: Text(label,
+            color: active ? AppColors.primary : AppColors.sidebarTxt,
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              label,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  fontSize: 13,
-                  color: active
-                      ? AppColors.primary
-                      : AppColors.sidebarTxt,
-                  fontWeight: active
-                      ? FontWeight.w600
-                      : FontWeight.normal)),
-        ),
-      ]),
+                fontSize: 13,
+                color: active ? AppColors.primary : AppColors.sidebarTxt,
+                fontWeight: active ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

@@ -37,7 +37,12 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     if (!signedIn) {
       body = [const _SignInPrompt()];
     } else if (ordersAsync.hasError) {
-      body = [MenuStatus.error(error: '${ordersAsync.error}', onRetry: () => ref.invalidate(myOrdersProvider))];
+      body = [
+        MenuStatus.error(
+          error: '${ordersAsync.error}',
+          onRetry: () => ref.invalidate(myOrdersProvider),
+        ),
+      ];
     } else if (ordersAsync.value == null) {
       body = [const MenuStatus.loading()];
     } else if (ordersAsync.value!.isEmpty) {
@@ -59,8 +64,12 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           counts: {
             _Filter.all: orders.length,
             _Filter.active: orders.where((o) => o.isOpen).length,
-            _Filter.completed: orders.where((o) => _stageOf(o.status) == _Stage.done).length,
-            _Filter.cancelled: orders.where((o) => _stageOf(o.status) == _Stage.cancelled).length,
+            _Filter.completed: orders
+                .where((o) => _stageOf(o.status) == _Stage.done)
+                .length,
+            _Filter.cancelled: orders
+                .where((o) => _stageOf(o.status) == _Stage.cancelled)
+                .length,
           },
           onChanged: (f) => setState(() => _filter = f),
         ),
@@ -81,7 +90,8 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
           ),
         if (past.isNotEmpty) ...[
           if (active.isNotEmpty) const SizedBox(height: 10),
-          if (_filter == _Filter.all) _SectionLabel('Order history', past.length),
+          if (_filter == _Filter.all)
+            _SectionLabel('Order history', past.length),
           for (var i = 0; i < past.length; i++)
             Reveal(
               key: ValueKey('past-${past[i].id}'),
@@ -159,7 +169,11 @@ class _FilterTabs extends StatelessWidget {
   final Map<_Filter, int> counts;
   final ValueChanged<_Filter> onChanged;
 
-  const _FilterTabs({required this.selected, required this.counts, required this.onChanged});
+  const _FilterTabs({
+    required this.selected,
+    required this.counts,
+    required this.onChanged,
+  });
 
   static const _labels = {
     _Filter.all: 'All',
@@ -180,11 +194,16 @@ class _FilterTabs extends StatelessWidget {
               onTap: () => onChanged(f),
               child: AnimatedContainer(
                 duration: Duration.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: f == selected ? CColors.ink : CColors.paper,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: f == selected ? CColors.ink : CColors.line),
+                  border: Border.all(
+                    color: f == selected ? CColors.ink : CColors.line,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -199,7 +218,10 @@ class _FilterTabs extends StatelessWidget {
                     ),
                     const SizedBox(width: 7),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: f == selected ? CColors.gold : CColors.cream,
                         borderRadius: BorderRadius.circular(20),
@@ -262,12 +284,21 @@ class _LiveOrderCard extends StatelessWidget {
     final delivery = order.type == 'Delivery';
     final headline = switch (stage) {
       _Stage.placed || _Stage.preparing => 'Your food is being prepared',
-      _Stage.ready => delivery ? 'Your order is on its way' : 'Your order is ready to collect',
+      _Stage.ready =>
+        delivery
+            ? 'Your order is on its way'
+            : 'Your order is ready to collect',
       _ => 'Order received',
     };
     final hint = switch (stage) {
-      _Stage.ready => delivery ? 'Our rider is heading to you.' : 'Pop in to Walton Road to pick it up.',
-      _ => delivery ? 'We\'ll send it out as soon as it\'s cooked.' : 'We\'ll have it ready for collection shortly.',
+      _Stage.ready =>
+        delivery
+            ? 'Our rider is heading to you.'
+            : 'Pop in to Walton Road to pick it up.',
+      _ =>
+        delivery
+            ? 'We\'ll send it out as soon as it\'s cooked.'
+            : 'We\'ll have it ready for collection shortly.',
     };
 
     return Container(
@@ -295,14 +326,25 @@ class _LiveOrderCard extends StatelessWidget {
                     const Spacer(),
                     Text(
                       'Order ${order.number}',
-                      style: CText.body(13, color: CColors.goldPale, weight: FontWeight.w600),
+                      style: CText.body(
+                        13,
+                        color: CColors.goldPale,
+                        weight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Text(headline, style: CText.display(24, color: Colors.white)),
                 const SizedBox(height: 6),
-                Text(hint, style: CText.body(13.5, color: CColors.mutedLight, height: 1.5)),
+                Text(
+                  hint,
+                  style: CText.body(
+                    13.5,
+                    color: CColors.mutedLight,
+                    height: 1.5,
+                  ),
+                ),
                 const SizedBox(height: 22),
                 _Tracker(stage: stage, delivery: delivery),
               ],
@@ -313,14 +355,19 @@ class _LiveOrderCard extends StatelessWidget {
           Container(
             margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: CColors.paper, borderRadius: BorderRadius.circular(18)),
+            decoration: BoxDecoration(
+              color: CColors.paper,
+              borderRadius: BorderRadius.circular(18),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   children: [
                     SvgIcon(
-                      delivery ? AppIcons.deliveryDiningRounded : AppIcons.takeoutDiningRounded,
+                      delivery
+                          ? AppIcons.deliveryDiningRounded
+                          : AppIcons.takeoutDiningRounded,
                       size: 18,
                       color: CColors.rust,
                     ),
@@ -354,8 +401,12 @@ class _LiveBadge extends StatefulWidget {
   State<_LiveBadge> createState() => _LiveBadgeState();
 }
 
-class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMixin {
-  late final _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
+class _LiveBadgeState extends State<_LiveBadge>
+    with SingleTickerProviderStateMixin {
+  late final _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat();
 
   @override
   void dispose() {
@@ -389,13 +440,18 @@ class _LiveBadgeState extends State<_LiveBadge> with SingleTickerProviderStateMi
                       height: 6 + 8 * _ctrl.value,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: CColors.goldLight.withValues(alpha: .5 * (1 - _ctrl.value)),
+                        color: CColors.goldLight.withValues(
+                          alpha: .5 * (1 - _ctrl.value),
+                        ),
                       ),
                     ),
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: const BoxDecoration(color: CColors.goldLight, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: CColors.goldLight,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ],
               ),
@@ -421,7 +477,12 @@ class _Tracker extends StatelessWidget {
     final steps = [
       (AppIcons.receiptLongRounded, 'Placed'),
       (AppIcons.soupKitchenRounded, 'Preparing'),
-      (delivery ? AppIcons.deliveryDiningRounded : AppIcons.takeoutDiningRounded, delivery ? 'On the way' : 'Ready'),
+      (
+        delivery
+            ? AppIcons.deliveryDiningRounded
+            : AppIcons.takeoutDiningRounded,
+        delivery ? 'On the way' : 'Ready',
+      ),
       (AppIcons.checkRounded, delivery ? 'Delivered' : 'Collected'),
     ];
     // Pending orders are already being cooked, so "Preparing" is the current step.
@@ -445,7 +506,9 @@ class _Tracker extends StatelessWidget {
                     height: 3,
                     margin: const EdgeInsets.only(top: 17),
                     decoration: BoxDecoration(
-                      color: i <= current ? CColors.goldLight : Colors.white.withValues(alpha: .12),
+                      color: i <= current
+                          ? CColors.goldLight
+                          : Colors.white.withValues(alpha: .12),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -461,16 +524,27 @@ class _Tracker extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: i <= current ? CColors.goldGradient : null,
-                        color: i <= current ? null : Colors.white.withValues(alpha: .08),
+                        color: i <= current
+                            ? null
+                            : Colors.white.withValues(alpha: .08),
                         boxShadow: i == current
-                            ? [BoxShadow(color: CColors.goldLight.withValues(alpha: .45), blurRadius: 14)]
+                            ? [
+                                BoxShadow(
+                                  color: CColors.goldLight.withValues(
+                                    alpha: .45,
+                                  ),
+                                  blurRadius: 14,
+                                ),
+                              ]
                             : null,
                       ),
                       alignment: Alignment.center,
                       child: SvgIcon(
                         steps[i].$1,
                         size: 18,
-                        color: i <= current ? CColors.ink : Colors.white.withValues(alpha: .35),
+                        color: i <= current
+                            ? CColors.ink
+                            : Colors.white.withValues(alpha: .35),
                       ),
                     ),
                     const SizedBox(height: 7),
@@ -480,7 +554,9 @@ class _Tracker extends StatelessWidget {
                       style: CText.body(
                         11.5,
                         color: i <= current ? Colors.white : CColors.mutedLight,
-                        weight: i == current ? FontWeight.w700 : FontWeight.w500,
+                        weight: i == current
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                   ],
@@ -513,7 +589,9 @@ class _PastOrderTileState extends State<_PastOrderTile> {
     if (sent && mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('Thanks for your feedback!')));
+        ..showSnackBar(
+          const SnackBar(content: Text('Thanks for your feedback!')),
+        );
     }
   }
 
@@ -530,7 +608,9 @@ class _PastOrderTileState extends State<_PastOrderTile> {
       decoration: BoxDecoration(
         color: CColors.paper,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _open ? CColors.gold.withValues(alpha: .55) : CColors.line),
+        border: Border.all(
+          color: _open ? CColors.gold.withValues(alpha: .55) : CColors.line,
+        ),
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -548,16 +628,22 @@ class _PastOrderTileState extends State<_PastOrderTile> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: stage == _Stage.cancelled ? CColors.cream : CColors.goldPale.withValues(alpha: .5),
+                        color: stage == _Stage.cancelled
+                            ? CColors.cream
+                            : CColors.goldPale.withValues(alpha: .5),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
                       child: SvgIcon(
                         stage == _Stage.cancelled
                             ? AppIcons.blockRounded
-                            : (delivery ? AppIcons.deliveryDiningRounded : AppIcons.takeoutDiningRounded),
+                            : (delivery
+                                  ? AppIcons.deliveryDiningRounded
+                                  : AppIcons.takeoutDiningRounded),
                         size: 21,
-                        color: stage == _Stage.cancelled ? CColors.mutedLight : CColors.rust,
+                        color: stage == _Stage.cancelled
+                            ? CColors.mutedLight
+                            : CColors.rust,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -571,15 +657,25 @@ class _PastOrderTileState extends State<_PastOrderTile> {
                                 child: Text(
                                   'Order ${order.number}',
                                   overflow: TextOverflow.ellipsis,
-                                  style: CText.body(15, color: CColors.ink, weight: FontWeight.w700),
+                                  style: CText.body(
+                                    15,
+                                    color: CColors.ink,
+                                    weight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              _StatusDot(label: statusLabel, color: statusColor),
+                              _StatusDot(
+                                label: statusLabel,
+                                color: statusColor,
+                              ),
                             ],
                           ),
                           const SizedBox(height: 2),
-                          Text(_when(order.createdAt), style: CText.body(12, color: CColors.muted)),
+                          Text(
+                            _when(order.createdAt),
+                            style: CText.body(12, color: CColors.muted),
+                          ),
                           const SizedBox(height: 2),
                           Text(
                             _itemsSummary(order),
@@ -598,13 +694,19 @@ class _PastOrderTileState extends State<_PastOrderTile> {
                           formatPrice(order.total),
                           style: CText.body(
                             15,
-                            color: stage == _Stage.cancelled ? CColors.mutedLight : CColors.ink,
+                            color: stage == _Stage.cancelled
+                                ? CColors.mutedLight
+                                : CColors.ink,
                             weight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 4),
                         if (order.canRate && !narrow)
-                          _MiniButton(label: 'Rate', icon: AppIcons.starRounded, onTap: _rate)
+                          _MiniButton(
+                            label: 'Rate',
+                            icon: AppIcons.starRounded,
+                            onTap: _rate,
+                          )
                         else if (order.myRating != null)
                           StarRow(rating: order.myRating!, size: 13),
                       ],
@@ -612,7 +714,11 @@ class _PastOrderTileState extends State<_PastOrderTile> {
                     AnimatedRotation(
                       turns: _open ? 0.5 : 0,
                       duration: Duration.zero,
-                      child: const SvgIcon(AppIcons.keyboardArrowDownRounded, size: 22, color: CColors.muted),
+                      child: const SvgIcon(
+                        AppIcons.keyboardArrowDownRounded,
+                        size: 22,
+                        color: CColors.muted,
+                      ),
                     ),
                   ],
                 ),
@@ -622,7 +728,12 @@ class _PastOrderTileState extends State<_PastOrderTile> {
             if (order.canRate && narrow)
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                child: _MiniButton(label: 'Rate this order', icon: AppIcons.starRounded, onTap: _rate, expand: true),
+                child: _MiniButton(
+                  label: 'Rate this order',
+                  icon: AppIcons.starRounded,
+                  onTap: _rate,
+                  expand: true,
+                ),
               ),
             AnimatedSize(
               duration: Duration.zero,
@@ -639,7 +750,11 @@ class _PastOrderTileState extends State<_PastOrderTile> {
                           const SizedBox(height: 14),
                           _LineItems(order: order),
                           const Divider(color: CColors.line, height: 22),
-                          _TotalRow(order: order, stage: stage, delivery: delivery),
+                          _TotalRow(
+                            order: order,
+                            stage: stage,
+                            delivery: delivery,
+                          ),
                         ],
                       ),
                     ),
@@ -660,7 +775,10 @@ class _StatusDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(color: color.withValues(alpha: .12), borderRadius: BorderRadius.circular(20)),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: .12),
+      borderRadius: BorderRadius.circular(20),
+    ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -685,7 +803,12 @@ class _MiniButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool expand;
 
-  const _MiniButton({required this.label, required this.icon, required this.onTap, this.expand = false});
+  const _MiniButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.expand = false,
+  });
 
   @override
   Widget build(BuildContext context) => Material(
@@ -704,7 +827,11 @@ class _MiniButton extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               label,
-              style: CText.body(12, color: CColors.rustDeep, weight: FontWeight.w700),
+              style: CText.body(
+                12,
+                color: CColors.rustDeep,
+                weight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -731,18 +858,31 @@ class _LineItems extends StatelessWidget {
               Container(
                 width: 26,
                 padding: const EdgeInsets.symmetric(vertical: 2),
-                decoration: BoxDecoration(color: CColors.cream, borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(
+                  color: CColors.cream,
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 alignment: Alignment.center,
                 child: Text(
                   '${l.qty}×',
-                  style: CText.body(12, color: CColors.rust, weight: FontWeight.w700),
+                  style: CText.body(
+                    12,
+                    color: CColors.rust,
+                    weight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(l.name, style: CText.body(13.5, color: CColors.ink)),
+                child: Text(
+                  l.name,
+                  style: CText.body(13.5, color: CColors.ink),
+                ),
               ),
-              Text(formatPrice(l.total), style: CText.body(13.5, color: CColors.muted)),
+              Text(
+                formatPrice(l.total),
+                style: CText.body(13.5, color: CColors.muted),
+              ),
             ],
           ),
         ),
@@ -755,7 +895,11 @@ class _TotalRow extends StatelessWidget {
   final _Stage stage;
   final bool delivery;
 
-  const _TotalRow({required this.order, required this.stage, required this.delivery});
+  const _TotalRow({
+    required this.order,
+    required this.stage,
+    required this.delivery,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -764,7 +908,9 @@ class _TotalRow extends StatelessWidget {
     return Row(
       children: [
         SvgIcon(
-          cancelled ? AppIcons.blockRounded : AppIcons.accountBalanceWalletRounded,
+          cancelled
+              ? AppIcons.blockRounded
+              : AppIcons.accountBalanceWalletRounded,
           size: 16,
           color: cancelled ? CColors.mutedLight : CColors.olive,
         ),
@@ -776,7 +922,11 @@ class _TotalRow extends StatelessWidget {
                 : paid
                 ? 'Paid'
                 : 'Pay on ${delivery ? 'delivery' : 'pickup'}',
-            style: CText.body(12.5, color: cancelled ? CColors.muted : CColors.olive, weight: FontWeight.w600),
+            style: CText.body(
+              12.5,
+              color: cancelled ? CColors.muted : CColors.olive,
+              weight: FontWeight.w600,
+            ),
           ),
         ),
         Text('Total  ', style: CText.body(13, color: CColors.muted)),
@@ -799,7 +949,11 @@ class _SignInPrompt extends StatelessWidget {
     icon: AppIcons.lockOutlineRounded,
     title: 'Log in to see your orders',
     text: 'Your orders and their status appear here once you are logged in.',
-    action: PillButton(label: 'Login', small: true, onPressed: () => showCustomerAuthDialog(context)),
+    action: PillButton(
+      label: 'Login',
+      small: true,
+      onPressed: () => showCustomerAuthDialog(context),
+    ),
   );
 }
 
@@ -815,7 +969,8 @@ class _NoOrders extends ConsumerWidget {
       label: 'Browse Menu',
       small: true,
       icon: AppIcons.arrowForwardRounded,
-      onPressed: () => ref.read(customerTabProvider.notifier).state = CustomerTab.menu,
+      onPressed: () =>
+          ref.read(customerTabProvider.notifier).state = CustomerTab.menu,
     ),
   );
 }
@@ -826,7 +981,12 @@ class _Message extends StatelessWidget {
   final String text;
   final Widget action;
 
-  const _Message({required this.icon, required this.title, required this.text, required this.action});
+  const _Message({
+    required this.icon,
+    required this.title,
+    required this.text,
+    required this.action,
+  });
 
   @override
   Widget build(BuildContext context) => Container(
@@ -838,7 +998,12 @@ class _Message extends StatelessWidget {
     ),
     child: Column(
       children: [
-        IconBadge(icon, size: 64, background: CColors.cream, color: CColors.gold),
+        IconBadge(
+          icon,
+          size: 64,
+          background: CColors.cream,
+          color: CColors.gold,
+        ),
         const SizedBox(height: 16),
         Text(title, textAlign: TextAlign.center, style: CText.display(22)),
         const SizedBox(height: 6),

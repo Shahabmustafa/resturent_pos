@@ -11,7 +11,8 @@ class CartLine {
   String get key => '${dish.id}:${option.label}';
   double get total => option.price * qty;
 
-  CartLine copyWith({int? qty}) => CartLine(dish: dish, option: option, qty: qty ?? this.qty);
+  CartLine copyWith({int? qty}) =>
+      CartLine(dish: dish, option: option, qty: qty ?? this.qty);
 }
 
 class CartNotifier extends Notifier<List<CartLine>> {
@@ -43,8 +44,14 @@ class CartNotifier extends Notifier<List<CartLine>> {
   void clear() => state = const [];
 }
 
-final cartProvider = NotifierProvider<CartNotifier, List<CartLine>>(CartNotifier.new);
+final cartProvider = NotifierProvider<CartNotifier, List<CartLine>>(
+  CartNotifier.new,
+);
 
-final cartCountProvider = Provider<int>((ref) => ref.watch(cartProvider).fold(0, (sum, l) => sum + l.qty));
+final cartCountProvider = Provider<int>(
+  (ref) => ref.watch(cartProvider).fold(0, (sum, l) => sum + l.qty),
+);
 
-final cartSubtotalProvider = Provider<double>((ref) => ref.watch(cartProvider).fold(0.0, (sum, l) => sum + l.total));
+final cartSubtotalProvider = Provider<double>(
+  (ref) => ref.watch(cartProvider).fold(0.0, (sum, l) => sum + l.total),
+);

@@ -33,8 +33,14 @@ class Reveal extends StatefulWidget {
 }
 
 class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
-  late final _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
-  late final _curve = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+  late final _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 650),
+  );
+  late final _curve = CurvedAnimation(
+    parent: _ctrl,
+    curve: Curves.easeOutCubic,
+  );
   List<ScrollPosition> _positions = const [];
   bool _started = false;
   Timer? _delay;
@@ -50,7 +56,11 @@ class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
     // Listen to every enclosing scrollable, not just the nearest: a shrink-wrapped
     // grid is a Scrollable that never scrolls, while the page around it does.
     final positions = <ScrollPosition>[];
-    for (var s = Scrollable.maybeOf(context); s != null; s = Scrollable.maybeOf(s.context)) {
+    for (
+      var s = Scrollable.maybeOf(context);
+      s != null;
+      s = Scrollable.maybeOf(s.context)
+    ) {
       positions.add(s.position);
     }
     _detach();
@@ -149,7 +159,12 @@ class EntranceFade extends StatelessWidget {
         opacity: t,
         child: Transform.translate(
           offset: Offset(0, (1 - t) * offsetY),
-          child: fromScale == 1 ? child : Transform.scale(scale: fromScale + (1 - fromScale) * t, child: child),
+          child: fromScale == 1
+              ? child
+              : Transform.scale(
+                  scale: fromScale + (1 - fromScale) * t,
+                  child: child,
+                ),
         ),
       ),
     );
@@ -167,8 +182,12 @@ class Floating extends StatefulWidget {
   State<Floating> createState() => _FloatingState();
 }
 
-class _FloatingState extends State<Floating> with SingleTickerProviderStateMixin {
-  late final _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
+class _FloatingState extends State<Floating>
+    with SingleTickerProviderStateMixin {
+  late final _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 3),
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
@@ -183,7 +202,10 @@ class _FloatingState extends State<Floating> with SingleTickerProviderStateMixin
       animation: _ctrl,
       child: widget.child,
       builder: (context, child) => Transform.translate(
-        offset: Offset(0, -widget.distance * Curves.easeInOut.transform(_ctrl.value)),
+        offset: Offset(
+          0,
+          -widget.distance * Curves.easeInOut.transform(_ctrl.value),
+        ),
         child: child,
       ),
     );

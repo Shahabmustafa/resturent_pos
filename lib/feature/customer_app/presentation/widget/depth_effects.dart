@@ -67,7 +67,8 @@ class PointerParallax extends StatefulWidget {
   State<PointerParallax> createState() => _PointerParallaxState();
 }
 
-class _PointerParallaxState extends State<PointerParallax> with SingleTickerProviderStateMixin {
+class _PointerParallaxState extends State<PointerParallax>
+    with SingleTickerProviderStateMixin {
   late final _follower = _Follower(this, speed: 5);
 
   @override
@@ -100,7 +101,8 @@ class _PointerParallaxState extends State<PointerParallax> with SingleTickerProv
 class _ParallaxScope extends InheritedNotifier<_Follower> {
   const _ParallaxScope({required super.notifier, required super.child});
 
-  static _Follower? of(BuildContext context) => context.getInheritedWidgetOfExactType<_ParallaxScope>()?.notifier;
+  static _Follower? of(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_ParallaxScope>()?.notifier;
 }
 
 /// One depth layer of a [PointerParallax].
@@ -111,14 +113,22 @@ class ParallaxLayer extends StatelessWidget {
   final double depth;
   final double tilt;
   final Widget child;
-  final Widget Function(BuildContext context, Offset pointer, Widget child)? builder;
+  final Widget Function(BuildContext context, Offset pointer, Widget child)?
+  builder;
 
-  const ParallaxLayer({super.key, required this.depth, this.tilt = 0, required this.child, this.builder});
+  const ParallaxLayer({
+    super.key,
+    required this.depth,
+    this.tilt = 0,
+    required this.child,
+    this.builder,
+  });
 
   @override
   Widget build(BuildContext context) {
     final follower = _ParallaxScope.of(context);
-    if (follower == null) return builder == null ? child : builder!(context, Offset.zero, child);
+    if (follower == null)
+      return builder == null ? child : builder!(context, Offset.zero, child);
     return ListenableBuilder(
       listenable: follower,
       child: child,
@@ -144,14 +154,23 @@ class FloatSway extends StatefulWidget {
   final double distance;
   final double sway; // degrees
 
-  const FloatSway({super.key, required this.child, this.distance = 10, this.sway = 2});
+  const FloatSway({
+    super.key,
+    required this.child,
+    this.distance = 10,
+    this.sway = 2,
+  });
 
   @override
   State<FloatSway> createState() => _FloatSwayState();
 }
 
-class _FloatSwayState extends State<FloatSway> with SingleTickerProviderStateMixin {
-  late final _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
+class _FloatSwayState extends State<FloatSway>
+    with SingleTickerProviderStateMixin {
+  late final _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 12),
+  )..repeat();
 
   @override
   void dispose() {
@@ -169,10 +188,19 @@ class _FloatSwayState extends State<FloatSway> with SingleTickerProviderStateMix
         final a = _ctrl.value * 2 * math.pi;
         // Bob twice per loop; sway on X and Y at different rates so it never looks mechanical.
         final m = _perspective()
-          ..translateByDouble(0, -widget.distance * (0.5 - 0.5 * math.cos(a * 2)), 0, 1)
+          ..translateByDouble(
+            0,
+            -widget.distance * (0.5 - 0.5 * math.cos(a * 2)),
+            0,
+            1,
+          )
           ..rotateX(math.sin(a) * widget.sway * _deg)
           ..rotateY(math.sin(a * 3 + 1) * widget.sway * 0.7 * _deg);
-        return Transform(alignment: Alignment.center, transform: m, child: child);
+        return Transform(
+          alignment: Alignment.center,
+          transform: m,
+          child: child,
+        );
       },
     );
   }
@@ -260,7 +288,10 @@ class _Tilt3DState extends State<Tilt3D> with TickerProviderStateMixin {
                             blurRadius: 18 + 22 * h,
                             spreadRadius: -4,
                             // The raised side faces the pointer, so the shadow falls the other way.
-                            offset: Offset(-p.dx * 14 * h, 10 + 12 * h - p.dy * 8 * h),
+                            offset: Offset(
+                              -p.dx * 14 * h,
+                              10 + 12 * h - p.dy * 8 * h,
+                            ),
                           ),
                         ],
                 ),
@@ -277,7 +308,8 @@ class _Tilt3DState extends State<Tilt3D> with TickerProviderStateMixin {
 class _TiltScope extends InheritedNotifier<_Follower> {
   const _TiltScope({required super.notifier, required super.child});
 
-  static _Follower? of(BuildContext context) => context.getInheritedWidgetOfExactType<_TiltScope>()?.notifier;
+  static _Follower? of(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_TiltScope>()?.notifier;
 }
 
 /// Shifts [child] with the enclosing [Tilt3D] so it reads as sitting closer to
@@ -295,8 +327,10 @@ class TiltDepth extends StatelessWidget {
     return ListenableBuilder(
       listenable: tilt,
       child: child,
-      builder: (context, child) =>
-          Transform.translate(offset: Offset(tilt.value.dx * depth, tilt.value.dy * depth), child: child),
+      builder: (context, child) => Transform.translate(
+        offset: Offset(tilt.value.dx * depth, tilt.value.dy * depth),
+        child: child,
+      ),
     );
   }
 }
@@ -312,7 +346,13 @@ class ScrollDepth extends StatefulWidget {
   final double rotateX; // degrees of tilt at the screen edges
   final double spin; // degrees of Z rotation at the screen edges
 
-  const ScrollDepth({super.key, required this.child, this.shiftY = 0, this.rotateX = 0, this.spin = 0});
+  const ScrollDepth({
+    super.key,
+    required this.child,
+    this.shiftY = 0,
+    this.rotateX = 0,
+    this.spin = 0,
+  });
 
   @override
   State<ScrollDepth> createState() => _ScrollDepthState();
@@ -331,7 +371,11 @@ class _ScrollDepthState extends State<ScrollDepth> {
     if (_disabled) return;
     // Listen to every enclosing scrollable — see Reveal for why.
     final positions = <ScrollPosition>[];
-    for (var s = Scrollable.maybeOf(context); s != null; s = Scrollable.maybeOf(s.context)) {
+    for (
+      var s = Scrollable.maybeOf(context);
+      s != null;
+      s = Scrollable.maybeOf(s.context)
+    ) {
       positions.add(s.position);
     }
     _positions = positions;
@@ -375,7 +419,11 @@ class _ScrollDepthState extends State<ScrollDepth> {
           ..translateByDouble(0, t * widget.shiftY, 0, 1)
           ..rotateX(t * widget.rotateX * _deg)
           ..rotateZ(t * widget.spin * _deg);
-        return Transform(alignment: Alignment.center, transform: m, child: child);
+        return Transform(
+          alignment: Alignment.center,
+          transform: m,
+          child: child,
+        );
       },
     );
   }
