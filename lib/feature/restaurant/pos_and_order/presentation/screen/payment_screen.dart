@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/constants/currency.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import '../provider/pos_provider.dart';
 
 const _bg = Color(0xFF10527A);
@@ -40,8 +41,18 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  PayMode _mode = PayMode.cash;
+  late PayMode _mode = _firstMode();
   String _entry = '';
+
+  PosSetup get _setup => readPosSetup(context);
+
+  /// Cash, unless the setup switched it off.
+  PayMode _firstMode() {
+    final p = readPosSetup(context).payMethods;
+    if (p.contains('cash') || p.isEmpty) return PayMode.cash;
+    if (p.contains('card')) return PayMode.card;
+    return PayMode.onDelivery;
+  }
 
   PosState get _s => widget.sale;
   double get _total => _s.total;
@@ -419,22 +430,26 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               child: Row(
                                 children: [
-                                  if (_delivery)
+                                  if (_delivery &&
+                                      _setup.payMethods.contains('cashDue'))
                                     _modeTab(
                                       'Cash On Delivery',
                                       AppIcons.localShippingRounded,
                                       PayMode.onDelivery,
                                     ),
-                                  _modeTab(
-                                    'Card payment',
-                                    AppIcons.paymentsRounded,
-                                    PayMode.card,
-                                  ),
-                                  _modeTab(
-                                    'Cash',
-                                    AppIcons.paymentsRounded,
-                                    PayMode.cash,
-                                  ),
+                                  if (_setup.payMethods.contains('card'))
+                                    _modeTab(
+                                      'Card payment',
+                                      AppIcons.paymentsRounded,
+                                      PayMode.card,
+                                    ),
+                                  if (_setup.payMethods.contains('cash') ||
+                                      _setup.payMethods.isEmpty)
+                                    _modeTab(
+                                      'Cash',
+                                      AppIcons.paymentsRounded,
+                                      PayMode.cash,
+                                    ),
                                 ],
                               ),
                             ),

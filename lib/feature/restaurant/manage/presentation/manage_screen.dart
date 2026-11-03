@@ -7,11 +7,13 @@ import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:resturent_application/feature/restaurant/auth/presentation/provider/branch_auth_provider.dart';
+import 'package:resturent_application/feature/restaurant/calls/call_provider.dart';
 import 'package:resturent_application/feature/restaurant/live_orders/presentation/live_orders_screen.dart';
-import 'package:resturent_application/feature/restaurant/order/presentation/provider/order_provider.dart';
 import 'package:resturent_application/feature/restaurant/setting/presentation/provider/branch_setting_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+const _website = 'www.pakafghanrestaurant.co.uk';
 const _bg = Color(0xFFD4D4D2);
 const _blue = Color(0xFF2C73B8);
 const _cols =
@@ -264,20 +266,32 @@ class ManageScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 6),
                 _NavButton(
-                  label: 'Menu',
-                  icon: AppIcons.menuBookRounded,
+                  label: 'Help',
+                  icon: AppIcons.infoOutlineRounded,
                   color: const Color(0xFF3F51B5),
-                  onTap: onMenu,
-                ),
-                if (onDeliveries != null) ...[
-                  const SizedBox(width: 6),
-                  _NavButton(
-                    label: 'Deliveries',
-                    icon: AppIcons.deliveryDiningRounded,
-                    color: const Color(0xFF8E44AD),
-                    onTap: onDeliveries!,
+                  onTap: () => showDialog<void>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Help'),
+                      content: Text(
+                        '$kAppName v$kAppVersion\n\nFor support contact $_website.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
+                const SizedBox(width: 6),
+                _NavButton(
+                  label: 'Website',
+                  icon: AppIcons.storefrontRounded,
+                  color: const Color(0xFF9B59B6),
+                  onTap: () => launchUrl(Uri.parse('https://$_website')),
+                ),
                 if (onUsers != null) ...[
                   const SizedBox(width: 6),
                   _NavButton(
@@ -297,9 +311,17 @@ class ManageScreen extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(width: 6),
+                const _NavButton(
+                  label: 'EMAIL / SMS',
+                  icon: AppIcons.alternateEmailRounded,
+                  color: Color(0xFF9E9E9E),
+                  background: Color(0xFFD0D0D0),
+                  onTap: null,
+                ),
+                const SizedBox(width: 6),
                 _NavButton(
                   label: 'Re Print',
-                  icon: AppIcons.receiptLongRounded,
+                  icon: AppIcons.printRounded,
                   color: const Color(0xFFE8742A),
                   onTap: onReprint,
                 ),
@@ -496,91 +518,146 @@ class _InfoRow extends StatelessWidget {
   );
 }
 
-/// Numbers that recently placed an order; "Saved" when the number belongs to a customer.
+/// Incoming calls from the caller-ID box; "Saved" when the number belongs to a customer.
 class _RecentNumbers extends ConsumerWidget {
   const _RecentNumbers();
 
+  static String _digits(String v) => v.replaceAll(RegExp(r'\D'), '');
+
+  Future<void> _testCall(BuildContext context) async {
+    final c = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Test call'),
+        content: TextField(
+          controller: c,
+          autofocus: true,
+          keyboardType: TextInputType.phone,
+          decoration: const InputDecoration(labelText: 'Phone number'),
+          onSubmitted: (_) => Navigator.pop(ctx, true),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Call'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await logCall(c.text);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final orders =
-        ref
-            .watch(orderProvider)
-            .orders
-            .where((o) => o.customerPhone.trim().isNotEmpty)
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final calls = ref.watch(callLogProvider);
+    final customers = ref.watch(callCustomersProvider).value ?? const [];
+    bool saved(String phone) {
+      final d = _digits(phone);
+      return d.isNotEmpty && customers.any((c) => c.hasPhone(d));
+    }
+
     return Container(
       color: Colors.white,
-      child: orders.isEmpty
-          ? const Center(
-              child: Text(
-                'No recent orders',
-                style: TextStyle(color: Color(0xFF6B7280)),
-              ),
-            )
-          : ListView.separated(
-              itemCount: orders.length.clamp(0, 40),
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (_, i) {
-                final o = orders[i];
-                final saved = o.customerId != null;
-                final at = o.createdAt.toLocal();
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              o.customerPhone,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                SvgIcon(
-                                  saved
-                                      ? AppIcons.checkRounded
-                                      : AppIcons.personRounded,
-                                  size: 14,
-                                  color: saved
-                                      ? const Color(0xFF3DBB16)
-                                      : Colors.red,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  saved ? 'Saved' : 'Unsaved',
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            DateFormat('h:mm a').format(at),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            DateFormat('M/d/yy').format(at),
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => _testCall(context),
+              child: const Text('Test call'),
             ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: calls.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Could not load calls: $e',
+                    style: const TextStyle(color: Color(0xFF6B7280)),
+                  ),
+                ),
+              ),
+              data: (list) => list.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No calls yet',
+                        style: TextStyle(color: Color(0xFF6B7280)),
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, i) {
+                        final call = list[i];
+                        final isSaved = saved(call.phone);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      call.phone,
+                                      style: const TextStyle(fontSize: 15),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        SvgIcon(
+                                          isSaved
+                                              ? AppIcons.checkRounded
+                                              : AppIcons.personRounded,
+                                          size: 14,
+                                          color: isSaved
+                                              ? const Color(0xFF3DBB16)
+                                              : Colors.red,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          isSaved ? 'Saved' : 'Unsaved',
+                                          style: const TextStyle(fontSize: 13),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    DateFormat('h:mm a').format(call.calledAt),
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DateFormat('M/d/yy').format(call.calledAt),
+                                    style: const TextStyle(fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -590,7 +667,7 @@ class _NavButton extends StatelessWidget {
   final AppIcon icon;
   final Color color;
   final Color background;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const _NavButton({
     required this.label,
     required this.icon,

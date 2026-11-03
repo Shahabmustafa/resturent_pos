@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../pos_and_order/data/model/order_model.dart';
 import '../../../setting/data/model/branch_setting_model.dart';
@@ -450,6 +451,15 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
 
     // FIX: sharePdf is faster on web — layoutPdf was slow through the browser print dialog
     final bytes = await doc.save();
+    // A printer ticked in the POS setup prints straight to it.
+    final printerUrl = readPosSetup(context).printerUrl;
+    if (printerUrl.isNotEmpty) {
+      final printed = await Printing.directPrintPdf(
+        printer: Printer(url: printerUrl),
+        onLayout: (_) async => bytes,
+      );
+      if (printed) return;
+    }
     await Printing.sharePdf(
       bytes: bytes,
       filename: 'receipt_${order.orderNumber.replaceAll('#', '')}.pdf',

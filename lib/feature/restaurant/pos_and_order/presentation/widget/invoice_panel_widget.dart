@@ -956,9 +956,7 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
     autofocus: autofocus,
     minLines: lines,
     maxLines: lines,
-    keyboardType: phone
-        ? TextInputType.phone
-        : null,
+    keyboardType: phone ? TextInputType.phone : null,
     style: const TextStyle(fontSize: 16),
     decoration: tillFieldDecoration(label),
   );

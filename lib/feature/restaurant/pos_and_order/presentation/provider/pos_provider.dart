@@ -344,8 +344,7 @@ class PosNotifier extends StateNotifier<PosState> {
   void setTaxRate(double rate) => state = state.copyWith(taxRate: rate);
   void setDeliveryAddress(String v) =>
       state = state.copyWith(deliveryAddress: v);
-  void setDeliveryCharge(double v) =>
-      state = state.copyWith(deliveryCharge: v);
+  void setDeliveryCharge(double v) => state = state.copyWith(deliveryCharge: v);
   void setRider(String? id) =>
       state = state.copyWith(selectedRiderId: id); // ── NEW
 

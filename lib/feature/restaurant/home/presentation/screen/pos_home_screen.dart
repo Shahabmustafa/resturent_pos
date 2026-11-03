@@ -4,8 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/desktop_window.dart';
+import 'package:resturent_application/core/widget/calculator_dialog.dart';
 import 'package:resturent_application/core/widget/drawer.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 
 /// Starts a new sale in POS with this order type ('Dine-in', 'Takeaway', 'Delivery').
 typedef StartSale = void Function(String orderType);
@@ -72,12 +74,7 @@ const _mainTiles = [
     AppIcons.receiptLongRounded,
     Color(0xFF6A2CF5),
   ),
-  _PageTile(
-    POSPage.menu,
-    'MENU',
-    AppIcons.menuBookRounded,
-    Color(0xFFD6336C),
-  ),
+  _PageTile(POSPage.menu, 'MENU', AppIcons.menuBookRounded, Color(0xFFD6336C)),
   _PageTile(
     POSPage.salesReport,
     'REPORT',
@@ -127,6 +124,15 @@ class POSHomeScreen extends StatefulWidget {
 }
 
 class _POSHomeScreenState extends State<POSHomeScreen> {
+  /// Sale types switched off in the POS setup are hidden.
+  bool _tileOn(SaleTile t) =>
+      readPosSetup(context).orderTypes.contains(switch (t.label) {
+        'SHOP' => 'carry',
+        'DINE' => 'dine',
+        'COLLECTION' => 'collection',
+        _ => 'delivery',
+      });
+
   Future<void> _confirmShutdown() async {
     final ok = await showDialog<bool>(
       context: context,
@@ -190,12 +196,13 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
                     Column(
                       children: [
                         for (final t in saleTiles)
-                          _SolidTile(
-                            tile: t,
-                            onTap: () => t.lookup
-                                ? widget.onCollection()
-                                : widget.onStartSale(t.orderType),
-                          ),
+                          if (_tileOn(t))
+                            _SolidTile(
+                              tile: t,
+                              onTap: () => t.lookup
+                                  ? widget.onCollection()
+                                  : widget.onStartSale(t.orderType),
+                            ),
                       ],
                     ),
                   const SizedBox(width: 120),
@@ -213,6 +220,12 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               const _ClockBox(),
+              const SizedBox(width: 14),
+              _ControlButton(
+                label: 'CALCULATOR',
+                icon: AppIcons.calculateOutlined,
+                onTap: () => showCalculator(context),
+              ),
               const SizedBox(width: 14),
               if (allowed.contains(POSPage.live))
                 _SplitTile(

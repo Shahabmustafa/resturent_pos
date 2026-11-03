@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
@@ -29,6 +30,9 @@ import '../../feature/restaurant/live_orders/presentation/live_orders_screen.dar
 import '../../feature/restaurant/till/presentation/till_screen.dart';
 import '../../feature/restaurant/notes/presentation/notes_screen.dart';
 import '../../feature/restaurant/home/presentation/screen/pos_home_screen.dart';
+import '../../feature/restaurant/calls/call_provider.dart';
+import '../../feature/restaurant/setup/pos_setup.dart';
+import '../../feature/restaurant/setup/pos_setup_screen.dart';
 import '../../feature/restaurant/customer_lookup/presentation/collection_flow.dart';
 import '../../feature/restaurant/pos_and_order/presentation/provider/pos_provider.dart';
 import '../../feature/restaurant/sales_dashboard/presentation/sales_dashboard_screen.dart';
@@ -55,6 +59,7 @@ enum POSPage {
   restaurant,
   manage,
   salesReport,
+  setup,
 }
 
 class NavItem {
@@ -100,6 +105,7 @@ const _roleAccess = <String, Set<POSPage>>{
     POSPage.menu,
     POSPage.users,
     POSPage.settings,
+    POSPage.setup,
     POSPage.notes,
     POSPage.live,
     POSPage.manage,
@@ -164,6 +170,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   bool _delivery = false;
   // Website orders not yet dismissed (raw `orders` rows from realtime).
   final List<Map<String, dynamic>> _alerts = [];
+  // Incoming call popup, and the number to fill in when a lookup is started from it.
+  CallEntry? _incoming;
+  Timer? _snooze;
+  String _callPhone = '';
+  String? _lastCallId;
+  bool _callsSeen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -205,6 +217,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       setState(() {
         _collection = false;
         _delivery = false;
+        _callPhone = '';
         _currentPage = page;
       });
     }
@@ -232,12 +245,50 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       final order = next.value;
       if (order == null || !allowed.contains(POSPage.order)) return;
       if (_alerts.any((a) => a['id'] == order['id'])) return;
-      SystemSound.play(SystemSoundType.alert);
+      final setup = ref.read(posSetupProvider);
+      if (!setup.onlinePopup) return;
+      if (setup.orderSound) SystemSound.play(SystemSoundType.alert);
       setState(() {
         _alerts.insert(0, order);
         if (_alerts.length > 4) _alerts.removeLast();
       });
     });
+
+    // A new row in the call log pops up; rows that already existed on start do not.
+    ref.listen(callLogProvider, (_, next) {
+      final calls = next.value;
+      if (calls == null || calls.isEmpty) return;
+      final latest = calls.first;
+      if (!_callsSeen) {
+        _callsSeen = true;
+        _lastCallId = latest.id;
+        return;
+      }
+      if (latest.id == _lastCallId) return;
+      _lastCallId = latest.id;
+      SystemSound.play(SystemSoundType.alert);
+      setState(() => _incoming = latest);
+    });
+
+    // Snooze hides the popup and shows it again after half a minute.
+    void snoozeCall() {
+      final call = _incoming;
+      setState(() => _incoming = null);
+      _snooze?.cancel();
+      _snooze = Timer(const Duration(seconds: 30), () {
+        if (mounted && call != null) setState(() => _incoming = call);
+      });
+    }
+
+    void answerCall(String type) {
+      final phone = _incoming?.phone ?? '';
+      _snooze?.cancel();
+      setState(() {
+        _incoming = null;
+        _callPhone = phone;
+      });
+      startSale(type);
+    }
 
     void dismissAlert(Map<String, dynamic> order) =>
         setState(() => _alerts.removeWhere((a) => a['id'] == order['id']));
@@ -282,19 +333,22 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     final b = settingsState.branch;
     final page = _currentPage;
-    return Scaffold(
+    final zoom = ref.watch(posSetupProvider.select((s) => s.zoom));
+    final scaffold = Scaffold(
       body: Stack(
         children: [
           if (_collection)
             CollectionFlow(
               onBack: () => navigate(null),
               onStartSale: startSale,
+              initialPhone: _callPhone,
               onSkip: () => startCollection(null),
               onConfirm: startCollection,
             )
           else if (_delivery)
             CollectionFlow(
               saleLabel: 'DELIVERY',
+              initialPhone: _callPhone,
               onBack: () => navigate(null),
               onStartSale: startSale,
               onSkip: () => startDelivery(null, 0, ''),
@@ -409,7 +463,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   ? () => navigate(POSPage.users)
                   : null,
               onSettings: allowed.contains(POSPage.settings)
-                  ? () => navigate(POSPage.settings)
+                  ? () => navigate(POSPage.setup)
                   : null,
               // Receipts are printed from the order's detail panel: open the latest order.
               onReprint: () {
@@ -418,6 +472,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 if (orders.isNotEmpty)
                   ref.read(orderProvider.notifier).select(orders.first);
               },
+            )
+          else if (page == POSPage.setup)
+            PosSetupScreen(
+              systemName: branchName,
+              onBack: () => navigate(POSPage.manage),
             )
           else if (page == POSPage.till)
             TillScreen(
@@ -443,6 +502,22 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 Expanded(child: _pageContent(page)),
               ],
             ),
+          if (_incoming != null)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: SafeArea(
+                child: _IncomingCallCard(
+                  call: _incoming!,
+                  onOk: () => answerCall('Collection'),
+                  onSnooze: snoozeCall,
+                  onReject: () {
+                    _snooze?.cancel();
+                    setState(() => _incoming = null);
+                  },
+                ),
+              ),
+            ),
           // Website order notifications, newest on top.
           if (_alerts.isNotEmpty)
             Positioned(
@@ -465,6 +540,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
         ],
       ),
+    );
+    return MediaQuery(
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: TextScaler.linear(zoom / 100)),
+      child: scaffold,
     );
   }
 
@@ -494,6 +575,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         return const UserManagementPage();
       case POSPage.settings:
         return const SettingsScreen();
+      case POSPage.setup:
+        return const SizedBox.shrink();
       case POSPage.cash:
         return const CashScreen();
       case POSPage.counter:
@@ -896,4 +979,114 @@ class ComingSoonPage extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// "Incoming call" popup: the caller's number with Reject, Snooze and Ok.
+class _IncomingCallCard extends ConsumerWidget {
+  final CallEntry call;
+  final VoidCallback onOk;
+  final VoidCallback onSnooze;
+  final VoidCallback onReject;
+
+  const _IncomingCallCard({
+    required this.call,
+    required this.onOk,
+    required this.onSnooze,
+    required this.onReject,
+  });
+
+  Widget _button(String label, Color color, VoidCallback onTap) => Expanded(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Material(
+        color: color,
+        elevation: 2,
+        borderRadius: BorderRadius.circular(3),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(3),
+          onTap: onTap,
+          child: SizedBox(
+            height: 66,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SvgIcon(
+                  AppIcons.phoneRounded,
+                  size: 20,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final digits = call.phone.replaceAll(RegExp(r'\D'), '');
+    final customer = (ref.watch(callCustomersProvider).value ?? const [])
+        .where((c) => c.hasPhone(digits))
+        .firstOrNull;
+    final name = customer?.fullName ?? '';
+    return Material(
+      elevation: 10,
+      color: Colors.white,
+      child: Container(
+        width: 460,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF2B3FB5), width: 2),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFF1F1F1),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SvgIcon(AppIcons.phoneRounded, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        call.phone,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (name.isNotEmpty)
+                    Text(
+                      name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _button('Reject', const Color(0xFFD9534F), onReject),
+                _button('Snooze', const Color(0xFF2B6CB0), onSnooze),
+                _button('Ok', const Color(0xFF5CB85C), onOk),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
 }

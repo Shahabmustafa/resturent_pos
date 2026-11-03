@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:resturent_application/core/constants/supabase_config.dart';
 import 'package:resturent_application/core/desktop_window.dart';
+import 'package:resturent_application/core/service/cash_drawer.dart';
 import 'package:resturent_application/feature/admin_panel/admin_panel_app.dart';
 import 'package:resturent_application/feature/customer_app/customer_app.dart';
 import 'package:resturent_application/feature/app_mode/app_mode.dart';
@@ -49,6 +50,9 @@ class RestaurantPOSApp extends StatelessWidget {
     return MaterialApp(
       title: kAppName,
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: drawerMessengerKey,
+      builder: (context, child) =>
+          DrawerKeyListener(child: child ?? const SizedBox.shrink()),
       theme: ThemeData(
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFF5F6FA),

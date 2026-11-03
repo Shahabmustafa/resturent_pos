@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 
 const _keyColor = Color(0xFFFDFDFD);
 const _actionKeyColor = Color(0xFFB8BEC8);
@@ -10,11 +11,19 @@ class OnScreenKeyboard extends StatefulWidget {
   final VoidCallback? onChanged;
   final VoidCallback onEnter;
 
+  /// Side padding; use a small value inside narrow dialogs.
+  final double horizontalPadding;
+
+  /// Opens on the number/symbol page (for phone and number fields).
+  final bool startNumbers;
+
   const OnScreenKeyboard({
     super.key,
     required this.controller,
     required this.onEnter,
     this.onChanged,
+    this.horizontalPadding = 80,
+    this.startNumbers = false,
   });
 
   @override
@@ -23,7 +32,7 @@ class OnScreenKeyboard extends StatefulWidget {
 
 class _OnScreenKeyboardState extends State<OnScreenKeyboard> {
   bool _shift = false;
-  bool _numbers = false;
+  late bool _numbers = widget.startNumbers;
 
   static const _letters = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
   static const _symbols = ['1234567890', '-/:;()£&@"', '.,?!\''];
@@ -85,7 +94,10 @@ class _OnScreenKeyboardState extends State<OnScreenKeyboard> {
     final rows = _numbers ? _symbols : _letters;
     return Container(
       color: const Color(0xFFD1D5DB),
-      padding: const EdgeInsets.fromLTRB(80, 6, 80, 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.horizontalPadding,
+        vertical: 6,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -146,6 +158,81 @@ class _OnScreenKeyboardState extends State<OnScreenKeyboard> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shows the on-screen keyboard under [child] whenever a text field inside
+/// [child] has focus (and the virtual keyboard is enabled in POS setup).
+class KeyboardHost extends StatefulWidget {
+  final Widget child;
+  final double horizontalPadding;
+
+  const KeyboardHost({
+    super.key,
+    required this.child,
+    this.horizontalPadding = 80,
+  });
+
+  @override
+  State<KeyboardHost> createState() => _KeyboardHostState();
+}
+
+class _KeyboardHostState extends State<KeyboardHost> {
+  EditableTextState? _field;
+
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addListener(_onFocus);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeListener(_onFocus);
+    super.dispose();
+  }
+
+  void _onFocus() {
+    final ctx = FocusManager.instance.primaryFocus?.context;
+    EditableTextState? found;
+    if (ctx != null) {
+      final f = ctx.findAncestorStateOfType<EditableTextState>();
+      // Only react to fields that live inside this host.
+      if (f != null &&
+          f.context.findAncestorStateOfType<_KeyboardHostState>() == this) {
+        found = f;
+      }
+    }
+    if (found == _field) return;
+    if (!mounted) return;
+    setState(() => _field = found);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final f = _field;
+    final show =
+        f != null && f.mounted && readPosSetup(context).virtualKeyboard;
+    final type = f?.widget.keyboardType;
+    final numeric =
+        type == TextInputType.phone ||
+        type == TextInputType.number ||
+        (type?.index == 2); // number
+    return Column(
+      children: [
+        Expanded(child: widget.child),
+        if (show)
+          TextFieldTapRegion(
+            child: OnScreenKeyboard(
+              key: ValueKey(f.widget.controller),
+              controller: f.widget.controller,
+              horizontalPadding: widget.horizontalPadding,
+              startNumbers: numeric,
+              onEnter: () => FocusManager.instance.primaryFocus?.unfocus(),
+            ),
+          ),
+      ],
     );
   }
 }

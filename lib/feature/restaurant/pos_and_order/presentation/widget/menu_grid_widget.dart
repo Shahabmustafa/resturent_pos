@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:resturent_application/core/constants/currency.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import '../../data/model/order_model.dart';
 
-const _bg = Color(0xFF2F6FD6);
 const _dealsId = '__deals__';
 
 // Till colours per category position: (item tile, category button). The menu's
@@ -53,6 +53,7 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final setup = readPosSetup(context);
     final tabs = _tabs;
     final selected =
         tabs.where((c) => c.id == _categoryId).firstOrNull ?? tabs.firstOrNull;
@@ -67,7 +68,7 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
             .$1;
 
     return Container(
-      color: _bg,
+      color: setup.menuColor,
       child: Column(
         children: [
           Expanded(
@@ -84,17 +85,18 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.all(12),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 150,
-                          mainAxisExtent: 92,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                        ),
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: setup.productWidth.toDouble(),
+                      mainAxisExtent: setup.productHeight.toDouble(),
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
                     itemCount: items.length,
                     itemBuilder: (_, i) => _ItemTile(
                       product: items[i],
                       color: tileColor,
+                      fontSize: setup.productFont.toDouble(),
+                      showPrice: !setup.nameOnly,
                       onTap: () => widget.onAddToCart(items[i]),
                     ),
                   ),
@@ -113,6 +115,9 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
                       label: c.name,
                       color: _palette[i % _palette.length].$2,
                       selected: c.id == selected?.id,
+                      width: setup.categoryWidth.toDouble(),
+                      height: setup.categoryHeight.toDouble(),
+                      fontSize: setup.categoryFont.toDouble(),
                       onTap: () => setState(() => _categoryId = c.id),
                     ),
                 ],
@@ -127,10 +132,14 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
 class _ItemTile extends StatelessWidget {
   final MenuProduct product;
   final Color color;
+  final double fontSize;
+  final bool showPrice;
   final VoidCallback onTap;
   const _ItemTile({
     required this.product,
     required this.color,
+    required this.fontSize,
+    required this.showPrice,
     required this.onTap,
   });
 
@@ -176,22 +185,24 @@ class _ItemTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w700,
                       height: 1.2,
                       shadows: hasImage ? shadow : null,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatMoney(price).replaceAll('£', ''),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      shadows: hasImage ? shadow : null,
+                  if (showPrice) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      formatMoney(price).replaceAll('£', ''),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w600,
+                        shadows: hasImage ? shadow : null,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -206,11 +217,17 @@ class _CategoryButton extends StatelessWidget {
   final String label;
   final Color color;
   final bool selected;
+  final double width;
+  final double height;
+  final double fontSize;
   final VoidCallback onTap;
   const _CategoryButton({
     required this.label,
     required this.color,
     required this.selected,
+    required this.width,
+    required this.height,
+    required this.fontSize,
     required this.onTap,
   });
 
@@ -228,8 +245,8 @@ class _CategoryButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(3),
       onTap: onTap,
       child: Container(
-        width: 140,
-        height: 54,
+        width: width,
+        height: height,
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Text(
@@ -237,9 +254,9 @@ class _CategoryButton extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Color(0xFF374151),
-            fontSize: 12,
+          style: TextStyle(
+            color: const Color(0xFF374151),
+            fontSize: fontSize,
             fontWeight: FontWeight.w600,
           ),
         ),

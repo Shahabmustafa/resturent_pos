@@ -15,6 +15,7 @@ import '../widget/till_dialog.dart';
 import 'package:resturent_application/core/constants/currency.dart';
 import 'package:resturent_application/feature/restaurant/auth/presentation/provider/branch_auth_provider.dart';
 import '../widget/till_bottom_bar_widget.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import 'payment_screen.dart';
 
 final _showCheckoutProvider = StateProvider<bool>((_) => false);
@@ -95,7 +96,7 @@ class POSScreen extends ConsumerWidget {
           ),
         ),
         SizedBox(
-          width: 380,
+          width: ref.watch(posSetupProvider).cartWidth.toDouble(),
           child: InvoicePanelWidget(
             onVoid: onHome,
             onSave: () {

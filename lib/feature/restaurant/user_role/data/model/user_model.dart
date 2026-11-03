@@ -4,50 +4,37 @@ import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
 
-enum BranchUserRole { admin, manager, cashier, chef, rider, waiter }
+enum BranchUserRole { admin, cashier }
 
 enum BranchUserStatus { active, inactive }
 
 extension BranchUserRoleX on BranchUserRole {
   String toJson() => name;
 
-  static BranchUserRole fromJson(String v) =>
-      BranchUserRole.values.firstWhere((e) => e.name == v);
+  /// Staff saved with an older role (manager, chef, rider, waiter) show as cashier.
+  static BranchUserRole fromJson(String v) => BranchUserRole.values.firstWhere(
+    (e) => e.name == v,
+    orElse: () => BranchUserRole.cashier,
+  );
 
   String get label => switch (this) {
     BranchUserRole.admin => 'Admin',
-    BranchUserRole.manager => 'Manager',
     BranchUserRole.cashier => 'Cashier',
-    BranchUserRole.chef => 'Chef',
-    BranchUserRole.rider => 'Rider',
-    BranchUserRole.waiter => 'Waiter',
   };
 
   AppIcon get icon => switch (this) {
     BranchUserRole.admin => AppIcons.shieldRounded,
-    BranchUserRole.manager => AppIcons.manageAccountsRounded,
     BranchUserRole.cashier => AppIcons.pointOfSaleRounded,
-    BranchUserRole.chef => AppIcons.soupKitchenRounded,
-    BranchUserRole.rider => AppIcons.deliveryDiningRounded,
-    BranchUserRole.waiter => AppIcons.roomServiceRounded,
   };
 
   Color get color => switch (this) {
     BranchUserRole.admin => const Color(0xFF7C3AED),
-    BranchUserRole.manager => const Color(0xFF1D4ED8),
     BranchUserRole.cashier => const Color(0xFF0369A1),
-    BranchUserRole.chef => const Color(0xFF15803D),
-    BranchUserRole.rider => const Color(0xFFB45309),
-    BranchUserRole.waiter => const Color(0xFFBE185D),
   };
 
   Color get bgColor => switch (this) {
     BranchUserRole.admin => const Color(0xFFF5F3FF),
-    BranchUserRole.manager => const Color(0xFFEFF6FF),
     BranchUserRole.cashier => const Color(0xFFE0F2FE),
-    BranchUserRole.chef => const Color(0xFFF0FDF4),
-    BranchUserRole.rider => const Color(0xFFFFFBEB),
-    BranchUserRole.waiter => const Color(0xFFFDF2F8),
   };
 
   List<String> get allowedPages => switch (this) {
@@ -61,11 +48,14 @@ extension BranchUserRoleX on BranchUserRole {
       'Users',
       'Settings',
     ],
-    BranchUserRole.manager => ['POS', 'Orders', 'Delivery', 'Tables', 'Menu'],
-    BranchUserRole.cashier => ['POS', 'Orders'],
-    BranchUserRole.chef => ['Orders'],
-    BranchUserRole.rider => ['Delivery'],
-    BranchUserRole.waiter => ['POS', 'Tables', 'Orders'],
+    BranchUserRole.cashier => [
+      'POS',
+      'Orders',
+      'Customers',
+      'Cash Counter',
+      'Till',
+      'Notes',
+    ],
   };
 }
 

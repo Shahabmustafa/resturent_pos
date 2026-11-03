@@ -261,9 +261,9 @@ class ReceiptTab extends ConsumerWidget {
             const SizedBox(width: 20),
             // ── Pass branch data to the preview ──
             branchAsync.when(
-              data: (branch) => _ReceiptPreview(settings: s, branch: branch),
+              data: (branch) => ReceiptPreview(settings: s, branch: branch),
               loading: () => const ReceiptPreviewSkeleton(),
-              error: (_, __) => _ReceiptPreview(settings: s, branch: null),
+              error: (_, __) => ReceiptPreview(settings: s, branch: null),
             ),
           ],
         ),
@@ -367,10 +367,10 @@ class _EditableField extends StatelessWidget {
 
 // ── Receipt Preview (thermal-safe: black only) ────────────────────────────────
 
-class _ReceiptPreview extends StatelessWidget {
+class ReceiptPreview extends StatelessWidget {
   final ReceiptSettings settings;
   final BranchModel? branch;
-  const _ReceiptPreview({required this.settings, required this.branch});
+  const ReceiptPreview({required this.settings, required this.branch});
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -519,4 +519,24 @@ class _RRow extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// The receipt as it prints, using the saved receipt settings and branch details.
+class LiveReceiptPreview extends ConsumerWidget {
+  const LiveReceiptPreview({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(receiptSettingsProvider);
+    if (state.loading) return const ReceiptPreviewSkeleton();
+    final settings = state.settings;
+    if (settings == null) return const SizedBox.shrink();
+    return ref
+        .watch(receiptBranchProvider)
+        .when(
+          data: (branch) => ReceiptPreview(settings: settings, branch: branch),
+          loading: () => const ReceiptPreviewSkeleton(),
+          error: (_, __) => ReceiptPreview(settings: settings, branch: null),
+        );
+  }
 }

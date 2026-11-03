@@ -12,7 +12,7 @@ class _FakeMenuNotifier extends MenuNotifier {
   _FakeMenuNotifier() : super(branchId: 'branch') {
     state = MenuState(
       status: MenuStatus.success,
-      categories: [MenuCategory(id: 'c1', branchId: 'branch', name: 'Pizza', description: '')],
+      categories: [MenuCategory(id: 'c1', name: 'Pizza', description: '')],
     );
   }
 
@@ -76,7 +76,7 @@ void main() {
 
   testWidgets('every size needs a price before saving', (tester) async {
     final saved = await _openDialog(tester, existing: MenuItem(
-      id: 'i1', branchId: 'branch', name: 'Chicken Pizza', price: 650, costPrice: 300, categoryId: 'c1',
+      id: 'i1', name: 'Chicken Pizza', price: 650, costPrice: 300, categoryId: 'c1',
       sizes: [ItemSize.temp(name: 'Small', price: 650), ItemSize.temp(name: 'Large', price: 1200, sortOrder: 1)],
     ));
     expect(_saveEnabled(tester), isTrue);
@@ -98,7 +98,7 @@ void main() {
 
   testWidgets('an item without sizes opens with its price as one size', (tester) async {
     await _openDialog(tester, existing: MenuItem(
-      id: 'i2', branchId: 'branch', name: 'Chicken Fry', price: 800, costPrice: 0, categoryId: 'c1',
+      id: 'i2', name: 'Chicken Fry', price: 800, costPrice: 0, categoryId: 'c1',
     ));
     expect(find.widgetWithText(TextField, 'Regular'), findsOneWidget);
     expect(find.widgetWithText(TextField, '800'), findsOneWidget);
@@ -107,7 +107,7 @@ void main() {
 
   testWidgets('removing a photo reports it and moves the cover', (tester) async {
     final saved = await _openDialog(tester, existing: MenuItem(
-      id: 'i3', branchId: 'branch', name: 'Burger', price: 500, costPrice: 0, categoryId: 'c1',
+      id: 'i3', name: 'Burger', price: 500, costPrice: 0, categoryId: 'c1',
       imageUrl: 'https://img/a.jpg', imageUrls: ['https://img/a.jpg', 'https://img/b.jpg'],
       sizes: [ItemSize.temp(name: 'Regular', price: 500)],
     ));

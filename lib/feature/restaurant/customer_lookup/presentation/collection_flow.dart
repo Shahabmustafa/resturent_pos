@@ -10,6 +10,7 @@ import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:resturent_application/feature/restaurant/auth/presentation/provider/branch_auth_provider.dart';
 import '../data/customer_lookup_datasource.dart';
 import 'lookup_tabs.dart';
+import 'on_screen_keyboard.dart';
 
 const _navy = Color(0xFF000000);
 const _tabActive = Color(0xFF9B51C0);
@@ -44,6 +45,9 @@ class CollectionFlow extends ConsumerStatefulWidget {
   final void Function(String customerId, double charge, String address)?
   onDelivery;
 
+  /// Number to fill in on the telephone pad (an incoming call).
+  final String initialPhone;
+
   const CollectionFlow({
     super.key,
     required this.onBack,
@@ -51,6 +55,7 @@ class CollectionFlow extends ConsumerStatefulWidget {
     required this.onSkip,
     required this.onConfirm,
     this.onDelivery,
+    this.initialPhone = '',
     this.saleLabel = 'COLLECTION',
   });
 
@@ -76,6 +81,7 @@ class _CollectionFlowState extends ConsumerState<CollectionFlow> {
               saleLabel: widget.saleLabel,
               onStartSale: widget.onStartSale,
               delivery: widget.onDelivery != null,
+              initialPhone: widget.initialPhone,
               onSkip: widget.onSkip,
               onCustomer: (c) => setState(() => _customer = c),
             )
@@ -105,6 +111,7 @@ class _LookupView extends StatefulWidget {
   final String saleLabel;
   final ValueChanged<String> onStartSale;
   final bool delivery;
+  final String initialPhone;
   final VoidCallback onSkip;
   final ValueChanged<CustomerProfile> onCustomer;
 
@@ -115,6 +122,7 @@ class _LookupView extends StatefulWidget {
     required this.saleLabel,
     required this.onStartSale,
     required this.delivery,
+    required this.initialPhone,
     required this.onSkip,
     required this.onCustomer,
   });
@@ -126,7 +134,7 @@ class _LookupView extends StatefulWidget {
 class _LookupViewState extends State<_LookupView> {
   _LookupTab _tab = _LookupTab.phone;
   late final Future<List<CustomerProfile>> _all = widget.loadAll();
-  final _phone = TextEditingController();
+  late final _phone = TextEditingController(text: widget.initialPhone);
   bool _searching = false;
 
   @override
@@ -451,10 +459,11 @@ class _DetailsViewState extends State<_DetailsView> {
       final id = await widget.save(c);
       if (mounted) {
         final charge = double.tryParse(_ctrl['charge']!.text.trim()) ?? 0;
-        final address = [c.address, c.city, c.postcode]
-            .where((p) => p.trim().isNotEmpty)
-            .map((p) => p.trim())
-            .join(', ');
+        final address = [
+          c.address,
+          c.city,
+          c.postcode,
+        ].where((p) => p.trim().isNotEmpty).map((p) => p.trim()).join(', ');
         widget.onConfirm(id, charge, address);
       }
     } catch (e) {
@@ -491,7 +500,11 @@ class _DetailsViewState extends State<_DetailsView> {
               ),
           ],
         ),
-        Expanded(child: _showOrders ? _ordersList() : _form()),
+        Expanded(
+          child: _showOrders
+              ? _ordersList()
+              : KeyboardHost(child: _form()),
+        ),
         _BottomBar(
           children: [
             _ActionButton(

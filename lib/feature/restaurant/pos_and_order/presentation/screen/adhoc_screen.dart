@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:resturent_application/core/constants/currency.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/feature/restaurant/customer_lookup/presentation/on_screen_keyboard.dart';
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import '../widget/till_dialog.dart';
 
 const _bg = Color(0xFF10527A);
@@ -300,7 +301,7 @@ class _AdhocScreenState extends State<AdhocScreen> {
               ],
             ),
           ),
-          if (_focus.hasFocus)
+          if (_focus.hasFocus && readPosSetup(context).virtualKeyboard)
             TextFieldTapRegion(
               child: SizedBox(
                 height: 270,

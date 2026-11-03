@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
+import 'package:resturent_application/feature/restaurant/customer_lookup/presentation/on_screen_keyboard.dart';
 
 // Touch-till dialogs: square corners, navy title bar, big buttons and keypads.
 
@@ -58,9 +59,12 @@ class TillDialog extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(18),
-              child: child,
+            child: KeyboardHost(
+              horizontalPadding: 6,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(18),
+                child: child,
+              ),
             ),
           ),
           if (actions.isNotEmpty)

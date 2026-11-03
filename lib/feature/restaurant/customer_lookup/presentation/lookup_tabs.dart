@@ -1,3 +1,4 @@
+import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import 'package:flutter/material.dart';
 import '../data/customer_lookup_datasource.dart';
 import 'on_screen_keyboard.dart';
@@ -260,7 +261,7 @@ class _SearchScaffoldState extends State<_SearchScaffold> {
             ),
           ),
         ),
-        if (_focus.hasFocus)
+        if (_focus.hasFocus && readPosSetup(context).virtualKeyboard)
           TextFieldTapRegion(
             child: OnScreenKeyboard(
               controller: _ctrl,
@@ -433,7 +434,6 @@ class _StreetsTabState extends State<StreetsTab> {
 
 /// 6-column grid of [_Tile]s with 5 rows per page.
 class _TilesPage extends StatelessWidget {
-  static const perPage = 30;
   final String hint;
   final String label;
   final Color labelColor;
@@ -460,6 +460,7 @@ class _TilesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final perPage = readPosSetup(context).postcodesPerPage;
     final pages = (count / perPage).ceil();
     final current = page.clamp(0, pages == 0 ? 0 : pages - 1);
     final start = current * perPage;
@@ -603,7 +604,7 @@ class _ChooseAddressPage extends StatefulWidget {
 }
 
 class _ChooseAddressPageState extends State<_ChooseAddressPage> {
-  static const _perPage = 30;
+  int get _perPage => readPosSetup(context).postcodesPerPage;
   int _page = 0;
 
   @override
@@ -724,45 +725,48 @@ class CustomersTab extends StatefulWidget {
 }
 
 class _CustomersTabState extends State<CustomersTab> {
-  static const _perPage = 15;
+  int get _perPage => readPosSetup(context).customersPerPage;
   String _query = '';
   String? _letter;
   int _page = 0;
 
+  // Scrolls when the on-screen keyboard leaves too little height for all letters.
   Widget _letters(List<String> letters) => SizedBox(
     width: 56,
-    child: Column(
-      children: [
-        for (final l in letters)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: InkWell(
-              canRequestFocus: false,
-              onTap: () => setState(() {
-                _letter = _letter == l ? null : l;
-                _page = 0;
-              }),
-              child: Container(
-                width: 48,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _letter == l ? _blue : Colors.white,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black38, offset: Offset(0, 2)),
-                  ],
-                ),
-                child: Text(
-                  l,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: _letter == l ? Colors.white : _blue,
+    child: SingleChildScrollView(
+      child: Column(
+        children: [
+          for (final l in letters)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: InkWell(
+                canRequestFocus: false,
+                onTap: () => setState(() {
+                  _letter = _letter == l ? null : l;
+                  _page = 0;
+                }),
+                child: Container(
+                  width: 48,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _letter == l ? _blue : Colors.white,
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black38, offset: Offset(0, 2)),
+                    ],
+                  ),
+                  child: Text(
+                    l,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: _letter == l ? Colors.white : _blue,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     ),
   );
 
