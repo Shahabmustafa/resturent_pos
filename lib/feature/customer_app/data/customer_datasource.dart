@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math' as math;
+
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'menu_data.dart';
 import 'model/dish_model.dart';
@@ -27,12 +31,16 @@ class CheckoutDetails {
   final String address;
   final String notes;
 
+  /// Miles from the restaurant to the delivery postcode (delivery only).
+  final double? distanceMiles;
+
   const CheckoutDetails({
     required this.delivery,
     required this.name,
     required this.phone,
     this.address = '',
     this.notes = '',
+    this.distanceMiles,
   });
 }
 
@@ -238,6 +246,7 @@ class CustomerDatasource {
         'p_customer_phone': details.phone,
         'p_address': details.delivery ? details.address : '',
         'p_notes': details.notes,
+        'p_distance_miles': details.delivery ? details.distanceMiles : null,
         'p_items': [
           for (final l in lines)
             {
@@ -268,6 +277,7 @@ class CustomerDatasource {
         'phone': details.phone,
         'address': details.delivery ? details.address : '',
         'notes': details.notes,
+        'distance_miles': details.delivery ? details.distanceMiles : null,
         'items': [
           for (final l in lines)
             {
@@ -404,10 +414,48 @@ class CustomerDatasource {
     );
   }
 
-  /// Delivery charge set in the POS (Settings → Company Info → Delivery). Only
-  /// shown here; the order functions add it on the server.
-  Future<double> fetchDeliveryFee() async =>
-      ((await _db.rpc('website_delivery_fee')) as num?)?.toDouble() ?? 0;
+  /// Straight-line miles from the restaurant (Settings → Company Info → Delivery
+  /// postcode) to [postcode]. Null when either postcode can't be found. The
+  /// server prices the order from this distance (see [deliveryFeeForMiles]).
+  Future<double?> fetchDeliveryMiles(String postcode) async {
+    final origin = ((await _db.rpc('website_delivery_origin')) as String?) ?? '';
+    if (origin.trim().isEmpty) return null;
+    final from = await _geocode(origin);
+    final to = await _geocode(postcode);
+    if (from == null || to == null) return null;
+    return _haversineMiles(from, to);
+  }
+
+  Future<({double lat, double lng})?> _geocode(String postcode) async {
+    final res = await http.get(
+      Uri.https(
+        'api.postcodes.io',
+        '/postcodes/${Uri.encodeComponent(postcode.replaceAll(' ', ''))}',
+      ),
+    );
+    if (res.statusCode != 200) return null;
+    final r = (jsonDecode(res.body) as Map)['result'] as Map?;
+    if (r == null) return null;
+    return (
+      lat: (r['latitude'] as num).toDouble(),
+      lng: (r['longitude'] as num).toDouble(),
+    );
+  }
+
+  double _haversineMiles(
+    ({double lat, double lng}) a,
+    ({double lat, double lng}) b,
+  ) {
+    double rad(double d) => d * math.pi / 180;
+    final dLat = rad(b.lat - a.lat);
+    final dLng = rad(b.lng - a.lng);
+    final h =
+        math.pow(math.sin(dLat / 2), 2) +
+        math.cos(rad(a.lat)) *
+            math.cos(rad(b.lat)) *
+            math.pow(math.sin(dLng / 2), 2);
+    return 3958.8 * 2 * math.asin(math.sqrt(h));
+  }
 
   /// Hours from the website branch, read through `website_hours()` so the rest of
   /// the branch row stays private.
@@ -446,4 +494,13 @@ class CustomerDatasource {
       latest: all.where((f) => f.comment.isNotEmpty).take(limit).toList(),
     );
   }
+}
+
+/// Delivery charge by distance: up to 3 miles £5, up to 5 miles £8, up to 7
+/// miles £10. Null means too far to deliver. The database applies the same rule.
+double? deliveryFeeForMiles(double miles) {
+  if (miles <= 3) return 5;
+  if (miles <= 5) return 8;
+  if (miles <= 7) return 10;
+  return null;
 }

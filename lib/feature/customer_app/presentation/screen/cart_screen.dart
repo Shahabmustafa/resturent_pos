@@ -72,9 +72,21 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     // Opened from a table's QR code: dine-in order for that table, no login needed.
     final table = ref.watch(tableSessionProvider).value;
     // Only delivery orders pay it; the server adds the same amount to the order.
-    final deliveryFee = table == null && _fulfilment == _Fulfilment.delivery
-        ? ref.watch(deliveryFeeProvider).value ?? 0.0
-        : 0.0;
+    final isDelivery = table == null && _fulfilment == _Fulfilment.delivery;
+    final postcode = _postcode.text.trim().toUpperCase();
+    final postcodeOk = _ukPostcode.hasMatch(postcode);
+    final milesAsync = isDelivery && postcodeOk
+        ? ref.watch(deliveryMilesProvider(postcode))
+        : null;
+    final miles = milesAsync?.value;
+    final deliveryFee = miles == null ? 0.0 : deliveryFeeForMiles(miles) ?? 0.0;
+    final deliveryError = !isDelivery || !postcodeOk || milesAsync!.isLoading
+        ? null
+        : miles == null
+        ? 'We couldn\'t find that postcode.'
+        : deliveryFeeForMiles(miles) == null
+        ? 'Sorry, we only deliver within 7 miles.'
+        : null;
     final gutter = MediaQuery.sizeOf(context).width < 640 ? 20.0 : 28.0;
     _prefill(user);
 
@@ -217,8 +229,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   controller: _postcode,
                                   textCapitalization:
                                       TextCapitalization.characters,
-                                  decoration: const InputDecoration(
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
                                     hintText: 'e.g. GU21 6AB',
+                                    helperText: miles != null && deliveryError == null
+                                        ? '${miles.toStringAsFixed(1)} miles away · delivery ${formatPrice(deliveryFee)}'
+                                        : 'Delivery: up to 3 miles £5 · 5 miles £8 · 7 miles £10',
+                                    errorText: deliveryError,
                                   ),
                                   validator: (v) =>
                                       _ukPostcode.hasMatch(
@@ -323,8 +340,28 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final delivery = _fulfilment == _Fulfilment.delivery;
+    double? miles;
+    if (delivery) {
+      miles = await ref.read(
+        deliveryMilesProvider(_postcode.text.trim().toUpperCase()).future,
+      );
+      if (!mounted) return;
+      if (miles == null || deliveryFeeForMiles(miles) == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              miles == null
+                  ? 'We couldn\'t find that postcode.'
+                  : 'Sorry, we only deliver within 7 miles.',
+            ),
+          ),
+        );
+        return;
+      }
+    }
     final details = CheckoutDetails(
       delivery: delivery,
+      distanceMiles: miles,
       name: _name.text.trim(),
       phone: _phone.text.trim(),
       // The postcode goes on the end of the address the restaurant sees.

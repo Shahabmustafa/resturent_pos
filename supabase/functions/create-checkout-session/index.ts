@@ -91,6 +91,7 @@ Deno.serve(async (req) => {
       p_address: String(body.address ?? ""),
       p_notes: String(body.notes ?? ""),
       p_items: body.items ?? [],
+      p_distance_miles: body.distance_miles ?? null,
     });
     if (rpcErr) throw new HttpError(400, rpcErr.message);
 

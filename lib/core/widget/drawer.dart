@@ -459,9 +459,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               onDeliveries: allowed.contains(POSPage.delivery)
                   ? () => navigate(POSPage.delivery)
                   : null,
-              onUsers: allowed.contains(POSPage.users)
-                  ? () => navigate(POSPage.users)
-                  : null,
               onSettings: allowed.contains(POSPage.settings)
                   ? () => navigate(POSPage.setup)
                   : null,

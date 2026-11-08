@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:resturent_application/feature/restaurant/live_orders/presentation/live_orders_screen.dart';
+import 'package:resturent_application/feature/restaurant/setting/presentation/provider/branch_setting_provider.dart';
 import 'package:resturent_application/feature/restaurant/setting/presentation/screen/receipt_tab.dart';
 import 'pos_setup.dart';
 
@@ -268,6 +269,8 @@ class _PosSetupScreenState extends ConsumerState<PosSetupScreen> {
                   ],
                 ),
               ),
+              _box('Opening Hours', const _OpeningHoursForm()),
+              _box('Delivery Charges', const _DeliveryChargeForm()),
               _box(
                 'Payment Methods',
                 Wrap(
@@ -531,4 +534,189 @@ class _PosSetupScreenState extends ConsumerState<PosSetupScreen> {
       ],
     ),
   );
+}
+
+/// Restaurant postcode and flat delivery charge, saved to the branch record.
+class _DeliveryChargeForm extends ConsumerStatefulWidget {
+  const _DeliveryChargeForm();
+
+  @override
+  ConsumerState<_DeliveryChargeForm> createState() =>
+      _DeliveryChargeFormState();
+}
+
+class _DeliveryChargeFormState extends ConsumerState<_DeliveryChargeForm> {
+  final _postcode = TextEditingController();
+  final _fee = TextEditingController();
+  bool _filled = false;
+
+  @override
+  void dispose() {
+    _postcode.dispose();
+    _fee.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final branch = ref.read(branchSettingsProvider).branch;
+    if (branch == null) return;
+    final fee = double.tryParse(_fee.text.trim());
+    if (fee == null || fee < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter a valid delivery charge, e.g. 2.50'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+    ref.read(branchSettingsProvider.notifier).save(
+      branch.copyWith(
+        deliveryFee: (fee * 100).round() / 100,
+        deliveryPostcode: _postcode.text.trim().toUpperCase(),
+      ),
+    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Delivery charges saved')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(branchSettingsProvider);
+    final branch = state.branch;
+    if (branch != null && !_filled) {
+      _filled = true;
+      _postcode.text = branch.deliveryPostcode;
+      _fee.text = branch.deliveryFee.toStringAsFixed(2);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Website delivery: up to 3 miles £5, up to 5 miles £8, up to 7 miles £10. '
+          'The distance is measured from the restaurant postcode.',
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _postcode,
+          textCapitalization: TextCapitalization.characters,
+          decoration: const InputDecoration(
+            labelText: 'Restaurant postcode',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _fee,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            labelText: 'Flat delivery charge for POS orders (£)',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: branch == null || state.saving ? null : _save,
+          child: Text(state.saving ? 'Saving...' : 'Save'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Opening and closing time (or open 24 hours), saved to the branch record.
+class _OpeningHoursForm extends ConsumerStatefulWidget {
+  const _OpeningHoursForm();
+
+  @override
+  ConsumerState<_OpeningHoursForm> createState() => _OpeningHoursFormState();
+}
+
+class _OpeningHoursFormState extends ConsumerState<_OpeningHoursForm> {
+  final _open = TextEditingController();
+  final _close = TextEditingController();
+  bool _is24 = false;
+  bool _filled = false;
+
+  @override
+  void dispose() {
+    _open.dispose();
+    _close.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final branch = ref.read(branchSettingsProvider).branch;
+    if (branch == null) return;
+    ref.read(branchSettingsProvider.notifier).save(
+      branch.copyWith(
+        openingTime: _open.text.trim(),
+        closingTime: _close.text.trim(),
+        is24Hours: _is24,
+      ),
+    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Opening hours saved')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(branchSettingsProvider);
+    final branch = state.branch;
+    if (branch != null && !_filled) {
+      _filled = true;
+      _open.text = branch.openingTime;
+      _close.text = branch.closingTime;
+      _is24 = branch.is24Hours;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          title: const Text('Open 24 hours'),
+          value: _is24,
+          onChanged: (v) => setState(() => _is24 = v ?? false),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _open,
+                enabled: !_is24,
+                decoration: const InputDecoration(
+                  labelText: 'Opening time (e.g. 11:00 AM)',
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _close,
+                enabled: !_is24,
+                decoration: const InputDecoration(
+                  labelText: 'Closing time (e.g. 11:30 PM)',
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: branch == null || state.saving ? null : _save,
+          child: Text(state.saving ? 'Saving...' : 'Save'),
+        ),
+      ],
+    );
+  }
 }

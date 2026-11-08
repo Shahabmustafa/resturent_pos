@@ -132,7 +132,6 @@ class ManageScreen extends ConsumerWidget {
   final VoidCallback onBack;
   final VoidCallback onMenu;
   final VoidCallback? onDeliveries;
-  final VoidCallback? onUsers;
   final VoidCallback? onSettings;
   final VoidCallback onReprint;
 
@@ -141,7 +140,6 @@ class ManageScreen extends ConsumerWidget {
     required this.onBack,
     required this.onMenu,
     required this.onDeliveries,
-    required this.onUsers,
     required this.onSettings,
     required this.onReprint,
   });
@@ -292,15 +290,6 @@ class ManageScreen extends ConsumerWidget {
                   color: const Color(0xFF9B59B6),
                   onTap: () => launchUrl(Uri.parse('https://$_website')),
                 ),
-                if (onUsers != null) ...[
-                  const SizedBox(width: 6),
-                  _NavButton(
-                    label: 'Users',
-                    icon: AppIcons.manageAccountsRounded,
-                    color: const Color(0xFF2C73B8),
-                    onTap: onUsers!,
-                  ),
-                ],
                 if (onSettings != null) ...[
                   const SizedBox(width: 6),
                   _NavButton(

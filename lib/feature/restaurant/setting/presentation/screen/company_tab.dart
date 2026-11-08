@@ -30,6 +30,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
   final _openingTime = TextEditingController();
   final _closingTime = TextEditingController();
   final _deliveryFee = TextEditingController();
+  final _deliveryPostcode = TextEditingController();
   bool _is24Hours = false;
   bool _loaded = false;
 
@@ -48,6 +49,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
     _openingTime.dispose();
     _closingTime.dispose();
     _deliveryFee.dispose();
+    _deliveryPostcode.dispose();
     super.dispose();
   }
 
@@ -68,6 +70,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
     _closingTime.text = b.closingTime;
     _is24Hours = b.is24Hours;
     _deliveryFee.text = b.deliveryFee.toStringAsFixed(2);
+    _deliveryPostcode.text = b.deliveryPostcode;
   }
 
   void _discard(BranchModel b) {
@@ -106,6 +109,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
       closingTime: _closingTime.text.trim(),
       is24Hours: _is24Hours,
       deliveryFee: (fee * 100).round() / 100,
+      deliveryPostcode: _deliveryPostcode.text.trim().toUpperCase(),
     );
     ref.read(branchSettingsProvider.notifier).save(updated);
   }
@@ -296,7 +300,12 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
           children: [
             _Field(
               label:
-                  'Delivery charge (£) — added to every website delivery order, 0 = free',
+                  'Restaurant postcode — website delivery is charged by distance from here (up to 3 miles £5, 5 miles £8, 7 miles £10)',
+              ctrl: _deliveryPostcode,
+            ),
+            _Field(
+              label:
+                  'Flat delivery charge (£) — used for POS orders only',
               ctrl: _deliveryFee,
               kt: const TextInputType.numberWithOptions(decimal: true),
             ),

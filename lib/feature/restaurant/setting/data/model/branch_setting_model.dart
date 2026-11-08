@@ -19,6 +19,7 @@ class BranchModel {
   final String closingTime;
   final String branchType;
   final double deliveryFee; // added to website delivery orders
+  final String deliveryPostcode; // start point for website delivery distance
 
   const BranchModel({
     required this.id,
@@ -41,6 +42,7 @@ class BranchModel {
     required this.closingTime,
     required this.branchType,
     this.deliveryFee = 0,
+    this.deliveryPostcode = '',
   });
 
   factory BranchModel.fromJson(Map<String, dynamic> j) => BranchModel(
@@ -64,6 +66,7 @@ class BranchModel {
     closingTime: j['closing_time'] as String? ?? '11:30 PM',
     branchType: j['branch_type'] as String? ?? 'restaurant',
     deliveryFee: (j['delivery_fee'] as num?)?.toDouble() ?? 0,
+    deliveryPostcode: j['delivery_postcode'] as String? ?? '',
   );
 
   Map<String, dynamic> toJson() => {
@@ -81,6 +84,7 @@ class BranchModel {
     'opening_time': openingTime,
     'closing_time': closingTime,
     'delivery_fee': deliveryFee,
+    'delivery_postcode': deliveryPostcode,
   };
 
   BranchModel copyWith({
@@ -98,6 +102,7 @@ class BranchModel {
     String? openingTime,
     String? closingTime,
     double? deliveryFee,
+    String? deliveryPostcode,
   }) => BranchModel(
     id: id,
     companyId: companyId,
@@ -119,5 +124,6 @@ class BranchModel {
     closingTime: closingTime ?? this.closingTime,
     branchType: branchType,
     deliveryFee: deliveryFee ?? this.deliveryFee,
+    deliveryPostcode: deliveryPostcode ?? this.deliveryPostcode,
   );
 }

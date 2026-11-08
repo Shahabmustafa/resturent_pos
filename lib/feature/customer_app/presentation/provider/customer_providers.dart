@@ -45,9 +45,10 @@ final publicFeedbackProvider = FutureProvider<FeedbackSummary>(
   (ref) => ref.watch(customerDatasourceProvider).fetchFeedback(),
 );
 
-/// Delivery charge as set in the POS (Settings → Company Info → Delivery).
-final deliveryFeeProvider = FutureProvider<double>(
-  (ref) => ref.watch(customerDatasourceProvider).fetchDeliveryFee(),
+/// Miles from the restaurant to a delivery postcode (null if it can't be found).
+final deliveryMilesProvider = FutureProvider.family<double?, String>(
+  (ref, postcode) =>
+      ref.watch(customerDatasourceProvider).fetchDeliveryMiles(postcode),
 );
 
 /// Opening hours as set in the POS (Settings → Company → Working hours).
