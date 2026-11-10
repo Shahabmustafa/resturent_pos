@@ -65,6 +65,7 @@ class CollectionFlow extends ConsumerStatefulWidget {
 
 class _CollectionFlowState extends ConsumerState<CollectionFlow> {
   CustomerProfile? _customer; // set = details step
+  bool _skipped = false; // details step opened with SKIP (phone optional)
 
   String get _branchId => ref.read(branchAuthProvider).branch!.branchId;
 
@@ -82,12 +83,31 @@ class _CollectionFlowState extends ConsumerState<CollectionFlow> {
               onStartSale: widget.onStartSale,
               delivery: widget.onDelivery != null,
               initialPhone: widget.initialPhone,
-              onSkip: widget.onSkip,
-              onCustomer: (c) => setState(() => _customer = c),
+              // Delivery needs a customer; collection shows the empty form.
+              onSkip: widget.onDelivery != null
+                  ? widget.onSkip
+                  : () => setState(() {
+                      _skipped = true;
+                      _customer = CustomerProfile();
+                    }),
+              onCustomer: (c) => setState(() {
+                _skipped = false;
+                _customer = c;
+              }),
             )
           : _DetailsView(
-              key: ValueKey(_customer!.id ?? 'new-${_customer!.phone}'),
+              key: ValueKey(
+                '${_customer!.id ?? 'new-${_customer!.phone}'}-$_skipped',
+              ),
               customer: _customer!,
+              saleLabel: widget.saleLabel,
+              skipped: _skipped,
+              onSkip: widget.onSkip,
+              findByPhone: (phone) => ds.findByPhone(_branchId, phone),
+              onFound: (c) => setState(() {
+                _skipped = false;
+                _customer = c;
+              }),
               loadOrders: ds.fetchOrders,
               save: (c) => ds.save(_branchId, c),
               onBack: () => setState(() => _customer = null),
@@ -154,7 +174,12 @@ class _LookupViewState extends State<_LookupView> {
 
   Future<void> _ok() async {
     final phone = _phone.text.trim();
-    if (phone.isEmpty) return;
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter telephone number')),
+      );
+      return;
+    }
     setState(() => _searching = true);
     try {
       final found = await widget.findByPhone(phone);
@@ -388,9 +413,21 @@ class _DetailsView extends StatefulWidget {
   final VoidCallback onBack;
   final bool delivery;
   final void Function(String id, double charge, String address) onConfirm;
+  final String saleLabel;
+
+  /// Opened with SKIP: the telephone is optional and an empty form = walk-in.
+  final bool skipped;
+  final VoidCallback onSkip;
+  final Future<CustomerProfile?> Function(String phone) findByPhone;
+  final ValueChanged<CustomerProfile> onFound;
 
   const _DetailsView({
     super.key,
+    required this.saleLabel,
+    required this.skipped,
+    required this.onSkip,
+    required this.findByPhone,
+    required this.onFound,
     required this.customer,
     required this.loadOrders,
     required this.save,
@@ -406,6 +443,7 @@ class _DetailsView extends StatefulWidget {
 class _DetailsViewState extends State<_DetailsView> {
   bool _showOrders = false;
   bool _saving = false;
+  bool _showAddress = false;
   late final CustomerProfile c = widget.customer;
   late final _ctrl = {
     'phone': TextEditingController(text: c.phone),
@@ -430,7 +468,37 @@ class _DetailsViewState extends State<_DetailsView> {
     super.dispose();
   }
 
+  Future<void> _search() async {
+    final phone = _ctrl['phone']!.text.trim();
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter telephone number')),
+      );
+      return;
+    }
+    try {
+      final found = await widget.findByPhone(phone);
+      if (!mounted) return;
+      if (found == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No customer found')));
+      } else {
+        widget.onFound(found);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not search customers: $e')));
+    }
+  }
+
   Future<void> _confirm() async {
+    if (widget.skipped && _ctrl['phone']!.text.trim().isEmpty) {
+      widget.onSkip(); // no telephone: walk-in collection
+      return;
+    }
     if (_ctrl['phone']!.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -481,7 +549,17 @@ class _DetailsViewState extends State<_DetailsView> {
     return Column(
       children: [
         _TabBar(
-          children: [
+          children: widget.skipped
+              ? [
+                  _TabButton(
+                    label: widget.saleLabel,
+                    active: true,
+                    onTap: () {},
+                  ),
+                  for (final l in const ['POSTCODES', 'STREETS', 'CUSTOMERS'])
+                    _TabButton(label: l, active: false, onTap: widget.onBack),
+                ]
+              : [
             _TabButton(
               label: name.isEmpty ? 'NEW CUSTOMER' : name.toUpperCase(),
               icon: AppIcons.personRounded,
@@ -503,7 +581,9 @@ class _DetailsViewState extends State<_DetailsView> {
         Expanded(
           child: _showOrders
               ? _ordersList()
-              : KeyboardHost(child: _form()),
+              : KeyboardHost(
+                  child: widget.skipped ? _compactForm() : _form(),
+                ),
         ),
         _BottomBar(
           children: [
@@ -515,7 +595,11 @@ class _DetailsViewState extends State<_DetailsView> {
             ),
             const Spacer(),
             _ActionButton(
-              label: widget.delivery ? 'DELIVERY' : 'COLLECTION',
+              label: widget.skipped
+                  ? 'OK'
+                  : widget.delivery
+                  ? 'DELIVERY'
+                  : 'COLLECTION',
               icon: AppIcons.checkRounded,
               color: _green,
               width: 210,
@@ -525,6 +609,110 @@ class _DetailsViewState extends State<_DetailsView> {
           ],
         ),
       ],
+    );
+  }
+
+  /// Short collection form opened by SKIP: name, telephone, optional address.
+  Widget _compactForm() {
+    Widget row(String label, String key, Widget? trailing, {double w = 420}) =>
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 110,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 14),
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(color: _label, fontSize: 13),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: w,
+                child: TextField(
+                  controller: _ctrl[key],
+                  keyboardType: key == 'phone' ? TextInputType.phone : null,
+                  textCapitalization: key == 'postcode'
+                      ? TextCapitalization.characters
+                      : TextCapitalization.words,
+                  decoration: _fieldDecoration(
+                    hint: key == 'first' ? 'No Name' : null,
+                  ),
+                ),
+              ),
+              if (trailing != null) ...[const SizedBox(width: 14), trailing],
+            ],
+          ),
+        );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                row('First Name', 'first', null),
+                row('Last Name', 'last', null),
+                row(
+                  'Telephone #1',
+                  'phone',
+                  Material(
+                    color: Colors.white,
+                    child: InkWell(
+                      onTap: _search,
+                      child: Container(
+                        width: 58,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFFD1D9E2)),
+                        ),
+                        child: const Icon(Icons.search, color: _red, size: 20),
+                      ),
+                    ),
+                  ),
+                  w: 310,
+                ),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _tabActive,
+                    side: const BorderSide(color: _tabActive),
+                    shape: const RoundedRectangleBorder(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                  onPressed: () => setState(() => _showAddress = !_showAddress),
+                  icon: const Icon(Icons.list_alt, size: 18),
+                  label: const Text('Full Address'),
+                ),
+                if (_showAddress) ...[
+                  const SizedBox(height: 16),
+                  row('Address', 'address', null),
+                  row('City', 'city', null),
+                  row('Postcode', 'postcode', null),
+                ],
+              ],
+            ),
+          ),
+          Container(
+            width: 480,
+            height: 74,
+            alignment: Alignment.center,
+            color: const Color(0xFFDCEBD3),
+            child: Text(
+              widget.saleLabel,
+              style: const TextStyle(color: Color(0xFF3E7B2E), fontSize: 18),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

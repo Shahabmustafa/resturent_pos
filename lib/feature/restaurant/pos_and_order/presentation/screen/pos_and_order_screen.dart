@@ -17,6 +17,7 @@ import 'package:resturent_application/feature/restaurant/auth/presentation/provi
 import '../widget/till_bottom_bar_widget.dart';
 import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import 'payment_screen.dart';
+import 'package:resturent_application/feature/restaurant/order/presentation/widget/receipt_dilog_widget.dart';
 
 final _showCheckoutProvider = StateProvider<bool>((_) => false);
 // Item whose sizes are showing in place of the menu grid (desktop till).
@@ -104,6 +105,7 @@ class POSScreen extends ConsumerWidget {
               _placeOrder(context, ref);
             },
             onPay: () => _pay(context, ref),
+            onPrint: () => _printInvoice(context, ref),
           ),
         ),
       ],
@@ -186,11 +188,56 @@ class POSScreen extends ConsumerWidget {
     await _placeOrder(context, ref, confirm: false, change: result.change);
   }
 
-  bool _valid(BuildContext context, PosState state) {
-    if (state.orderType == 'Dine-in' && state.selectedTable.isEmpty) {
-      _snack(context, 'Please select a table for Dine-in', kRed);
-      return false;
+  /// PRINT: print the invoice of the sale on the till right now.
+  Future<void> _printInvoice(BuildContext context, WidgetRef ref) async {
+    final s = ref.read(posProvider);
+    if (s.cart.isEmpty) return;
+    final order = OrderModel(
+      id: '',
+      orderNumber: 'INVOICE',
+      orderType: s.orderType,
+      customerType: s.customerType,
+      customerName: s.customerName,
+      customerPhone: s.customerPhone,
+      tableNumber: s.selectedTable,
+      status: 'pending',
+      paymentMethod: s.paymentMethod,
+      paymentStatus: s.paymentStatus,
+      subtotal: s.subtotal,
+      discountPct: s.discountPct,
+      discountFlat: s.discountFlat,
+      discountAmt: s.discountAmt,
+      taxPct: s.taxRate,
+      taxAmt: s.tax,
+      deliveryFee: s.fee,
+      total: s.total,
+      notes: '',
+      createdAt: DateTime.now(),
+      items: [
+        for (final c in s.cart)
+          OrderItemModel(
+            id: '',
+            orderId: '',
+            menuItemId: null,
+            itemName: c.displayName,
+            itemEmoji: '',
+            size: c.size?.name ?? '',
+            unitPrice: c.unitPrice,
+            qty: c.qty,
+            totalPrice: c.total,
+          ),
+      ],
+    );
+    final ok = await printOrderReceipt(
+      ProviderScope.containerOf(context),
+      order,
+    );
+    if (!ok && context.mounted) {
+      _snack(context, 'Could not print the invoice', kRed);
     }
+  }
+
+  bool _valid(BuildContext context, PosState state) {
     if (state.orderType == 'Delivery' && state.deliveryAddress.trim().isEmpty) {
       _snack(context, 'Enter a delivery address', kRed);
       return false;
@@ -252,6 +299,14 @@ class POSScreen extends ConsumerWidget {
 
     if (success) {
       final order = ref.read(posProvider).lastPlaced;
+      // Receipt goes straight to the thermal printer (when one is set up).
+      if (order != null) {
+        printOrderReceipt(
+          ProviderScope.containerOf(context),
+          order,
+          silent: true,
+        );
+      }
       ref.read(posProvider.notifier)
         ..clearLastPlaced()
         ..clearCart();

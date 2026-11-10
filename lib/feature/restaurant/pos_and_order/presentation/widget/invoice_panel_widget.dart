@@ -45,6 +45,9 @@ class InvoicePanelWidget extends ConsumerStatefulWidget {
   /// Places the order as paid with [PosState.paymentMethod].
   final VoidCallback onPay;
 
+  /// Prints the invoice of the current sale.
+  final VoidCallback? onPrint;
+
   /// Void: drop this sale and go back to the home screen.
   final VoidCallback? onVoid;
 
@@ -52,6 +55,7 @@ class InvoicePanelWidget extends ConsumerStatefulWidget {
     super.key,
     required this.onSave,
     required this.onPay,
+    this.onPrint,
     this.onVoid,
   });
 
@@ -131,14 +135,7 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
                 Row(
                   children: [
                     if (s.orderType == 'Dine-in')
-                      _ActionKey(
-                        label: s.selectedTable.isEmpty
-                            ? 'TABLE'
-                            : 'TABLE ${s.selectedTable}',
-                        icon: AppIcons.tableRestaurantRounded,
-                        color: const Color(0xFF5B8DB8),
-                        onTap: () => _pickTable(s),
-                      )
+                      const Expanded(child: SizedBox())
                     else if (s.orderType == 'Delivery')
                       _ActionKey(
                         label: 'ADDRESS',
@@ -184,7 +181,12 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
                       color: const Color(0xFF6A3FB5),
                       onTap: _adhoc,
                     ),
-                    const Expanded(child: SizedBox()),
+                    _ActionKey(
+                      label: 'PRINT',
+                      icon: AppIcons.printRounded,
+                      color: const Color(0xFF3A7CA5),
+                      onTap: s.cart.isEmpty ? null : widget.onPrint,
+                    ),
                     const Expanded(child: SizedBox()),
                   ],
                 ),
@@ -251,10 +253,7 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
             ),
           ),
         ),
-        if (s.orderType == 'Dine-in')
-          _TableHeaderButton(table: s.selectedTable, onTap: () => _pickTable(s))
-        else
-          SizedBox(
+        SizedBox(
             width: 64,
             child: Center(
               child: Text(
@@ -274,9 +273,7 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
   Widget _customerStrip(PosState s) {
     final name = s.customerName.trim();
     final phone = s.customerPhone.trim();
-    final extra = s.orderType == 'Dine-in' && s.selectedTable.isNotEmpty
-        ? 'TABLE ${s.selectedTable}'
-        : s.orderType == 'Delivery' && s.deliveryAddress.trim().isNotEmpty
+    final extra = s.orderType == 'Delivery' && s.deliveryAddress.trim().isNotEmpty
         ? s.deliveryAddress.trim()
         : '';
     return InkWell(
@@ -719,21 +716,6 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
     if (m != null) _n.setPaymentMethod(m);
   }
 
-  Future<void> _pickTable(PosState s) async {
-    if (s.tables.isEmpty) {
-      _snack('No available tables');
-      return;
-    }
-    final t = await showDialog<String>(
-      context: context,
-      builder: (_) => _TableGridDialog(
-        tables: [for (final t in s.tables) t.tableNumber],
-        current: s.selectedTable,
-      ),
-    );
-    if (t != null) _n.setTable(t);
-  }
-
   Future<void> _editQty(CartItem line) async {
     final qty = await showTillNumberPad(
       context,
@@ -960,9 +942,6 @@ class _InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
     style: const TextStyle(fontSize: 16),
     decoration: tillFieldDecoration(label),
   );
-
-  void _snack(String msg) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 }
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
@@ -1155,159 +1134,6 @@ class _BigKey extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    ),
-  );
-}
-
-/// Right end of the header on Dine-in: table icon, plus the chosen table number.
-class _TableHeaderButton extends StatelessWidget {
-  final String table;
-  final VoidCallback onTap;
-  const _TableHeaderButton({required this.table, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(4),
-    child: Material(
-      color: const Color(0xFF2370D9),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-        side: const BorderSide(color: Colors.black, width: 2),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(6),
-        onTap: onTap,
-        child: Container(
-          width: 84,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SvgIcon(
-                AppIcons.tableRestaurantRounded,
-                size: 20,
-                color: Colors.white,
-              ),
-              if (table.isNotEmpty) ...[
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    table,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-/// White "Select Table" dialog: a grid of table tiles and a green Ok button.
-class _TableGridDialog extends StatefulWidget {
-  final List<String> tables;
-  final String current;
-  const _TableGridDialog({required this.tables, required this.current});
-
-  @override
-  State<_TableGridDialog> createState() => _TableGridDialogState();
-}
-
-class _TableGridDialogState extends State<_TableGridDialog> {
-  late String _selected = widget.current;
-
-  @override
-  Widget build(BuildContext context) => Dialog(
-    backgroundColor: Colors.white,
-    insetPadding: const EdgeInsets.all(24),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 760, maxHeight: 560),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
-            child: Column(
-              children: [
-                const Text(
-                  'Select Table',
-                  style: TextStyle(fontSize: 20, color: Color(0xFF333333)),
-                ),
-                const SizedBox(height: 14),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final t in widget.tables)
-                          SizedBox(
-                            width: 110,
-                            height: 52,
-                            child: Material(
-                              color: t == _selected
-                                  ? const Color(0xFFFFD54F)
-                                  : Colors.white,
-                              elevation: 3,
-                              child: InkWell(
-                                onTap: () => setState(() => _selected = t),
-                                child: Center(
-                                  child: Text(
-                                    t,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Color(0xFF333333),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 12,
-            bottom: 12,
-            child: SizedBox(
-              width: 72,
-              height: 62,
-              child: Material(
-                color: const Color(0xFF5CB85C),
-                elevation: 3,
-                child: InkWell(
-                  onTap: () => Navigator.pop(
-                    context,
-                    _selected.isEmpty ? null : _selected,
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.check, color: Colors.white, size: 30),
-                      Text(
-                        'Ok',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     ),
   );

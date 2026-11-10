@@ -1,11 +1,11 @@
 import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
-import 'package:resturent_application/core/widget/svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../../pos_and_order/presentation/widget/till_dialog.dart';
 import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../pos_and_order/data/model/order_model.dart';
@@ -42,145 +42,49 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     final branchAsync = ref.watch(receiptBranchProvider);
     final branch = branchAsync.value;
 
-    return Dialog(
-      backgroundColor: kCard,
-      child: SizedBox(
-        width: 420,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: kBorder)),
-              ),
-              child: Row(
-                children: [
-                  const SvgIcon(
-                    AppIcons.receiptLongRounded,
-                    color: kPrimary,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Receipt — ${widget.order.orderNumber}',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: kText,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const SvgIcon(
-                      AppIcons.closeRounded,
-                      size: 18,
-                      color: kMuted,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
+    return TillDialog(
+      title: 'Receipt — ${widget.order.orderNumber}',
+      width: 420,
+      child: settingsState.loading
+          ? const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator(color: kPrimary)),
+            )
+          : Center(
+              child: _ReceiptPreview(
+                order: widget.order,
+                settings: settings,
+                branch: branch,
               ),
             ),
-
-            // Preview
-            if (settingsState.loading)
-              const Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(color: kPrimary),
-              )
-            else
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Center(
-                    child: _ReceiptPreview(
-                      order: widget.order,
-                      settings: settings,
-                      branch: branch,
-                    ),
-                  ),
-                ),
-              ),
-
-            // Actions
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: kBorder)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: kMuted,
-                        side: const BorderSide(color: kBorder),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Close',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      onPressed: (settings == null || _printing)
-                          ? null
-                          : () async {
-                              setState(() => _printing = true);
-                              try {
-                                await _printReceipt(
-                                  context,
-                                  widget.order,
-                                  settings,
-                                  branch,
-                                );
-                              } finally {
-                                if (mounted) setState(() => _printing = false);
-                              }
-                            },
-                      icon: _printing
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const SvgIcon(AppIcons.printRounded, size: 16),
-                      label: Text(
-                        _printing ? 'Preparing...' : 'Print Receipt',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+      actions: [
+        TillButton(
+          label: 'CLOSE',
+          icon: AppIcons.closeRounded,
+          color: const Color(0xFFB5525A),
+          onTap: () => Navigator.pop(context),
         ),
-      ),
+        TillButton(
+          label: _printing ? 'PREPARING...' : 'PRINT RECEIPT',
+          icon: AppIcons.printRounded,
+          color: const Color(0xFF4CA67A),
+          onTap: (settings == null || _printing)
+              ? null
+              : () async {
+                  setState(() => _printing = true);
+                  try {
+                    await _printReceipt(
+                      readPosSetup(context).printerUrl,
+                      widget.order,
+                      settings,
+                      branch,
+                    );
+                  } finally {
+                    if (mounted) setState(() => _printing = false);
+                  }
+                },
+        ),
+      ],
     );
   }
 
@@ -193,12 +97,13 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     }
   }
 
-  Future<void> _printReceipt(
-    BuildContext context,
+  static Future<bool> _printReceipt(
+    String printerUrl,
     OrderModel order,
     ReceiptSettings s,
-    BranchModel? branch,
-  ) async {
+    BranchModel? branch, {
+    bool silent = false,
+  }) async {
     final doc = pw.Document();
 
     // FIX: load fonts + logo in parallel (uses the cache too)
@@ -452,45 +357,48 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     // FIX: sharePdf is faster on web — layoutPdf was slow through the browser print dialog
     final bytes = await doc.save();
     // A printer ticked in the POS setup prints straight to it.
-    final printerUrl = readPosSetup(context).printerUrl;
     if (printerUrl.isNotEmpty) {
       final printed = await Printing.directPrintPdf(
         printer: Printer(url: printerUrl),
         onLayout: (_) async => bytes,
       );
-      if (printed) return;
+      if (printed) return true;
     }
+    // Automatic printing never opens a save dialog.
+    if (silent) return false;
     await Printing.sharePdf(
       bytes: bytes,
       filename: 'receipt_${order.orderNumber.replaceAll('#', '')}.pdf',
     );
+    return true;
   }
 
-  pw.Widget _pdfRow(String label, String value, {bool boldValue = false}) =>
-      pw.Padding(
-        padding: const pw.EdgeInsets.symmetric(vertical: 1.5),
-        child: pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(
-              label,
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
-            ),
-            pw.Text(
-              value,
-              style: pw.TextStyle(
-                fontSize: 9,
-                fontWeight: boldValue
-                    ? pw.FontWeight.bold
-                    : pw.FontWeight.normal,
-              ),
-            ),
-          ],
+  static pw.Widget _pdfRow(
+    String label,
+    String value, {
+    bool boldValue = false,
+  }) => pw.Padding(
+    padding: const pw.EdgeInsets.symmetric(vertical: 1.5),
+    child: pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(
+          label,
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
         ),
-      );
+        pw.Text(
+          value,
+          style: pw.TextStyle(
+            fontSize: 9,
+            fontWeight: boldValue ? pw.FontWeight.bold : pw.FontWeight.normal,
+          ),
+        ),
+      ],
+    ),
+  );
 
   // Dashed line — reads better on thermal paper than a solid pw.Divider.
-  pw.Widget _dashedDivider() => pw.LayoutBuilder(
+  static pw.Widget _dashedDivider() => pw.LayoutBuilder(
     builder: (ctx, constraints) {
       final width = constraints?.maxWidth ?? 180;
       const dashWidth = 3.0, gap = 2.0;
@@ -509,8 +417,42 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     },
   );
 
-  String _formatDate(DateTime d) =>
+  static String _formatDate(DateTime d) =>
       '${d.day}/${d.month}/${d.year} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+}
+
+/// Prints [order] on the thermal printer picked in POS Setup > Print.
+/// With [silent] it never opens a save dialog: if no printer is set up or the
+/// print fails it returns false so the till keeps working.
+Future<bool> printOrderReceipt(
+  ProviderContainer container,
+  OrderModel order, {
+  bool silent = false,
+}) async {
+  try {
+    final printerUrl = container.read(posSetupProvider).printerUrl;
+    if (silent && printerUrl.isEmpty) return false;
+    var settings = container.read(receiptSettingsProvider).settings;
+    if (settings == null) {
+      // Settings load lazily — fetch them if this is the first print.
+      await container.read(receiptSettingsProvider.notifier).load();
+      settings = container.read(receiptSettingsProvider).settings;
+    }
+    if (settings == null) return false;
+    BranchModel? branch;
+    try {
+      branch = await container.read(receiptBranchProvider.future);
+    } catch (_) {}
+    return await _ReceiptPrintDialogState._printReceipt(
+      printerUrl,
+      order,
+      settings,
+      branch,
+      silent: silent,
+    );
+  } catch (_) {
+    return false;
+  }
 }
 
 // ── Flutter Receipt Preview (in dialog) ──────────────────────────────────────
