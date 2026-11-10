@@ -327,7 +327,7 @@ class _PosSetupScreenState extends ConsumerState<PosSetupScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Receipts print straight to the ticked printer. With none ticked, the print dialog opens each time.',
+          'Receipts print straight to the ticked printer. With none ticked, the thermal or default printer is used automatically.',
           style: TextStyle(color: Color(0xFF6B7280)),
         ),
         const SizedBox(height: 8),
@@ -570,12 +570,14 @@ class _DeliveryChargeFormState extends ConsumerState<_DeliveryChargeForm> {
       );
       return;
     }
-    ref.read(branchSettingsProvider.notifier).save(
-      branch.copyWith(
-        deliveryFee: (fee * 100).round() / 100,
-        deliveryPostcode: _postcode.text.trim().toUpperCase(),
-      ),
-    );
+    ref
+        .read(branchSettingsProvider.notifier)
+        .save(
+          branch.copyWith(
+            deliveryFee: (fee * 100).round() / 100,
+            deliveryPostcode: _postcode.text.trim().toUpperCase(),
+          ),
+        );
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Delivery charges saved')));
@@ -652,13 +654,15 @@ class _OpeningHoursFormState extends ConsumerState<_OpeningHoursForm> {
   void _save() {
     final branch = ref.read(branchSettingsProvider).branch;
     if (branch == null) return;
-    ref.read(branchSettingsProvider.notifier).save(
-      branch.copyWith(
-        openingTime: _open.text.trim(),
-        closingTime: _close.text.trim(),
-        is24Hours: _is24,
-      ),
-    );
+    ref
+        .read(branchSettingsProvider.notifier)
+        .save(
+          branch.copyWith(
+            openingTime: _open.text.trim(),
+            closingTime: _close.text.trim(),
+            is24Hours: _is24,
+          ),
+        );
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Opening hours saved')));

@@ -304,8 +304,7 @@ class _CompanyTabState extends ConsumerState<CompanyTab> {
               ctrl: _deliveryPostcode,
             ),
             _Field(
-              label:
-                  'Flat delivery charge (£) — used for POS orders only',
+              label: 'Flat delivery charge (£) — used for POS orders only',
               ctrl: _deliveryFee,
               kt: const TextInputType.numberWithOptions(decimal: true),
             ),

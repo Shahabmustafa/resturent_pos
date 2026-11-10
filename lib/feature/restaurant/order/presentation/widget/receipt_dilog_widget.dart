@@ -356,21 +356,49 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
 
     // FIX: sharePdf is faster on web — layoutPdf was slow through the browser print dialog
     final bytes = await doc.save();
-    // A printer ticked in the POS setup prints straight to it.
-    if (printerUrl.isNotEmpty) {
-      final printed = await Printing.directPrintPdf(
-        printer: Printer(url: printerUrl),
-        onLayout: (_) async => bytes,
-      );
-      if (printed) return true;
+    // Prints straight to the ticked printer; with none ticked it finds the
+    // thermal / default printer itself so the PDF viewer never opens.
+    final printer = await _resolvePrinter(printerUrl);
+    if (printer != null) {
+      try {
+        final printed = await Printing.directPrintPdf(
+          printer: printer,
+          onLayout: (_) async => bytes,
+        );
+        if (printed) return true;
+      } catch (_) {}
     }
-    // Automatic printing never opens a save dialog.
+    // Automatic printing never opens a dialog.
     if (silent) return false;
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: 'receipt_${order.orderNumber.replaceAll('#', '')}.pdf',
+    // No usable printer: let the user pick one in the system print dialog.
+    return Printing.layoutPdf(
+      name: 'receipt_${order.orderNumber.replaceAll('#', '')}',
+      onLayout: (_) async => bytes,
     );
-    return true;
+  }
+
+  static final _virtualPrinter = RegExp(
+    r'pdf|onenote|xps|fax|virtual|snagit',
+    caseSensitive: false,
+  );
+
+  /// The printer to use: the one chosen in POS Setup, otherwise the system
+  /// default, otherwise the first physical printer (thermal printers first).
+  static Future<Printer?> _resolvePrinter(String printerUrl) async {
+    if (printerUrl.isNotEmpty) return Printer(url: printerUrl);
+    try {
+      final all = await Printing.listPrinters();
+      final real = all.where((p) => !_virtualPrinter.hasMatch(p.name)).toList();
+      final thermal = real.where(
+        (p) => RegExp(r'xp-?80|thermal|pos|receipt', caseSensitive: false)
+            .hasMatch(p.name),
+      );
+      if (thermal.isNotEmpty) return thermal.first;
+      final def = real.where((p) => p.isDefault);
+      if (def.isNotEmpty) return def.first;
+      if (real.isNotEmpty) return real.first;
+    } catch (_) {}
+    return null;
   }
 
   static pw.Widget _pdfRow(
@@ -431,7 +459,6 @@ Future<bool> printOrderReceipt(
 }) async {
   try {
     final printerUrl = container.read(posSetupProvider).printerUrl;
-    if (silent && printerUrl.isEmpty) return false;
     var settings = container.read(receiptSettingsProvider).settings;
     if (settings == null) {
       // Settings load lazily — fetch them if this is the first print.
