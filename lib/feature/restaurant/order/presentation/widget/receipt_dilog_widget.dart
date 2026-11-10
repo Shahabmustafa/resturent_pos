@@ -124,9 +124,11 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     doc.addPage(
       pw.Page(
         pageFormat: PdfPageFormat(
-          58 * PdfPageFormat.mm,
+          // Matches the 80mm paper roll so the content is centred, not
+          // pushed to the left edge.
+          80 * PdfPageFormat.mm,
           double.infinity,
-          marginAll: 5 * PdfPageFormat.mm,
+          marginAll: 4 * PdfPageFormat.mm,
         ),
         theme: pw.ThemeData.withFont(base: regularFont, bold: boldFont),
         build: (pw.Context ctx) => pw.Column(
