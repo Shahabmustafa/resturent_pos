@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:resturent_application/core/widget/hard_shadow.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
@@ -38,13 +39,13 @@ class _PageTile {
 
 // SHOP is a quick walk-in counter sale; COLLECTION is a takeaway order to collect later.
 const saleTiles = [
-  SaleTile('SHOP', 'Shop', AppIcons.storefrontRounded, Color(0xFF0096A8)),
-  SaleTile('DINE', 'Dine-in', AppIcons.restaurantRounded, Color(0xFF2368D6)),
+  SaleTile('SHOP', 'Shop', AppIcons.storefrontRounded, Color(0xFF0099A8)),
+  SaleTile('DINE', 'Dine-in', AppIcons.restaurantRounded, Color(0xFF1A6FD8)),
   SaleTile(
     'COLLECTION',
     'Takeaway',
     AppIcons.shoppingBagRounded,
-    Color(0xFFC9168A),
+    Color(0xFFCC0A82),
     lookup: true,
   ),
   SaleTile(
@@ -60,13 +61,13 @@ const _mainTiles = [
     POSPage.restaurant,
     'RESTAURANT',
     AppIcons.eventSeatRounded,
-    Color(0xFFFF4033),
+    Color(0xFFFF3B2A),
   ),
   _PageTile(
     POSPage.customers,
     'CUSTOMERS',
     AppIcons.peopleRounded,
-    Color(0xFF664A31),
+    Color(0xFF5C4B33),
   ),
   _PageTile(
     POSPage.order,
@@ -79,19 +80,19 @@ const _mainTiles = [
     POSPage.salesReport,
     'REPORT',
     AppIcons.barChartRounded,
-    Color(0xFF2E8B78),
+    Color(0xFF2E8B6E),
   ),
   _PageTile(
     POSPage.till,
     'OPEN TILL',
     AppIcons.pointOfSaleRounded,
-    Color(0xFFE8A512),
+    Color(0xFFE8A612),
   ),
   _PageTile(
     POSPage.notes,
     'NOTES',
     AppIcons.stickyNote2Rounded,
-    Color(0xFFB5541E),
+    Color(0xFFB8541E),
   ),
 ];
 
@@ -183,8 +184,8 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
     ];
 
     return Container(
-      color: const Color(0xFFE9E9E9),
-      padding: const EdgeInsets.fromLTRB(36, 36, 36, 24),
+      color: const Color(0xFFEDF0EA),
+      padding: const EdgeInsets.fromLTRB(28, 28, 28, 20),
       child: Column(
         children: [
           Expanded(
@@ -205,11 +206,11 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
                             ),
                       ],
                     ),
-                  const SizedBox(width: 120),
+                  const SizedBox(width: 110),
                   // Two columns, filled row by row like the reference POS.
                   SizedBox(
                     width: 2 * _SplitTile.width + 20,
-                    child: Wrap(spacing: 20, runSpacing: 24, children: tiles),
+                    child: Wrap(spacing: 20, runSpacing: 22, children: tiles),
                   ),
                 ],
               ),
@@ -219,38 +220,63 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const _ClockBox(),
-              const SizedBox(width: 14),
-              _ControlButton(
-                label: 'CALCULATOR',
-                icon: AppIcons.calculateOutlined,
-                onTap: () => showCalculator(context),
-              ),
-              const SizedBox(width: 14),
-              if (allowed.contains(POSPage.live))
-                _SplitTile(
-                  label: 'DASH',
-                  icon: AppIcons.dashboardRounded,
-                  color: const Color(0xFF2E6B85),
-                  onTap: () => widget.onOpen(POSPage.live),
-                ),
-              const Spacer(),
-              _ControlButton(
-                label: 'SHUTDOWN',
-                icon: AppIcons.powerSettingsNewRounded,
-                onTap: _confirmShutdown,
-              ),
-              const SizedBox(width: 14),
-              _ControlButton(
-                label: 'LOCK',
-                icon: AppIcons.lockOutlineRounded,
-                onTap: widget.onLock,
-              ),
-              const SizedBox(width: 14),
-              _ControlButton(
-                label: 'MINIMIZE',
-                icon: AppIcons.removeRounded,
-                onTap: minimizeApp,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Raised row: system buttons sit above the clock row, as on the reference POS.
+                  Padding(
+                    padding: const EdgeInsets.only(left: 200),
+                    child: Row(
+                      children: [
+                        _ControlButton(
+                          label: 'System Off',
+                          icon: AppIcons.powerSettingsNewRounded,
+                          red: true,
+                          onTap: _confirmShutdown,
+                        ),
+                        const SizedBox(width: 12),
+                        _ControlButton(
+                          label: 'LOCK',
+                          icon: AppIcons.lockOutlineRounded,
+                          onTap: widget.onLock,
+                        ),
+                        const SizedBox(width: 12),
+                        _ControlButton(
+                          label: 'MINIMIZE',
+                          icon: AppIcons.removeRounded,
+                          onTap: minimizeApp,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const _ClockBox(),
+                      const SizedBox(width: 10),
+                      _ControlButton(
+                        label: 'CALCULATOR',
+                        icon: AppIcons.calculateOutlined,
+                        onTap: () => showCalculator(context),
+                      ),
+                      const SizedBox(width: 10),
+                      if (allowed.contains(POSPage.live))
+                        _SplitTile(
+                          label: 'DASH',
+                          icon: AppIcons.dashboardRounded,
+                          color: const Color(0xFF2E6B7D),
+                          tileWidth: 150,
+                          tileHeight: 72,
+                          blockWidth: 56,
+                          iconSize: 28,
+                          fontSize: 13,
+                          onTap: () => widget.onOpen(POSPage.live),
+                        ),
+                    ],
+                  ),
+                ],
               ),
               const Spacer(),
               _BranchInfo(
@@ -273,39 +299,96 @@ class _SolidTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 30),
-    child: Material(
-      color: tile.color,
-      elevation: 6,
-      shadowColor: Colors.black,
-      borderRadius: BorderRadius.circular(3),
-      child: InkWell(
+    padding: const EdgeInsets.only(bottom: 28),
+    child: HardShadow(
+      offset: 4,
+      child: Material(
+        color: tile.color,
         borderRadius: BorderRadius.circular(3),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(3),
+          onTap: onTap,
+          child: SizedBox(
+            width: 200,
+            height: 90,
+            child: Row(
+              children: [
+                const SizedBox(width: 14),
+                SvgIcon(tile.icon, size: 40, color: Colors.white),
+                Expanded(
+                  child: Text(
+                    tile.label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Two-tone tile: coloured icon block on the left, light label panel on the right.
+class _SplitTile extends StatelessWidget {
+  static const width = 190.0;
+
+  final String label;
+  final AppIcon icon;
+  final Color color;
+  final VoidCallback onTap;
+  final double? tileWidth;
+  final double tileHeight;
+  final double blockWidth;
+  final double iconSize;
+  final double fontSize;
+  const _SplitTile({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+    this.tileWidth,
+    this.tileHeight = 76,
+    this.blockWidth = 76,
+    this.iconSize = 32,
+    this.fontSize = 13,
+  });
+
+  @override
+  Widget build(BuildContext context) => HardShadow(
+    offset: 4,
+    child: Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(3),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onTap,
         child: SizedBox(
-          width: 200,
-          height: 84,
+          width: tileWidth ?? width,
+          height: tileHeight,
           child: Row(
             children: [
-              const SizedBox(width: 14),
               Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                width: blockWidth,
+                color: color,
                 alignment: Alignment.center,
-                child: SvgIcon(tile.icon, size: 26, color: Colors.white),
+                child: SvgIcon(icon, size: iconSize, color: Colors.white),
               ),
               Expanded(
                 child: Text(
-                  tile.label,
+                  label,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: fontSize,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -317,95 +400,51 @@ class _SolidTile extends StatelessWidget {
   );
 }
 
-/// Two-tone tile: coloured icon block on the left, light label panel on the right.
-class _SplitTile extends StatelessWidget {
-  static const width = 210.0;
-
-  final String label;
-  final AppIcon icon;
-  final Color color;
-  final VoidCallback onTap;
-  const _SplitTile({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.white,
-    elevation: 4,
-    shadowColor: Colors.black,
-    borderRadius: BorderRadius.circular(3),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        width: width,
-        height: 72,
-        child: Row(
-          children: [
-            Container(
-              width: 68,
-              color: color,
-              alignment: Alignment.center,
-              child: SvgIcon(icon, size: 28, color: Colors.white),
-            ),
-            Expanded(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 /// Grey button with icon over label (shutdown, lock, minimize).
 class _ControlButton extends StatelessWidget {
   final String label;
   final AppIcon icon;
   final VoidCallback onTap;
+  final bool red;
   const _ControlButton({
     required this.label,
     required this.icon,
     required this.onTap,
+    this.red = false,
   });
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: const Color(0xFFEEF2F6),
-    elevation: 3,
-    borderRadius: BorderRadius.circular(3),
-    child: InkWell(
+  Widget build(BuildContext context) => HardShadow(
+    child: Material(
+      color: Colors.white,
       borderRadius: BorderRadius.circular(3),
-      onTap: onTap,
-      child: SizedBox(
-        width: 130,
-        height: 64,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgIcon(icon, size: 24, color: const Color(0xFF4B5563)),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(3),
+        onTap: onTap,
+        child: SizedBox(
+          width: 130,
+          height: 70,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgIcon(
+                icon,
+                size: 28,
+                color: red ? const Color(0xFFE02020) : const Color(0xFF111111),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: red
+                      ? const Color(0xFFE02020)
+                      : const Color(0xFF222222),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -442,24 +481,26 @@ class _ClockBoxState extends State<_ClockBox> {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     return Container(
-      width: 160,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF4A2A2A),
-        borderRadius: BorderRadius.circular(3),
+      width: 190,
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: const BoxDecoration(
+        color: Color(0xFF4527A8),
+        border: Border(left: BorderSide(color: Colors.black, width: 14)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             DateFormat('EEE dd.MM.yy').format(now),
-            style: const TextStyle(color: Colors.white70, fontSize: 11),
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
           Text(
             DateFormat('h:mm a').format(now),
+            maxLines: 1,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -477,7 +518,7 @@ class _BranchInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    width: 240,
+    width: 200,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,

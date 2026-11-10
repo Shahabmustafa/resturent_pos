@@ -1,47 +1,154 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:resturent_application/core/widget/svg_icon.dart';
 
-/// Bottom strip of the desktop till: clock with the signed-in user, and
-/// buttons back to the home tiles and to Orders.
-class TillBottomBarWidget extends StatelessWidget {
+/// Bottom strip of the desktop till: clock, item search, item count, and the
+/// Menu and Comments buttons.
+class TillBottomBarWidget extends StatefulWidget {
   final String userName;
-  final VoidCallback onHome;
-  final VoidCallback? onOrders;
+  final int itemCount;
+  final bool hasItems;
+  final int heldCount;
+  final VoidCallback onHeld;
+  final ValueChanged<String> onSearch;
+  final ValueChanged<BuildContext> onMenu;
+  final VoidCallback onComments;
 
   const TillBottomBarWidget({
     super.key,
     required this.userName,
-    required this.onHome,
-    this.onOrders,
+    required this.itemCount,
+    this.hasItems = false,
+    this.heldCount = 0,
+    required this.onHeld,
+    required this.onSearch,
+    required this.onMenu,
+    required this.onComments,
   });
 
   @override
+  State<TillBottomBarWidget> createState() => _TillBottomBarWidgetState();
+}
+
+class _TillBottomBarWidgetState extends State<TillBottomBarWidget> {
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => Container(
-    color: const Color(0xFFDCE6F2),
-    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+    color: const Color(0xFFD3D3D3),
+    padding: const EdgeInsets.fromLTRB(8, 9, 8, 9),
     child: Row(
       children: [
-        _ClockBox(userName: userName),
-        const SizedBox(width: 16),
-        _BarButton(
-          label: 'HOME',
-          icon: AppIcons.dashboardRounded,
-          color: const Color(0xFF8E7CC3),
-          onTap: onHome,
-        ),
-        if (onOrders != null) ...[
-          const SizedBox(width: 10),
-          _BarButton(
-            label: 'ORDERS',
-            icon: AppIcons.receiptLongRounded,
-            color: const Color(0xFFF4F7FB),
-            dark: true,
-            onTap: onOrders!,
+        _ClockBox(userName: widget.userName, hasItems: widget.hasItems),
+        const SizedBox(width: 4),
+        SizedBox(
+          width: 150,
+          height: 66,
+          child: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      color: const Color(0xFFE8201B),
+                      alignment: Alignment.center,
+                      child: const SvgIcon(
+                        AppIcons.searchRounded,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        alignment: Alignment.center,
+                        child: TextField(
+                          controller: _search,
+                          onChanged: widget.onSearch,
+                          style: const TextStyle(fontSize: 14),
+                          decoration: const InputDecoration(
+                            hintText: 'search',
+                            hintStyle: TextStyle(color: Color(0xFF444444)),
+                            border: InputBorder.none,
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 1),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      color: const Color(0xFF12A67A),
+                      alignment: Alignment.center,
+                      child: const SvgIcon(
+                        AppIcons.shoppingCartOutlined,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${widget.itemCount}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+        const SizedBox(width: 10),
+        Builder(
+          builder: (ctx) => _BarButton(
+            label: 'Menu',
+            icon: AppIcons.menuBookRounded,
+            color: const Color(0xFF9050C0),
+            onTap: () => widget.onMenu(ctx),
+          ),
+        ),
+        const SizedBox(width: 6),
+        _BarButton(
+          label: 'Comments',
+          icon: AppIcons.stickyNote2Rounded,
+          color: widget.hasItems
+              ? const Color(0xFFE32D0E)
+              : const Color(0xFFCFCFCF),
+          dark: !widget.hasItems,
+          onTap: widget.onComments,
+        ),
+        const SizedBox(width: 6),
+        _BarButton(
+          label: 'Hold List (${widget.heldCount})',
+          icon: AppIcons.receiptLongRounded,
+          color: widget.heldCount > 0
+              ? const Color(0xFFFF7200)
+              : const Color(0xFFCFCFCF),
+          dark: widget.heldCount == 0,
+          onTap: widget.onHeld,
+        ),
       ],
     ),
   );
@@ -49,7 +156,8 @@ class TillBottomBarWidget extends StatelessWidget {
 
 class _ClockBox extends StatefulWidget {
   final String userName;
-  const _ClockBox({required this.userName});
+  final bool hasItems;
+  const _ClockBox({required this.userName, required this.hasItems});
 
   @override
   State<_ClockBox> createState() => _ClockBoxState();
@@ -74,43 +182,80 @@ class _ClockBoxState extends State<_ClockBox> {
   }
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => SizedBox(
     width: 170,
-    height: 56,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: const Color(0xFF2346B8),
-      borderRadius: BorderRadius.circular(3),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
+    height: 66,
+    child: Row(
       children: [
-        Text(
-          DateFormat('h:mm a').format(DateTime.now()),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+        Container(
+          width: 18,
+          color: Colors.black,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for (var i = 0; i < 3; i++)
+                Container(
+                  width: 11,
+                  height: 11,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                ),
+            ],
           ),
         ),
-        Row(
-          children: [
-            const SvgIcon(
-              AppIcons.personRounded,
-              size: 13,
-              color: Colors.white70,
+        Expanded(
+          child: Container(
+            color: widget.hasItems
+                ? const Color(0xFFE32D0E)
+                : const Color(0xFF2778C4),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      DateFormat('h:mm a').format(DateTime.now()),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(height: 1, color: Colors.white54),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/branding/app_icon.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          widget.userName.isEmpty
+                              ? 'PakAfghan'
+                              : widget.userName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                widget.userName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     ),
@@ -133,31 +278,26 @@ class _BarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = dark ? const Color(0xFF4B5563) : Colors.white;
-    return Material(
-      color: color,
-      elevation: 2,
-      borderRadius: BorderRadius.circular(3),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(3),
-        onTap: onTap,
-        child: SizedBox(
-          width: 130,
-          height: 56,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgIcon(icon, size: 22, color: fg),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  color: fg,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+    final fg = dark ? const Color(0xFF6B6E68) : Colors.white;
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        boxShadow: [BoxShadow(color: Colors.black87, offset: Offset(3, 3))],
+      ),
+      child: Material(
+        color: color,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: 120,
+            height: 64,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgIcon(icon, size: 24, color: fg),
+                const SizedBox(height: 3),
+                Text(label, style: TextStyle(color: fg, fontSize: 12)),
+              ],
+            ),
           ),
         ),
       ),

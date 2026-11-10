@@ -418,7 +418,8 @@ class CustomerDatasource {
   /// postcode) to [postcode]. Null when either postcode can't be found. The
   /// server prices the order from this distance (see [deliveryFeeForMiles]).
   Future<double?> fetchDeliveryMiles(String postcode) async {
-    final origin = ((await _db.rpc('website_delivery_origin')) as String?) ?? '';
+    final origin =
+        ((await _db.rpc('website_delivery_origin')) as String?) ?? '';
     if (origin.trim().isEmpty) return null;
     final from = await _geocode(origin);
     final to = await _geocode(postcode);

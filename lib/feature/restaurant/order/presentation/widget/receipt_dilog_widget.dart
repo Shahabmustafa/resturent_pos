@@ -392,8 +392,10 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
       final all = await Printing.listPrinters();
       final real = all.where((p) => !_virtualPrinter.hasMatch(p.name)).toList();
       final thermal = real.where(
-        (p) => RegExp(r'xp-?80|thermal|pos|receipt', caseSensitive: false)
-            .hasMatch(p.name),
+        (p) => RegExp(
+          r'xp-?80|thermal|pos|receipt',
+          caseSensitive: false,
+        ).hasMatch(p.name),
       );
       if (thermal.isNotEmpty) return thermal.first;
       final def = real.where((p) => p.isDefault);
@@ -479,7 +481,8 @@ Future<bool> printOrderReceipt(
       branch,
       silent: silent,
     );
-  } catch (_) {
+  } catch (e, st) {
+    debugPrint('printOrderReceipt failed: $e\n$st');
     return false;
   }
 }

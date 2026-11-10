@@ -560,30 +560,28 @@ class _DetailsViewState extends State<_DetailsView> {
                     _TabButton(label: l, active: false, onTap: widget.onBack),
                 ]
               : [
-            _TabButton(
-              label: name.isEmpty ? 'NEW CUSTOMER' : name.toUpperCase(),
-              icon: AppIcons.personRounded,
-              active: !_showOrders,
-              onTap: () => setState(() => _showOrders = false),
-            ),
-            if (c.id != null)
-              _TabButton(
-                label: 'ORDERS (${c.orders})',
-                icon: AppIcons.receiptLongRounded,
-                active: _showOrders,
-                onTap: () => setState(() {
-                  _showOrders = true;
-                  _orders ??= widget.loadOrders(c.id!);
-                }),
-              ),
-          ],
+                  _TabButton(
+                    label: name.isEmpty ? 'NEW CUSTOMER' : name.toUpperCase(),
+                    icon: AppIcons.personRounded,
+                    active: !_showOrders,
+                    onTap: () => setState(() => _showOrders = false),
+                  ),
+                  if (c.id != null)
+                    _TabButton(
+                      label: 'ORDERS (${c.orders})',
+                      icon: AppIcons.receiptLongRounded,
+                      active: _showOrders,
+                      onTap: () => setState(() {
+                        _showOrders = true;
+                        _orders ??= widget.loadOrders(c.id!);
+                      }),
+                    ),
+                ],
         ),
         Expanded(
           child: _showOrders
               ? _ordersList()
-              : KeyboardHost(
-                  child: widget.skipped ? _compactForm() : _form(),
-                ),
+              : KeyboardHost(child: widget.skipped ? _compactForm() : _form()),
         ),
         _BottomBar(
           children: [

@@ -992,33 +992,32 @@ class _IncomingCallCard extends ConsumerWidget {
     required this.onReject,
   });
 
-  Widget _button(String label, Color color, VoidCallback onTap) => Expanded(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Material(
-        color: color,
-        elevation: 2,
-        borderRadius: BorderRadius.circular(3),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(3),
-          onTap: onTap,
-          child: SizedBox(
-            height: 66,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SvgIcon(
-                  AppIcons.phoneRounded,
-                  size: 20,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ],
-            ),
+  Widget _button(String label, Color color, VoidCallback onTap) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    child: Material(
+      color: color,
+      elevation: 1,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: onTap,
+        child: SizedBox(
+          width: 92,
+          height: 62,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SvgIcon(
+                AppIcons.phoneRounded,
+                size: 16,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ],
           ),
         ),
       ),
@@ -1032,33 +1031,37 @@ class _IncomingCallCard extends ConsumerWidget {
         .where((c) => c.hasPhone(digits))
         .firstOrNull;
     final name = customer?.fullName ?? '';
-    return Material(
-      elevation: 10,
-      color: Colors.white,
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFFFF8),
+        boxShadow: [BoxShadow(color: Colors.black, offset: Offset(4, 4))],
+      ),
       child: Container(
-        width: 460,
-        padding: const EdgeInsets.all(8),
+        width: 360,
+        margin: const EdgeInsets.all(6),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
         decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFF2B3FB5), width: 2),
+          border: Border.all(color: const Color(0xFF1F1FC8), width: 1.5),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: double.infinity,
-              color: const Color(0xFFF1F1F1),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              color: const Color(0xFFF1F5EE),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SvgIcon(AppIcons.phoneRounded, size: 18),
+                      const SvgIcon(AppIcons.phoneRounded, size: 16),
                       const SizedBox(width: 6),
                       Text(
                         call.phone,
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
+                          color: Color(0xFF333333),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -1072,15 +1075,16 @@ class _IncomingCallCard extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 22),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _button('Reject', const Color(0xFFD9534F), onReject),
-                _button('Snooze', const Color(0xFF2B6CB0), onSnooze),
-                _button('Ok', const Color(0xFF5CB85C), onOk),
+                _button('Reject', const Color(0xFFDD4B50), onReject),
+                _button('Snooze', const Color(0xFF2A75B8), onSnooze),
+                _button('Ok', const Color(0xFF62B85F), onOk),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 14),
           ],
         ),
       ),

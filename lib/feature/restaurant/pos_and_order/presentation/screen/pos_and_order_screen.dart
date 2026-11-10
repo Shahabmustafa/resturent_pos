@@ -19,6 +19,8 @@ import 'package:resturent_application/feature/restaurant/setup/pos_setup.dart';
 import 'payment_screen.dart';
 import 'package:resturent_application/feature/restaurant/order/presentation/widget/receipt_dilog_widget.dart';
 
+final _searchProvider = StateProvider<String>((_) => '');
+final _invoiceKey = GlobalKey<InvoicePanelState>();
 final _showCheckoutProvider = StateProvider<bool>((_) => false);
 // Item whose sizes are showing in place of the menu grid (desktop till).
 final _optionsProductProvider = StateProvider<MenuProduct?>((_) => null);
@@ -85,13 +87,19 @@ class POSScreen extends ConsumerWidget {
                             ref.watch(posCategoriesProvider).value ?? const [],
                         onAddToCart: (p) => _handleAddToCart(context, ref, p),
                         isLoading: state.isLoading,
+                        query: ref.watch(_searchProvider),
                       ),
               ),
               if (onHome != null)
                 TillBottomBarWidget(
                   userName: ref.watch(branchAuthProvider).branch?.name ?? '',
-                  onHome: onHome!,
-                  onOrders: onOrders,
+                  itemCount: state.cart.fold<int>(0, (a, c) => a + c.qty),
+                  hasItems: state.cart.isNotEmpty,
+                  heldCount: ref.watch(heldSalesProvider).length,
+                  onHeld: () => _invoiceKey.currentState?.openHeldSales(),
+                  onSearch: (v) => ref.read(_searchProvider.notifier).state = v,
+                  onMenu: (ctx) => _invoiceKey.currentState?.openMenu(ctx),
+                  onComments: () => _invoiceKey.currentState?.openComments(),
                 ),
             ],
           ),
@@ -99,10 +107,11 @@ class POSScreen extends ConsumerWidget {
         SizedBox(
           width: ref.watch(posSetupProvider).cartWidth.toDouble(),
           child: InvoicePanelWidget(
+            key: _invoiceKey,
             onVoid: onHome,
             onSave: () {
               notifier.setPaymentStatus('Unpaid');
-              _placeOrder(context, ref);
+              _placeOrder(context, ref, confirm: false);
             },
             onPay: () => _pay(context, ref),
             onPrint: () => _printInvoice(context, ref),
@@ -232,8 +241,20 @@ class POSScreen extends ConsumerWidget {
       ProviderScope.containerOf(context),
       order,
     );
-    if (!ok && context.mounted) {
-      _snack(context, 'Could not print the invoice', kRed);
+    if (!context.mounted) return;
+    if (ok) {
+      _snack(
+        context,
+        'Invoice sent to the printer',
+        kGreen,
+        icon: AppIcons.checkCircleRounded,
+      );
+    } else {
+      _snack(
+        context,
+        'Could not print the invoice — check the printer in POS Setup',
+        kRed,
+      );
     }
   }
 

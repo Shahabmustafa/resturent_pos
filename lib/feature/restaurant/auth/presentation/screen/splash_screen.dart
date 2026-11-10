@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/supabase_config.dart';
 import 'package:resturent_application/core/desktop_window.dart';
@@ -49,6 +48,10 @@ class _SplashScreenState extends State<SplashScreen>
       Scaffold(body: SplashCard(progress: _progress));
 }
 
+/// Flat orange and bright blue footer, matching the reference splash design.
+const _splashOrange = Color(0xFFFF5A00);
+const _splashBlue = Color(0xFF2E9DFF);
+
 /// The orange brand card that fills the splash window.
 class SplashCard extends StatelessWidget {
   const SplashCard({super.key, required this.progress});
@@ -63,26 +66,10 @@ class SplashCard extends StatelessWidget {
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFE3AC57),
-                  Color(0xFFA8431F),
-                  Color(0xFF7E2F14),
-                ],
-              ),
-            ),
+            decoration: const BoxDecoration(color: _splashOrange),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  'assets/branding/app_icon.svg',
-                  width: 110,
-                  height: 110,
-                ),
-                const SizedBox(width: 24),
                 const Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +88,7 @@ class SplashCard extends StatelessWidget {
                       Text(
                         'RESTAURANT',
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 7,
@@ -115,7 +102,7 @@ class SplashCard extends StatelessWidget {
           ),
         ),
         Container(
-          color: const Color(0xFF5E2210),
+          color: _splashBlue,
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
           child: Row(
             children: [
@@ -127,7 +114,7 @@ class SplashCard extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: progress.value,
                       minHeight: 4,
-                      backgroundColor: Colors.white24,
+                      backgroundColor: Colors.white30,
                       valueColor: const AlwaysStoppedAnimation(Colors.white),
                     ),
                   ),

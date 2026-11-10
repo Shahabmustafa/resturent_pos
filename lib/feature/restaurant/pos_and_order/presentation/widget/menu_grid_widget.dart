@@ -8,12 +8,12 @@ const _dealsId = '__deals__';
 // Till colours per category position: (item tile, category button). The menu's
 // own category colours are all red shades, which are too alike to tell apart here.
 const _palette = [
-  (Color(0xFF1E3A9E), Color(0xFFBFD7F5)),
-  (Color(0xFFB23A2E), Color(0xFFF6C6C0)),
-  (Color(0xFF2E7D4F), Color(0xFFC8EBC9)),
-  (Color(0xFF6A3FA0), Color(0xFFDCCBF0)),
-  (Color(0xFF00796B), Color(0xFFB9E6E0)),
-  (Color(0xFFC0570F), Color(0xFFF9D5B5)),
+  (Color(0xFF1E3A9E), Color(0xFFA8D080)),
+  (Color(0xFFB23A2E), Color(0xFF29B6F6)),
+  (Color(0xFF2E7D4F), Color(0xFFFFFACD)),
+  (Color(0xFF6A3FA0), Color(0xFFBDD330)),
+  (Color(0xFF00796B), Color(0xFF9CCC65)),
+  (Color(0xFFC0570F), Color(0xFFFFE4EC)),
   (Color(0xFF7A7A1E), Color(0xFFE6E6A8)),
   (Color(0xFF7B4A2E), Color(0xFFE8D2C2)),
 ];
@@ -27,6 +27,9 @@ class MenuGridWidget extends StatefulWidget {
   final ValueChanged<MenuProduct> onAddToCart;
   final bool isLoading;
 
+  /// Text from the till's search box; when set it lists matching items from every category.
+  final String query;
+
   const MenuGridWidget({
     super.key,
     required this.products,
@@ -34,6 +37,7 @@ class MenuGridWidget extends StatefulWidget {
     required this.categories,
     required this.onAddToCart,
     this.isLoading = false,
+    this.query = '',
   });
 
   @override
@@ -57,7 +61,13 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
     final tabs = _tabs;
     final selected =
         tabs.where((c) => c.id == _categoryId).firstOrNull ?? tabs.firstOrNull;
-    final items = selected == null
+    final q = widget.query.trim().toLowerCase();
+    final items = q.isNotEmpty
+        ? [
+            for (final p in [...widget.products, ...widget.deals])
+              if (p.name.toLowerCase().contains(q)) p,
+          ]
+        : selected == null
         ? widget.products
         : selected.id == _dealsId
         ? widget.deals
@@ -104,11 +114,10 @@ class _MenuGridWidgetState extends State<MenuGridWidget> {
           if (tabs.isNotEmpty)
             Container(
               width: double.infinity,
-              color: const Color(0xFF2A62C0),
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 20),
               child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 12,
+                runSpacing: 14,
                 children: [
                   for (final (i, c) in tabs.indexed)
                     _CategoryButton(
@@ -232,32 +241,38 @@ class _CategoryButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: color,
-    elevation: selected ? 0 : 3,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(3),
-      side: selected
-          ? const BorderSide(color: Color(0xFF1B2A4A), width: 2.5)
-          : BorderSide.none,
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(
+      boxShadow: [BoxShadow(color: Colors.black87, offset: Offset(3, 3))],
     ),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(3),
-      onTap: onTap,
-      child: Container(
-        width: width,
-        height: height,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Text(
-          label.toUpperCase(),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: const Color(0xFF374151),
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
+    child: Material(
+      color: color,
+      elevation: 0,
+      shadowColor: Colors.black,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(3),
+        side: selected
+            ? const BorderSide(color: Color(0xFF1F1FC8), width: 2)
+            : BorderSide.none,
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(3),
+        onTap: onTap,
+        child: Container(
+          width: width,
+          height: height,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Text(
+            label.toUpperCase(),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: const Color(0xFF222222),
+              fontSize: fontSize,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
       ),

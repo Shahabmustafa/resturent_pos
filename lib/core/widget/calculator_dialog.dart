@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 /// Opens the quick calculator as a dialog.
-Future<void> showCalculator(BuildContext context) =>
-    showDialog<void>(context: context, builder: (_) => const CalculatorDialog());
+Future<void> showCalculator(BuildContext context) => showDialog<void>(
+  context: context,
+  builder: (_) => const CalculatorDialog(),
+);
 
 /// Simple till calculator: + - x / with a small history of finished sums.
 class CalculatorDialog extends StatefulWidget {
@@ -187,9 +189,18 @@ class _CalculatorDialogState extends State<CalculatorDialog> {
                               crossAxisSpacing: 10,
                               physics: const NeverScrollableScrollPhysics(),
                               children: [
-                                digit('7'), digit('8'), digit('9'), op('+'),
-                                digit('4'), digit('5'), digit('6'), op('-'),
-                                digit('1'), digit('2'), digit('3'), op('/'),
+                                digit('7'),
+                                digit('8'),
+                                digit('9'),
+                                op('+'),
+                                digit('4'),
+                                digit('5'),
+                                digit('6'),
+                                op('-'),
+                                digit('1'),
+                                digit('2'),
+                                digit('3'),
+                                op('/'),
                                 digit('0'),
                                 digit('.'),
                                 _key(

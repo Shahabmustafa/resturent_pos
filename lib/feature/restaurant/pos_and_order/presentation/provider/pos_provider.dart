@@ -296,6 +296,27 @@ class PosNotifier extends StateNotifier<PosState> {
     );
   }
 
+  /// Brings a held sale back onto the till (the till must be empty).
+  void recallSale(PosState s) => state = state.copyWith(
+    cart: s.cart,
+    discountPct: s.discountPct,
+    discountFlat: s.discountFlat,
+    orderNotes: s.orderNotes,
+    customerName: s.customerName,
+    customerPhone: s.customerPhone,
+    selectedTable: s.selectedTable,
+    selectedCustomerId: s.selectedCustomerId,
+    orderType: s.orderType,
+    isShop: s.isShop,
+    customerType: s.customerType,
+    paymentMethod: s.paymentMethod,
+    paymentStatus: s.paymentStatus,
+    deliveryAddress: s.deliveryAddress,
+    deliveryCharge: s.deliveryCharge,
+    deliveryTime: s.deliveryTime,
+    selectedRiderId: s.selectedRiderId,
+  );
+
   void clearCart() => state = state.copyWith(
     cart: [],
     discountPct: 0,
@@ -594,6 +615,17 @@ final posCategoriesProvider =
           .fetchCategories(branchId);
       return rows.map(PosCategoryModel.fromJson).toList();
     });
+
+/// A sale parked with the till's Hold button. It is not an order: nothing is
+/// saved to Orders until the sale is recalled and paid or saved.
+class HeldSale {
+  final PosState sale;
+  final DateTime heldAt;
+  HeldSale(this.sale) : heldAt = DateTime.now();
+}
+
+/// Sales on hold, oldest first (kept in memory for this session).
+final heldSalesProvider = StateProvider<List<HeldSale>>((_) => []);
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 final posProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {

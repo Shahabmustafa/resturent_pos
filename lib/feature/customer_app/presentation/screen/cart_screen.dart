@@ -232,7 +232,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                                   onChanged: (_) => setState(() {}),
                                   decoration: InputDecoration(
                                     hintText: 'e.g. GU21 6AB',
-                                    helperText: miles != null && deliveryError == null
+                                    helperText:
+                                        miles != null && deliveryError == null
                                         ? '${miles.toStringAsFixed(1)} miles away · delivery ${formatPrice(deliveryFee)}'
                                         : 'Delivery: up to 3 miles £5 · 5 miles £8 · 7 miles £10',
                                     errorText: deliveryError,

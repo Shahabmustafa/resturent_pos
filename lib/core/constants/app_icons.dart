@@ -347,6 +347,11 @@ class AppIcons {
   static const stickyNote2Outlined = AppIcon(
     'assets/icons/sticky_note_2_outlined.svg',
   );
+  static const sentimentSatisfied = AppIcon(
+    'assets/icons/sentiment_satisfied.svg',
+  );
+  static const spellcheck = AppIcon('assets/icons/spellcheck.svg');
+  static const chatFilled = AppIcon('assets/icons/chat_filled.svg');
   static const stickyNote2Rounded = AppIcon(
     'assets/icons/sticky_note_2_rounded.svg',
   );

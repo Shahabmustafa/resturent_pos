@@ -114,9 +114,7 @@ class _DrawerKeyListenerState extends ConsumerState<DrawerKeyListener> {
     final err = await openCashDrawer(ref.read(posSetupProvider).printerName);
     drawerMessengerKey.currentState
       ?..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text(err ?? 'Cash drawer opened')),
-      );
+      ..showSnackBar(SnackBar(content: Text(err ?? 'Cash drawer opened')));
   }
 
   @override
