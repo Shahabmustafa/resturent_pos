@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:resturent_application/core/constants/currency.dart';
 import '../../data/model/order_model.dart';
 
-const _bg = Color(0xFF2F6FD6);
 const _sizeColors = [
   Color(0xFF1B5E20),
   Color(0xFF2196F3),
@@ -27,7 +26,13 @@ class SizeOptionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: _bg,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1F5FC4), Color(0xFF4F95DD)],
+        ),
+      ),
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
       child: Column(
@@ -64,12 +69,13 @@ class SizeOptionsWidget extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Container(
-            width: 128,
-            height: 30,
+            width: 150,
+            height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
               color: const Color(0xFF9B51C0),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(3),
+              border: Border.all(color: Colors.white, width: 2),
             ),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -96,8 +102,8 @@ class SizeOptionsWidget extends StatelessWidget {
           const Divider(color: Colors.white54, height: 16),
           const SizedBox(height: 10),
           Wrap(
-            spacing: 14,
-            runSpacing: 14,
+            spacing: 18,
+            runSpacing: 18,
             children: [
               for (final (i, sz) in product.sizes.indexed)
                 Container(
@@ -111,17 +117,21 @@ class SizeOptionsWidget extends StatelessWidget {
                     child: InkWell(
                       onTap: () => onSelect(sz),
                       child: SizedBox(
-                        width: 120,
-                        height: 76,
+                        width: 170,
+                        height: 110,
                         child: Stack(
                           children: [
                             Center(
-                              child: Text(
-                                sz.name.toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 20),
+                                child: Text(
+                                  sz.name.toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ),
@@ -132,7 +142,7 @@ class SizeOptionsWidget extends StatelessWidget {
                                 formatMoney(sz.price),
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),

@@ -95,8 +95,6 @@ class POSScreen extends ConsumerWidget {
                   userName: ref.watch(branchAuthProvider).branch?.name ?? '',
                   itemCount: state.cart.fold<int>(0, (a, c) => a + c.qty),
                   hasItems: state.cart.isNotEmpty,
-                  heldCount: ref.watch(heldSalesProvider).length,
-                  onHeld: () => _invoiceKey.currentState?.openHeldSales(),
                   onSearch: (v) => ref.read(_searchProvider.notifier).state = v,
                   onMenu: (ctx) => _invoiceKey.currentState?.openMenu(ctx),
                   onComments: () => _invoiceKey.currentState?.openComments(),

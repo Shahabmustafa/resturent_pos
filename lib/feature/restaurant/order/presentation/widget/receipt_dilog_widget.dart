@@ -368,7 +368,12 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
           onLayout: (_) async => bytes,
         );
         if (printed) return true;
-      } catch (_) {}
+        debugPrint('Printer ${printer.name} did not accept the job');
+      } catch (e) {
+        debugPrint('Direct print to ${printer.name} failed: $e');
+      }
+    } else {
+      debugPrint('No printer found — add the printer in macOS System Settings');
     }
     // Automatic printing never opens a dialog.
     if (silent) return false;

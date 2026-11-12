@@ -226,7 +226,7 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
                 children: [
                   // Raised row: system buttons sit above the clock row, as on the reference POS.
                   Padding(
-                    padding: const EdgeInsets.only(left: 200),
+                    padding: const EdgeInsets.only(left: 270),
                     child: Row(
                       children: [
                         _ControlButton(
@@ -256,10 +256,25 @@ class _POSHomeScreenState extends State<POSHomeScreen> {
                     children: [
                       const _ClockBox(),
                       const SizedBox(width: 10),
-                      _ControlButton(
-                        label: 'CALCULATOR',
-                        icon: AppIcons.calculateOutlined,
-                        onTap: () => showCalculator(context),
+                      // Small green key opens the calculator.
+                      HardShadow(
+                        child: Material(
+                          color: const Color(0xFF12A37A),
+                          child: InkWell(
+                            onTap: () => showCalculator(context),
+                            child: SizedBox(
+                              width: 60,
+                              height: 72,
+                              child: Center(
+                                child: SvgIcon(
+                                  AppIcons.calculateOutlined,
+                                  size: 26,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 10),
                       if (allowed.contains(POSPage.live))
@@ -485,7 +500,7 @@ class _ClockBoxState extends State<_ClockBox> {
       height: 72,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: const BoxDecoration(
-        color: Color(0xFF4527A8),
+        color: Color(0xFF6B4437),
         border: Border(left: BorderSide(color: Colors.black, width: 14)),
       ),
       child: Column(

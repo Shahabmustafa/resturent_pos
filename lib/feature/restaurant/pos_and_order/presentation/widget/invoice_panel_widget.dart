@@ -224,45 +224,63 @@ class InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
         s.orderType == 'Delivery' && s.deliveryAddress.trim().isNotEmpty
         ? s.deliveryAddress.trim()
         : '';
-    return InkWell(
-      onTap: () => _startLookup(s.orderType, edit: true),
-      child: Container(
-        width: double.infinity,
-        color: const Color(0xFFF1F5EE),
-        padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-        child: Column(
-          children: [
-            Text(
-              name.isEmpty ? 'WALK-IN' : name.toUpperCase(),
-              style: const TextStyle(
-                color: _text,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+    final title = phone.isNotEmpty
+        ? phone
+        : (name.isEmpty ? 'WALK-IN' : name.toUpperCase());
+    return SizedBox(
+      height: 52,
+      child: Row(
+        children: [
+          // Hamburger: opens the list (held sales, save, clear, void, order types).
+          Builder(
+            builder: (btnCtx) => InkWell(
+              onTap: () => openMenu(btnCtx),
+              child: Container(
+                width: 60,
+                color: const Color(0xFF2B6FD6),
+                alignment: Alignment.center,
+                child: const Icon(Icons.menu, color: Colors.white, size: 26),
               ),
             ),
-            if (phone.isNotEmpty || extra.isNotEmpty)
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      extra,
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () => _startLookup(s.orderType, edit: true),
+              child: Container(
+                color: phone.isNotEmpty
+                    ? const Color(0xFFE32D0E)
+                    : const Color(0xFFF1F5EE),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${_typeLabel(s.orderType)} · $title',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: _text, fontSize: 12),
+                      style: TextStyle(
+                        color: phone.isNotEmpty ? Colors.white : _text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  Text(
-                    phone,
-                    style: const TextStyle(
-                      color: _text,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                    if (name.isNotEmpty && phone.isNotEmpty || extra.isNotEmpty)
+                      Text(
+                        extra.isNotEmpty ? extra : name.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: phone.isNotEmpty ? Colors.white70 : _text,
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -435,97 +453,106 @@ class InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
     final box = anchor.findRenderObject() as RenderBox;
     final origin = box.localToGlobal(Offset.zero);
     final screenH = MediaQuery.of(context).size.height;
+    final screenW = MediaQuery.of(context).size.width;
+    final opensDown = origin.dy < screenH / 2;
+    final maxH =
+        (opensDown ? screenH - origin.dy - box.size.height : origin.dy) - 12;
     final action = await showDialog<String>(
       context: context,
       barrierColor: Colors.transparent,
       builder: (ctx) => Stack(
         children: [
           Positioned(
-            left: origin.dx,
-            bottom: screenH - origin.dy,
+            left: origin.dx.clamp(0.0, screenW - 270),
+            // Opens downward from a header button, upward from the bottom bar.
+            top: opensDown ? origin.dy + box.size.height : null,
+            bottom: opensDown ? null : screenH - origin.dy,
             width: 270,
-            child: Material(
-              color: Colors.white,
-              elevation: 10,
-              borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _MenuAction(
-                      'Held Sales (${ref.read(heldSalesProvider).length})',
-                      AppIcons.receiptLongRounded,
-                      const Color(0xFFFF7200),
-                      () => Navigator.pop(ctx, 'held'),
-                    ),
-                    _MenuAction(
-                      'Save Order',
-                      AppIcons.receiptLongRounded,
-                      const Color(0xFFE2B33C),
-                      () => Navigator.pop(ctx, 'save'),
-                    ),
-                    _MenuAction(
-                      'Clear',
-                      AppIcons.refreshRounded,
-                      const Color(0xFF8A94A6),
-                      () => Navigator.pop(ctx, 'clear'),
-                    ),
-                    _MenuAction(
-                      'Void',
-                      AppIcons.deleteOutlineRounded,
-                      const Color(0xFFE5321A),
-                      () => Navigator.pop(ctx, 'void'),
-                    ),
-                    _MenuAction(
-                      'Edit Customer',
-                      AppIcons.personRounded,
-                      const Color(0xFF0096A8),
-                      () => Navigator.pop(ctx, 'customer'),
-                    ),
-                    const SizedBox(height: 22),
-                    _MenuAction(
-                      'DINE',
-                      AppIcons.restaurantRounded,
-                      const Color(0xFF2368D6),
-                      () => Navigator.pop(ctx, 'Dine-in'),
-                    ),
-                    _MenuAction(
-                      'COLLECTION',
-                      AppIcons.shoppingBagRounded,
-                      const Color(0xFFC9168A),
-                      () => Navigator.pop(ctx, 'Takeaway'),
-                    ),
-                    _MenuAction(
-                      'DELIVERY',
-                      AppIcons.localShippingRounded,
-                      const Color(0xFFFF7A00),
-                      () => Navigator.pop(ctx, 'Delivery'),
-                    ),
-                    const SizedBox(height: 4),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(
-                          Icons.close,
-                          size: 18,
-                          color: Colors.black,
-                        ),
-                        label: const Text(
-                          'Close',
-                          style: TextStyle(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxH),
+              child: Material(
+                color: Colors.white,
+                elevation: 10,
+                borderRadius: BorderRadius.circular(4),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _MenuAction(
+                        'Held Sales (${ref.read(heldSalesProvider).length})',
+                        AppIcons.receiptLongRounded,
+                        const Color(0xFFFF7200),
+                        () => Navigator.pop(ctx, 'held'),
+                      ),
+                      _MenuAction(
+                        'Save Order',
+                        AppIcons.receiptLongRounded,
+                        const Color(0xFFE2B33C),
+                        () => Navigator.pop(ctx, 'save'),
+                      ),
+                      _MenuAction(
+                        'Clear',
+                        AppIcons.refreshRounded,
+                        const Color(0xFF8A94A6),
+                        () => Navigator.pop(ctx, 'clear'),
+                      ),
+                      _MenuAction(
+                        'Void',
+                        AppIcons.deleteOutlineRounded,
+                        const Color(0xFFE5321A),
+                        () => Navigator.pop(ctx, 'void'),
+                      ),
+                      _MenuAction(
+                        'Edit Customer',
+                        AppIcons.personRounded,
+                        const Color(0xFF0096A8),
+                        () => Navigator.pop(ctx, 'customer'),
+                      ),
+                      const SizedBox(height: 22),
+                      _MenuAction(
+                        'DINE',
+                        AppIcons.restaurantRounded,
+                        const Color(0xFF2368D6),
+                        () => Navigator.pop(ctx, 'Dine-in'),
+                      ),
+                      _MenuAction(
+                        'COLLECTION',
+                        AppIcons.shoppingBagRounded,
+                        const Color(0xFFC9168A),
+                        () => Navigator.pop(ctx, 'Takeaway'),
+                      ),
+                      _MenuAction(
+                        'DELIVERY',
+                        AppIcons.localShippingRounded,
+                        const Color(0xFFFF7A00),
+                        () => Navigator.pop(ctx, 'Delivery'),
+                      ),
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(
+                            Icons.close,
+                            size: 18,
                             color: Colors.black,
-                            fontWeight: FontWeight.w700,
+                          ),
+                          label: const Text(
+                            'Close',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            shape: const RoundedRectangleBorder(),
+                            side: const BorderSide(color: Colors.black),
                           ),
                         ),
-                        style: OutlinedButton.styleFrom(
-                          shape: const RoundedRectangleBorder(),
-                          side: const BorderSide(color: Colors.black),
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -890,6 +917,8 @@ class InvoicePanelState extends ConsumerState<InvoicePanelWidget> {
   void _hold() {
     final s = ref.read(posProvider);
     if (s.cart.isEmpty) return;
+    // Print the invoice slip first (reads the sale before it is cleared).
+    widget.onPrint?.call();
     ref.read(heldSalesProvider.notifier).update((l) => [...l, HeldSale(s)]);
     _n.clearCart();
     ScaffoldMessenger.of(

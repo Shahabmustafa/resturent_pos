@@ -11,8 +11,6 @@ class TillBottomBarWidget extends StatefulWidget {
   final String userName;
   final int itemCount;
   final bool hasItems;
-  final int heldCount;
-  final VoidCallback onHeld;
   final ValueChanged<String> onSearch;
   final ValueChanged<BuildContext> onMenu;
   final VoidCallback onComments;
@@ -22,8 +20,6 @@ class TillBottomBarWidget extends StatefulWidget {
     required this.userName,
     required this.itemCount,
     this.hasItems = false,
-    this.heldCount = 0,
-    required this.onHeld,
     required this.onSearch,
     required this.onMenu,
     required this.onComments,
@@ -138,16 +134,6 @@ class _TillBottomBarWidgetState extends State<TillBottomBarWidget> {
               : const Color(0xFFCFCFCF),
           dark: !widget.hasItems,
           onTap: widget.onComments,
-        ),
-        const SizedBox(width: 6),
-        _BarButton(
-          label: 'Hold List (${widget.heldCount})',
-          icon: AppIcons.receiptLongRounded,
-          color: widget.heldCount > 0
-              ? const Color(0xFFFF7200)
-              : const Color(0xFFCFCFCF),
-          dark: widget.heldCount == 0,
-          onTap: widget.onHeld,
         ),
       ],
     ),
