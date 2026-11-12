@@ -124,11 +124,11 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     doc.addPage(
       pw.Page(
         pageFormat: PdfPageFormat(
-          // Matches the 80mm paper roll so the content is centred, not
+          // Printable width of an 80mm paper roll (72mm) so the content is centred, not
           // pushed to the left edge.
-          80 * PdfPageFormat.mm,
+          72 * PdfPageFormat.mm,
           double.infinity,
-          marginAll: 4 * PdfPageFormat.mm,
+          marginAll: 3 * PdfPageFormat.mm,
         ),
         theme: pw.ThemeData.withFont(base: regularFont, bold: boldFont),
         build: (pw.Context ctx) => pw.Column(
@@ -158,8 +158,8 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
               pw.Text(
                 branch!.address,
                 style: const pw.TextStyle(
-                  fontSize: 8,
-                  color: PdfColors.grey700,
+                  fontSize: 9.5,
+                  color: PdfColors.black,
                 ),
                 textAlign: pw.TextAlign.center,
               ),
@@ -169,8 +169,8 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
               pw.Text(
                 branch!.phone,
                 style: const pw.TextStyle(
-                  fontSize: 8,
-                  color: PdfColors.grey700,
+                  fontSize: 9.5,
+                  color: PdfColors.black,
                 ),
                 textAlign: pw.TextAlign.center,
               ),
@@ -180,8 +180,8 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
               pw.Text(
                 s.headerNote,
                 style: const pw.TextStyle(
-                  fontSize: 8,
-                  color: PdfColors.grey700,
+                  fontSize: 9.5,
+                  color: PdfColors.black,
                 ),
                 textAlign: pw.TextAlign.center,
               ),
@@ -210,17 +210,17 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
                 pw.Text(
                   'ITEM',
                   style: pw.TextStyle(
-                    fontSize: 8,
+                    fontSize: 9.5,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.grey600,
+                    color: PdfColors.black,
                   ),
                 ),
                 pw.Text(
                   'AMOUNT',
                   style: pw.TextStyle(
-                    fontSize: 8,
+                    fontSize: 9.5,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.grey600,
+                    color: PdfColors.black,
                   ),
                 ),
               ],
@@ -240,13 +240,13 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
                         pw.Expanded(
                           child: pw.Text(
                             item.itemName,
-                            style: const pw.TextStyle(fontSize: 9.5),
+                            style: const pw.TextStyle(fontSize: 10.5),
                           ),
                         ),
                         pw.Text(
                           formatMoney(item.totalPrice),
                           style: pw.TextStyle(
-                            fontSize: 9.5,
+                            fontSize: 10.5,
                             fontWeight: pw.FontWeight.bold,
                           ),
                         ),
@@ -256,8 +256,8 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
                       '${item.qty} x ${formatMoney(item.totalPrice / item.qty)}'
                       '${item.size.isNotEmpty ? '  •  ${item.size}' : ''}',
                       style: const pw.TextStyle(
-                        fontSize: 8,
-                        color: PdfColors.grey600,
+                        fontSize: 9.5,
+                        color: PdfColors.black,
                       ),
                     ),
                   ],
@@ -324,7 +324,7 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
               child: pw.Text(
                 order.paymentStatus.toUpperCase(),
                 style: pw.TextStyle(
-                  fontSize: 8,
+                  fontSize: 9.5,
                   fontWeight: pw.FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
@@ -335,8 +335,8 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
               pw.Text(
                 'Cashier: ${branch?.name ?? 'N/A'}',
                 style: const pw.TextStyle(
-                  fontSize: 8,
-                  color: PdfColors.grey700,
+                  fontSize: 9.5,
+                  color: PdfColors.black,
                 ),
               ),
             ],
@@ -346,7 +346,7 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
               pw.Text(
                 s.footerText,
                 style: pw.TextStyle(
-                  fontSize: 9,
+                  fontSize: 10,
                   fontStyle: pw.FontStyle.italic,
                 ),
                 textAlign: pw.TextAlign.center,
@@ -421,12 +421,12 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
       children: [
         pw.Text(
           label,
-          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+          style: const pw.TextStyle(fontSize: 10, color: PdfColors.black),
         ),
         pw.Text(
           value,
           style: pw.TextStyle(
-            fontSize: 9,
+            fontSize: 10,
             fontWeight: boldValue ? pw.FontWeight.bold : pw.FontWeight.normal,
           ),
         ),
@@ -446,7 +446,7 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
           (_) => pw.Container(
             width: dashWidth,
             height: 0.7,
-            color: PdfColors.grey500,
+            color: PdfColors.black,
             margin: const pw.EdgeInsets.only(right: gap),
           ),
         ),
