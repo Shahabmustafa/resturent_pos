@@ -351,6 +351,10 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
                 ),
                 textAlign: pw.TextAlign.center,
               ),
+            // Blank feed after the footer: the printer's cutter sits a few cm
+            // below the print head, so without this the slip is cut before the
+            // total / UNPAID / thank-you lines come out.
+            pw.SizedBox(height: 30 * PdfPageFormat.mm),
           ],
         ),
       ),
