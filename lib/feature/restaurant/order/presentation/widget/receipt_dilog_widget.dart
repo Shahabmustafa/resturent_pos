@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:resturent_application/core/constants/app_info.dart';
 import 'package:resturent_application/core/constants/app_icons.dart';
 import 'package:flutter/material.dart';
@@ -367,8 +368,14 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     final printer = await _resolvePrinter(printerUrl);
     if (printer != null) {
       try {
+        // directPrintPdf defaults to an A4 job. The driver then paginates /
+        // cuts by A4 length, so the slip is cut mid-receipt or not cut at all.
+        // Send the job with the receipt's real size so one slip = one page.
         final printed = await Printing.directPrintPdf(
           printer: printer,
+          name: 'receipt_${order.orderNumber.replaceAll('#', '')}',
+          format: _pdfPageSize(bytes),
+          dynamicLayout: false,
           onLayout: (_) async => bytes,
         );
         if (printed) return true;
@@ -385,6 +392,22 @@ class _ReceiptPrintDialogState extends ConsumerState<ReceiptPrintDialog> {
     return Printing.layoutPdf(
       name: 'receipt_${order.orderNumber.replaceAll('#', '')}',
       onLayout: (_) async => bytes,
+    );
+  }
+
+  /// Reads the page size (points) back from the generated PDF, because the
+  /// receipt page has an unbounded height that is only known after layout.
+  static PdfPageFormat _pdfPageSize(Uint8List bytes) {
+    final text = String.fromCharCodes(bytes);
+    final m = RegExp(
+      r'/MediaBox\s*\[\s*[\d.]+\s+[\d.]+\s+([\d.]+)\s+([\d.]+)\s*\]',
+    ).firstMatch(text);
+    if (m == null) {
+      return PdfPageFormat(72 * PdfPageFormat.mm, 200 * PdfPageFormat.mm);
+    }
+    return PdfPageFormat(
+      double.parse(m.group(1)!),
+      double.parse(m.group(2)!),
     );
   }
 
